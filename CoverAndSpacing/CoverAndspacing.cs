@@ -5,7 +5,6 @@
     /// </summary>
     public static class ACI318_19_CoverAndspacing
     {
-
         public enum MemberTypes
         {
             MEMBER_TYPE_SLAB = 0,

@@ -21,7 +21,5 @@
             // Rebar weight per foot in plf
             public static double[] Weights = { 0.376,   0.668,   1.043,   1.502,   2.044,   2.670,   3.400,   4.303,   5.313,   7.650,   13.60 };
         }
-
-
     }
 }
