@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace ACI318_19Library.DevelopmentLength
+namespace ACI318_19Library
 {
     public class StraightDevelopmentLength : BaseDevelopmentLength
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using static ACI319_19Library.Constants.RebarConstants;
 
-namespace ACI318_19Library.DevelopmentLength
+namespace ACI318_19Library
 {
     /// <summary>
     /// Enum to hold the different types of development length that can be analyzed
@@ -24,7 +24,7 @@ namespace ACI318_19Library.DevelopmentLength
     {
         public bool DEBUG_MODE = false;
 
-        public ACI318_19Library.DevelopmentLength.DevelopmentLengthTypes DevLengthType = ACI318_19Library.DevelopmentLength.DevelopmentLengthTypes.DEV_LENGTH_UNDEFINED;
+        public DevelopmentLengthTypes DevLengthType = DevelopmentLengthTypes.DEV_LENGTH_UNDEFINED;
 
         #region Public Properties
 
