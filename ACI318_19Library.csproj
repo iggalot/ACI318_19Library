@@ -7,8 +7,8 @@
     <ProjectGuid>{EF65150E-C9D4-4D2D-AF2C-5F7BF62D76E7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ACI319_19Library</RootNamespace>
-    <AssemblyName>ACI319_19Library</AssemblyName>
+    <RootNamespace>ACI318_19Library</RootNamespace>
+    <AssemblyName>ACI318_19Library</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
