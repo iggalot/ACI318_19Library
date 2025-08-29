@@ -19,7 +19,10 @@ namespace ACI318_19Library
         public int BarCount { get; set; }
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double ProvidedAs { get; set; }
+        public double ProvidedAs_Compression { get; set; }
+
+        /// <summary>Provided area by selection (in^2)</summary>
+        public double ProvidedAs_Tension { get; set; }
 
         /// <summary>Final computed Mn (in-lb)</summary>
         public double Mu { get; set; }
@@ -36,7 +39,7 @@ namespace ACI318_19Library
         // <summary>Neutral axis location, c (in)</summary>
         public double NeutralAxis { get; set; }
 
-        /// <summary>strain at tensile steel</summary>
+        /// <summary>tensile strain at extreme tension bar</summary>
         public double eps_T { get; set; }
 
         /// <summary>Iterations used in solver</summary>
