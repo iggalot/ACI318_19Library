@@ -9,58 +9,65 @@
     /// </summary>
     public class FlexuralResult
     {
-        /// <summary>Total reinforcement area (As,t + As,c), in^2</summary>
-        public double As { get; set; }
+        /// <summary>Factored moment capacity φMn (in-lb)</summary>
+        public double Mu { get; set; }
 
-        /// <summary>Tension reinforcement area (As,t), in^2</summary>
-        public double AsT { get; set; }
-
-        /// <summary>Compression reinforcement area (As,c), in^2</summary>
-        public double AsC { get; set; }
-
-        /// <summary>Effective depth to tension reinforcement centroid (d), in</summary>
-        public double d { get; set; }
-
-        /// <summary>Distance from extreme compression fiber to compression steel centroid (d'), in</summary>
-        public double dPrime { get; set; }
-
-        /// <summary>Equivalent stress block depth (a), in</summary>
-        public double a { get; set; }
-
-        /// <summary>Neutral axis depth from compression face (c = a / β1), in</summary>
-        public double c { get; set; }
-
-        /// <summary>Nominal flexural strength (Mn), in-lb</summary>
+        /// <summary>Nominal moment capacity Mn (in-lb)</summary>
         public double Mn { get; set; }
 
-        /// <summary>Design flexural strength (φMn), in-lb</summary>
-        public double PhiMn { get; set; }
-
-        /// <summary>Strength reduction factor (φ) used to compute φMn</summary>
+        /// <summary>Strength reduction factor φ</summary>
         public double Phi { get; set; }
 
-        /// <summary>Computed extreme tension steel strain ε_t (unitless)</summary>
-        public double EpsilonT { get; set; }
+        /// <summary>Strength reduction factor φ</summary>
+        public double PhiMn { get; set; }
 
-        /// <summary>Computed steel yield strain ε_y (Fy / Es) (unitless)</summary>
-        public double EpsilonY { get; set; }
-
-        /// <summary>Ductility classification (TensionControlled, Transition, CompressionControlled)</summary>
-        public DuctilityClass Ductility { get; set; }
-
-        /// <summary>Reinforcement ratio ρ = AsT / (b * d)</summary>
-        public double Rho { get; set; }
-
-        /// <summary>Balanced reinforcement ratio ρ_b per ACI</summary>
+        /// <summary>Balanced steel ratio ρb</summary>
         public double RhoBalanced { get; set; }
 
-        /// <summary>True if section is over-reinforced (ρ &gt; ρ_b)</summary>
-        public bool IsOverReinforced { get; set; }
+        /// <summary>Actual steel ratio ρ = AsT / (b*d)</summary>
+        public double RhoActual { get; set; }
 
-        /// <summary>True if compression steel yields (fs' reaches fy)</summary>
-        public bool CompressionSteelYields { get; set; }
+        /// <summary>Neutral axis depth c from top fiber</summary>
+        public double NeutralAxis { get; set; }
 
-        /// <summary>Human-readable warnings (empty if none)</summary>
-        public string Warnings { get; set; } = "";
+        /// <summary>Total tension steel area AsT (in^2)</summary>
+        public double AsT { get; set; }
+
+        /// <summary>Total compression steel area AsC (in^2)</summary>
+        public double AsC { get; set; }
+
+        /// <summary>Effective tension steel centroid d (in) from top fiber</summary>
+        public double d { get; set; }
+
+        /// <summary>Compression steel centroid d' (in) from top fiber</summary>
+        public double dPrime { get; set; }
+
+        /// <summary>Steel yield strain EpsY = Fy/Es</summary>
+        public double EpsY { get; set; }
+
+        /// <summary>Concrete stress block factor β1</summary>
+        public double Beta1 { get; set; }
+
+        /// <summary>Number of tension steel layers</summary>
+        public int TensionLayerCount { get; set; }
+
+        /// <summary>Number of compression steel layers</summary>
+        public int CompressionLayerCount { get; set; }
+
+        /// <summary>Moment contribution of concrete compression (in-lb)</summary>
+        public double ConcreteMoment { get; set; }
+
+        /// <summary>Moment contribution of tension steel (in-lb)</summary>
+        public double TensionMoment { get; set; }
+
+        /// <summary>Moment contribution of compression steel (in-lb)</summary>
+        public double CompressionMoment { get; set; }
+
+        /// <summary>Warnings such as over-reinforced or non-yielding compression steel</summary>
+        public string Warnings { get; set; }
+
+        /// <summary>Bisection iterations used to solve neutral axis depth</summary>
+        public int Iterations { get; set; }
     }
+
 }

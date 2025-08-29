@@ -45,11 +45,15 @@
     <Compile Include="CoverAndSpacing\CoverAndspacing.cs" />
     <Compile Include="DevelopmentLength\BaseDevelopmentLength.cs" />
     <Compile Include="DevelopmentLength\HookDevelopmentLength.cs" />
+    <Compile Include="Flexure\FlexuralResult.cs" />
+    <Compile Include="Flexure\DesignResult.cs" />
+    <Compile Include="Models\RebarCatalog.cs" />
+    <Compile Include="Models\RebarLayer.cs" />
+    <Compile Include="Models\RebarModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DevelopmentLength\StraightDevelopmentLength.cs" />
+    <Compile Include="Models\CrossSection.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Flexure\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

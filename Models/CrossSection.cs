@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 
 namespace ACI318_19Library
 {
@@ -62,251 +63,72 @@ namespace ACI318_19Library
             CompressionRebars.Add(new RebarLayer(barSize, count, rebar, dPrime));
         }
 
-        /// <summary>
-        /// Compute flexural capacity by solving for neutral axis depth c (bisection),
-        /// accounting for elastic/yield behavior of both tension and compression steel.
-        /// Returns flexural result (Mn, phiMn, strains, warnings, etc).
-        /// </summary>
-        /// <param name="bEff">Optional effective width to use instead of section width (in)</param>
-        public FlexuralResult ComputeFlexuralStrength(double? bEff = null)
-        {
-            double b = bEff ?? Width;
-
-            double AsT = TensionRebars.Sum(r => r.SteelArea);
-            double AsC = CompressionRebars.Sum(r => r.SteelArea);
-
-            if (AsT <= 0)
-                throw new InvalidOperationException("No tension reinforcement defined.");
-
-            double d = TensionRebars.Average(r => r.Depth);
-            double dPrime = (CompressionRebars.Count > 0) ? CompressionRebars.Average(r => r.Depth) : 0.0;
-
-            double beta1 = GetBeta1(Fck);
-            double epsY = Fy / Es;
-
-            // Balanced reinforcement ratio rho_b per ACI (ρ_b = 0.85*β1*(f'c/fy)*(ε_cu/(ε_cu+ε_y)))
-            double rhoBalanced = 0.85 * beta1 * (Fck / Fy) * (EpsilonCu / (EpsilonCu + epsY));
-
-            // Reinforcement ratio rho
-            double rho = AsT / (b * d);
-
-            // We'll solve for c numerically using bisection on force equilibrium:
-            // F(c) = C_conc + C_steel - T_steel = 0
-            // where:
-            //  C_conc = 0.85 * f'c * b * a  (a = beta1 * c)
-            //  C_steel = AsC * f_sc (positive if compressive)
-            //  T_steel = AsT * f_st (positive if tensile)
-            //
-            // f_sc and f_st come from strains which depend on c:
-            //  eps_st = eps_cu * (d - c) / c
-            //  eps_sc = eps_cu * (c - d') / c
-            //
-            // steel stress: f = Es*eps (clamped to ±fy)
-
-            Func<double, double> equilibrium = (c) =>
-            {
-                if (c <= 0) return double.PositiveInfinity;
-
-                double a = beta1 * c;
-                double Cconc = 0.85 * Fck * b * a; // compressive force in concrete
-
-                // tension steel strain & stress
-                double eps_st = EpsilonCu * (d - c) / c;
-                double fst = Es * eps_st;
-                // clamp to yield in tension (direction)
-                if (Math.Abs(fst) >= Fy)
-                    fst = Math.Sign(fst) * Fy;
-
-                // compression steel strain & stress
-                double eps_sc = EpsilonCu * (c - dPrime) / c;
-                double fsc = Es * eps_sc;
-                if (Math.Abs(fsc) >= Fy)
-                    fsc = Math.Sign(fsc) * Fy;
-
-                // Force sign convention:
-                // Cconc positive (compressive)
-                // Csteel positive if compression (fsc > 0), negative if in tension
-                // Tsteel positive (tensile) = AsT * fst (fst should be positive in tension)
-                double Csteel = AsC * fsc; // may be negative if compression bars are actually in tension
-                double Tsteel = AsT * fst; // may be negative if steel in compression (unlikely if c < d)
-                // We want residual = compressive - tensile
-                return (Cconc + Csteel) - Tsteel;
-            };
-
-            // Setup bisection bounds
-            double cLow = 1e-6;
-            double cHigh = Math.Max(d * 5.0, Depth * 2.0); // reasonably large upper bound
-
-            double fLow = equilibrium(cLow);
-            double fHigh = equilibrium(cHigh);
-
-            // If no sign change, try expanding cHigh
-            int expandAttempts = 0;
-            while (fLow * fHigh > 0 && expandAttempts < 20)
-            {
-                cHigh *= 2.0;
-                fHigh = equilibrium(cHigh);
-                expandAttempts++;
-            }
-
-            if (fLow * fHigh > 0)
-            {
-                // Fall back: try using approximate linear a from simple assumption: a = (AsT*Fy - AsC*Fy)/(0.85*f'c*b)
-                // This may produce negative/invalid a, so set a small positive and proceed.
-                double aApprox = (AsT * Fy - AsC * Fy) / (0.85 * Fck * b);
-                if (aApprox <= 1e-6) aApprox = 1e-3;
-                double cApprox = aApprox / beta1;
-                // still continue but warn
-                var resApprox = ComputeResultFromC(cApprox, b, AsT, AsC, d, dPrime, beta1, rho, rhoBalanced, epsY);
-                resApprox.Warnings = AppendWarning(resApprox.Warnings, "Equilibrium root-finding failed (no sign change). Returned approximate result based on estimated c.");
-                return resApprox;
-            }
-
-            // Bisection
-            double cMid = 0;
-            for (int iter = 0; iter < 200; iter++)
-            {
-                cMid = 0.5 * (cLow + cHigh);
-                double fMid = equilibrium(cMid);
-
-                if (Math.Abs(fMid) < 1e-6)
-                    break;
-
-                // decide side
-                if (fLow * fMid <= 0)
-                {
-                    cHigh = cMid;
-                    fHigh = fMid;
-                }
-                else
-                {
-                    cLow = cMid;
-                    fLow = fMid;
-                }
-            }
-
-            // Compute final results from found c
-            var result = ComputeResultFromC(cMid, b, AsT, AsC, d, dPrime, beta1, rho, rhoBalanced, epsY);
-
-            return result;
-        }
-
         private static string AppendWarning(string existing, string add)
         {
             if (string.IsNullOrWhiteSpace(existing)) return add;
             return existing + " " + add;
         }
 
-        private FlexuralResult ComputeResultFromC(double c,
-                                                  double b,
-                                                  double AsT,
-                                                  double AsC,
-                                                  double d,
-                                                  double dPrime,
-                                                  double beta1,
-                                                  double rho,
-                                                  double rhoBalanced,
-                                                  double epsY)
+        /// <summary>
+        /// Computes neutral axis depth 'c' (from extreme compression fiber) for a doubly reinforced rectangular section.
+        /// Uses a simple bisection method to satisfy equilibrium: Cc + Cs = Ts.
+        /// </summary>
+        /// <param name="b">Effective width of section (in)</param>
+        /// <param name="d">Effective tension steel depth (in)</param>
+        /// <param name="AsC">Total compression steel area (in^2)</param>
+        /// <param name="dPrime">Centroid of compression steel from top (in)</param>
+        /// <param name="tolerance">Convergence tolerance (in)</param>
+        /// <param name="maxIterations">Maximum iterations</param>
+        /// <returns>Neutral axis depth c (in)</returns>
+        private double ComputeNeutralAxisDepth(double b, double d, double AsC, double dPrime, double fck, double fy, double tolerance = 1e-4, int maxIterations = 50)
         {
-            var res = new FlexuralResult();
-            res.AsT = AsT;
-            res.AsC = AsC;
-            res.As = AsT + AsC;
-            res.d = d;
-            res.dPrime = dPrime;
+            double cLow = 0.1;         // cannot be zero
+            double cHigh = d;          // cannot exceed tension steel depth
+            double c = 0.5 * (cLow + cHigh);
 
-            // a and concrete compression
-            double a = beta1 * c;
-            double Cconc = 0.85 * Fck * b * a;
-
-            // strains
-            double eps_t = EpsilonCu * (d - c) / c;
-            double eps_sc = EpsilonCu * (c - dPrime) / c;
-
-            // steel stresses (signed): positive = tension, negative = compression in sign convention of Es*eps
-            double fs_t = Es * eps_t;
-            double fs_c = Es * eps_sc;
-
-            // clamp to yield magnitudes but keep sign
-            if (Math.Abs(fs_t) >= Fy)
-                fs_t = Math.Sign(fs_t) * Fy;
-            if (Math.Abs(fs_c) >= Fy)
-                fs_c = Math.Sign(fs_c) * Fy;
-
-            // Forces: Tsteel (positive tensile) = AsT * fs_t
-            //        Csteel (compressive positive) = AsC * (-fs_c) if fs_c negative means compressive?
-            // We'll compute with consistent sign:
-            //   Take fs_t positive for tension, fs_c positive for compression:
-            double f_st_mag = fs_t; // should be positive for tensile (if negative, then it's compressive)
-            double f_sc_mag = -fs_c; // if fs_c is negative (compression), f_sc_mag positive. If fs_c positive (tension), f_sc_mag negative.
-
-            double Tsteel = AsT * f_st_mag; // tensile force (may be negative if steel actually compressive)
-            double Csteel = AsC * f_sc_mag; // compressive force (may be negative if steel actually tensile)
-
-            // Nominal moment: contribution of tension steel about compression resultant (lever arm from steel to centroid of compression block)
-            // Use: Mn = AsT * f_st * (d - a/2) + AsC * f_sc_comp * (d - d')
-            // Where f_sc_comp is compressive stress magnitude (positive).
-            // If compression steel actually in tension, its contribution will be negative (subtracted).
-            double Mn = 0.0;
-            // contribution from tension steel (signed)
-            Mn += AsT * f_st_mag * (d - a / 2.0);
-            // contribution from compression steel (use compressive magnitude Csteel and lever arm to tension resultant)
-            // If Csteel positive (actual compression), its moment arm to tension resultant is (d - dPrime)
-            Mn += Csteel * (d - dPrime);
-
-            // Compute phi using tension steel strain eps_t
-            double phi;
-            DuctilityClass ductility;
-            double eps_y = epsY; // passed in
-
-            if (eps_t >= 0.005)
+            int iter = 0;
+            while (iter < maxIterations)
             {
-                phi = 0.90;
-                ductility = DuctilityClass.TensionControlled;
-            }
-            else if (eps_t <= eps_y)
-            {
-                phi = 0.65;
-                ductility = DuctilityClass.CompressionControlled;
-            }
-            else
-            {
-                double slope = 0.25 / (0.005 - eps_y);
-                phi = 0.65 + (eps_t - eps_y) * slope;
-                if (phi < 0.65) phi = 0.65;
-                if (phi > 0.90) phi = 0.90;
-                ductility = DuctilityClass.Transition;
+                double a = 0.85 * c; // equivalent rectangular stress block depth
+
+                double Cc = 0.85 * fck * b * a;     // concrete compressive force
+                double Cs = AsC * fy;               // compression steel force
+                double Ts = AsT_total() * fy;       // total tension steel force (AsT_total is sum of tension layers)
+
+                double res = (Cc + Cs) - Ts;
+
+                if (Math.Abs(res) < 1e-4) // equilibrium satisfied
+                    break;
+
+                if (res > 0) // compression too high -> reduce c
+                    cHigh = c;
+                else         // compression too low -> increase c
+                    cLow = c;
+
+                c = 0.5 * (cLow + cHigh);
+                iter++;
             }
 
-            // Is compression steel yielding?
-            bool compSteelYields = Math.Abs(fs_c) >= Fy;
-
-            // Over-reinforced?
-            bool isOver = rho > rhoBalanced;
-
-            // Compose warnings
-            string warnings = "";
-            if (isOver) warnings = AppendWarning(warnings, "Section is over-reinforced (ρ > ρ_b) — compression failure likely (brittle).");
-            if (!compSteelYields && AsC > 0) warnings = AppendWarning(warnings, "Compression steel does not yield; elastic stress used for compression steel.");
-            if (c <= 1e-6) warnings = AppendWarning(warnings, "Neutral axis depth c is extremely small — check geometry or reinforcement.");
-
-            // Fill result
-            res.c = c;
-            res.a = a;
-            res.Mn = Mn;
-            res.Phi = phi;
-            res.PhiMn = phi * Mn;
-            res.EpsilonT = eps_t;
-            res.EpsilonY = eps_y;
-            res.Ductility = ductility;
-            res.Rho = rho;
-            res.RhoBalanced = rhoBalanced;
-            res.IsOverReinforced = isOver;
-            res.CompressionSteelYields = compSteelYields;
-            res.Warnings = warnings;
-
-            return res;
+            return c;
         }
+
+        /// <summary>
+        /// Helper: sum all tension steel areas
+        /// </summary>
+        private double AsT_total()
+        {
+            return TensionRebars.Sum(r => r.SteelArea);
+        }
+
+
+        // Helper: effective tension steel centroid
+        private double dEffective()
+        {
+            if (TensionRebars.Count == 0) return Depth - Cover - 0.5;
+            return TensionRebars.Sum(l => l.SteelArea * l.Depth) / TensionRebars.Sum(l => l.SteelArea);
+        }
+
+
 
         private double GetBeta1(double fck)
         {
@@ -315,23 +137,288 @@ namespace ACI318_19Library
             if (fck >= 8000) return 0.65;
             return 0.85 - 0.05 * ((fck - 4000.0) / 1000.0);
         }
-    }
 
-    public class RebarLayer
-    {
-        public string BarSize { get; private set; }
-        public int Count { get; private set; }
-        public Rebar Bar { get; private set; }
-        public double Depth { get; private set; } // centroid depth from top fiber, in
-
-        public RebarLayer(string barSize, int count, Rebar bar, double depth)
+        public DesignResult DesignForMoment(double Mu_kipft,
+                                    RebarCatalog catalog,
+                                    double? bEff = null,
+                                    double toleranceIn2 = 1e-4,
+                                    int maxIterations = 60)
         {
-            BarSize = barSize;
-            Count = count;
-            Bar = bar;
-            Depth = depth;
+            double b = bEff ?? Width;
+            double Mu_inlb = Mu_kipft * 12000.0; // kip-ft → in-lb
+            double d = dEffective();
+
+            // Initial bounds for AsT
+            double AsT_low = 1e-6;
+            double AsT_high = Math.Max(0.05 * b * d, 1.0);
+
+            // Expand upper bound until φMn ≥ Mu
+            int expandCount = 0;
+            while (expandCount < 40)
+            {
+                var trial = ComputeFlexuralStrengthPerLayer(b, AsT_high);
+                if (trial.Mu >= Mu_inlb) break;
+                AsT_high *= 2.0;
+                expandCount++;
+            }
+
+            var highTrial = ComputeFlexuralStrengthPerLayer(b, AsT_high);
+            if (highTrial.Mu < Mu_inlb)
+            {
+                return new DesignResult
+                {
+                    crossSection = this,
+                    RequiredAs = AsT_high,
+                    ProvidedAs = AsT_high,
+                    Mu = highTrial.Mu,
+                    Mn = highTrial.Mn,
+                    Phi = highTrial.Phi,
+                    Iterations = 0,
+                    Warnings = AppendWarning(highTrial.Warnings, "Unable to reach Mu with practical AsT upper bound."),
+                    //ConcreteDesignInfo = $"Required As = {AsT_high:F3} in²\nUnable to reach Mu"
+                };
+            }
+
+            // Bisection to find minimal AsT
+            int iter = 0;
+            double AsT_final = AsT_high;
+
+            while (iter < maxIterations && (AsT_high - AsT_low) > toleranceIn2)
+            {
+                double mid = 0.5 * (AsT_low + AsT_high);
+                var trialMid = ComputeFlexuralStrengthPerLayer(b, mid);
+
+                if (trialMid.Mu >= Mu_inlb)
+                    AsT_high = mid;
+                else
+                    AsT_low = mid;
+
+                iter++;
+            }
+
+            AsT_final = AsT_high;
+
+            // Select practical bars from catalog
+            var sortedBars = catalog.RebarTable.Values.OrderByDescending(r => r.Area).ToList();
+            string chosenBar = null;
+            int chosenCount = 0;
+            double providedAs = 0.0;
+
+            foreach (var bar in sortedBars)
+            {
+                int count = (int)Math.Ceiling(AsT_final / bar.Area);
+                if (count <= 0) continue;
+
+                double areaProvided = count * bar.Area;
+
+                if (chosenBar == null || count < chosenCount || (count == chosenCount && areaProvided < providedAs))
+                {
+                    chosenBar = bar.Designation;
+                    chosenCount = count;
+                    providedAs = areaProvided;
+                }
+            }
+
+            // Compute final flexural capacity with selected bars
+            var finalResult = ComputeFlexuralStrengthPerLayer(b, providedAs);
+
+            // Build ConcreteDesignInfo string
+            string info = $"Required As = {AsT_final:F3} in²\n" +
+                          $"Selected: {chosenCount} x {chosenBar} (Provided As = {providedAs:F3} in²)\n" +
+                          $"φMn = {finalResult.Mu / 12000.0:F2} kip-ft, φ = {finalResult.Phi:F3}\n" +
+                          $"{(string.IsNullOrWhiteSpace(finalResult.Warnings) ? "" : "Warnings: " + finalResult.Warnings)}";
+
+            return new DesignResult
+            {
+                crossSection = this,
+                RequiredAs = AsT_final,
+                SelectedBar = chosenBar,
+                BarCount = chosenCount,
+                ProvidedAs = providedAs,
+                Mu = Mu_inlb,
+                Mn = finalResult.Mn,
+                Phi = finalResult.Phi,
+                Iterations = iter,
+                Warnings = finalResult.Warnings,
+            };
         }
 
-        public double SteelArea => Count * Bar.Area;
+
+
+        /// <summary>
+        /// Automated design routine: choose As (tension steel area) to resist Mu (kip-ft).
+        /// Uses existing compression steel (AsC) and section geometry/materials.
+        /// Returns DesignResult with recommended bar selection using a greedy approach.
+        /// </summary>
+        // Updated signature
+        public FlexuralResult ComputeFlexuralStrengthPerLayer(double b, double? trialAsT = null)
+        {
+            double beta1 = GetBeta1(Fck);
+            double tolerance = 1e-6;
+            int maxIter = 200;
+
+            double d = dEffective();
+            double AsC = CompressionRebars.Sum(r => r.SteelArea);
+            double dPrime = (CompressionRebars.Count > 0) ? CompressionRebars.Sum(r => r.Depth * r.SteelArea) / AsC : 0.0;
+
+            // Temporarily replace tension layers if trialAsT is supplied
+            List<RebarLayer> originalTension = null;
+            double trialAs = 0.0;
+            if (trialAsT.HasValue)
+            {
+                originalTension = TensionRebars.ToList();
+                TensionRebars.Clear();
+                TensionRebars.Add(new RebarLayer(trialAsT.Value, d));
+                trialAs = trialAsT.Value;
+            }
+            else
+            {
+                trialAs = TensionRebars.Sum(r => r.SteelArea);
+            }
+
+            double cLow = 1e-6;
+            double cHigh = Depth * 5.0;
+            double c = 0.0;
+            int iter = 0;
+            string warnings = "";
+
+            while (iter < maxIter)
+            {
+                c = ComputeNeutralAxisDepth(b, d, trialAs, dPrime, Fck, Fy); // mid-point for bisection
+                double a = beta1 * c;
+
+                // Concrete compressive force
+                double Cconc = 0.85 * Fck * b * a;
+
+                // Steel forces
+                double T = 0.0;
+                foreach (var layer in TensionRebars)
+                {
+                    double eps = EpsilonCu * (layer.Depth - c) / c;
+                    double fs = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                    T += layer.SteelArea * fs;
+                }
+
+                double Csteel = 0.0;
+                foreach (var layer in CompressionRebars)
+                {
+                    double eps = EpsilonCu * (c - layer.Depth) / c;
+                    double fs = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                    Csteel += layer.SteelArea * fs;
+                }
+
+                double F = Cconc + Csteel - T;
+
+                if (Math.Abs(F) < tolerance) break;
+
+                if (F > 0)
+                    cHigh = c;
+                else
+                    cLow = c;
+
+                iter++;
+            }
+
+            double aFinal = beta1 * c;
+
+            // Moments
+            double tensionMoment = 0.0;
+            foreach (var layer in TensionRebars)
+            {
+                double eps = EpsilonCu * (layer.Depth - c) / c;
+                double fs = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                tensionMoment += layer.SteelArea * fs * (layer.Depth - aFinal / 2.0); // lever arm: d - a/2
+            }
+
+            double compressionMoment = 0.0;
+            foreach (var layer in CompressionRebars)
+            {
+                double eps = EpsilonCu * (c - layer.Depth) / c;
+                double fs = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                compressionMoment += layer.SteelArea * fs * (c - layer.Depth); // lever arm: distance to neutral axis
+                if (Math.Abs(fs) < Fy)
+                    warnings += $"Compression steel at {layer.Depth:F2} in did not yield; ";
+            }
+
+            double Mconcrete = 0.85 * Fck * b * aFinal * (aFinal / 2.0);
+            double Mn = Mconcrete + tensionMoment + compressionMoment;
+
+            // φ factor (lower bound 0.65)
+            double epsT = (TensionRebars.Count > 0) ? EpsilonCu * (d - c) / c : 0.006;
+            double epsTmax = 0.005;
+            double phi = (epsT >= epsTmax) ? 0.9 : Math.Max(0.65, 0.65 + 0.25 * (epsT / epsTmax));
+
+            // Balanced ratio
+            double rhoActual = trialAs / (b * d);
+            double rhoBal = 0.85 * Fck * b * beta1 * c / (Fy * d);
+            if (rhoActual > rhoBal)
+                warnings += "Section is over-reinforced; ";
+
+            // Restore original tension layers
+            if (trialAsT.HasValue && originalTension != null)
+            {
+                TensionRebars.Clear();
+                TensionRebars.AddRange(originalTension);
+            }
+
+            return new FlexuralResult
+            {
+                Mn = Mn,
+                Mu = Mn * phi,
+                Phi = phi,
+                NeutralAxis = c,
+                AsT = trialAs,
+                AsC = AsC,
+                d = d,
+                dPrime = dPrime,
+                Beta1 = beta1,
+                RhoActual = rhoActual,
+                RhoBalanced = rhoBal,
+                TensionLayerCount = TensionRebars.Count,
+                CompressionLayerCount = CompressionRebars.Count,
+                ConcreteMoment = Mconcrete,
+                TensionMoment = tensionMoment,
+                CompressionMoment = compressionMoment,
+                Iterations = iter,
+                Warnings = warnings,
+                EpsY = Fy / Es
+            };
+        }
+
+
+
+
+        ///// <summary>
+        ///// Helper: compute trial φMn for a given AsT without permanently modifying TensionRebars
+        ///// </summary>
+        //private FlexuralResult ComputeTrialFlexuralStrength(double AsT, double b, double d, double dPrime, double AsC)
+        //{
+        //    var tempLayers = new List<RebarLayer>
+        //    {
+        //        new RebarLayer( AsT, d)
+        //    };
+
+        //    var originalTension = TensionRebars.ToList();
+        //    TensionRebars.Clear();
+        //    TensionRebars.AddRange(tempLayers);
+
+        //    var result = ComputeFlexuralStrengthPerLayer(b);
+
+        //    // Restore original layers
+        //    TensionRebars.Clear();
+        //    TensionRebars.AddRange(originalTension);
+
+        //    return result;
+        //}
+
+        public string DisplayInfo()
+        {
+            return
+                $"Width: {Width} in\n" +
+                $"Depth: {Depth} in\n" +
+                $"Cover: {Cover} in\n" +
+                $"Fck: {Fck} psi\n" +
+                $"Fy: {Fy} psi\n";
+        }
     }
 }
