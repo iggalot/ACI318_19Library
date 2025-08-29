@@ -45,7 +45,6 @@
     <Compile Include="CoverAndSpacing\CoverAndspacing.cs" />
     <Compile Include="DevelopmentLength\BaseDevelopmentLength.cs" />
     <Compile Include="DevelopmentLength\HookDevelopmentLength.cs" />
-    <Compile Include="Flexure\FlexuralResult.cs" />
     <Compile Include="Flexure\DesignResult.cs" />
     <Compile Include="Models\RebarCatalog.cs" />
     <Compile Include="Models\RebarLayer.cs" />

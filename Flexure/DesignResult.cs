@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace ACI318_19Library
@@ -9,20 +11,15 @@ namespace ACI318_19Library
         /// <summary>Concrete cross section</summary>
         public CrossSection crossSection { get; set; }
 
-        /// <summary>Required tension steel area (in^2)</summary>
-        public double RequiredAs { get; set; }
-
-        /// <summary>Selected bar designation (e.g. "#6")</summary>
-        public string SelectedBar { get; set; }
-
-        /// <summary>Number of bars of SelectedBar</summary>
-        public int BarCount { get; set; }
+        // Reinforcement layers
+        public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
+        public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double ProvidedAs_Compression { get; set; }
+        public double AsC { get => CompressionRebars.Sum(r => r.SteelArea); }
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double ProvidedAs_Tension { get; set; }
+        public double AsT { get => TensionRebars.Sum(r => r.SteelArea); }
 
         /// <summary>Final computed Mn (in-lb)</summary>
         public double Mu { get; set; }
@@ -42,8 +39,14 @@ namespace ACI318_19Library
         /// <summary>tensile strain at extreme tension bar</summary>
         public double eps_T { get; set; }
 
-        /// <summary>Iterations used in solver</summary>
-        public int Iterations { get; set; }
+        /// <summary>Concrete stress block factor β1</summary>
+        public double Beta1 { get; set; }
+
+        /// <summary>Balanced steel ratio ρb</summary>
+        public double RhoBalanced { get; set; }
+
+        /// <summary>Actual steel ratio ρ = AsT / (b*d)</summary>
+        public double RhoActual { get; set; }
 
         /// <summary>Warnings (e.g. over-reinforced, compression steel not yielded)</summary>
         public string Warnings { get; set; }

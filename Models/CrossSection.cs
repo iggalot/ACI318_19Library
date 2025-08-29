@@ -97,12 +97,12 @@ namespace ACI318_19Library
             return 0.85 - 0.05 * ((fck - 4000.0) / 1000.0);
         }
 
-        public DesignResult ComputeFlexuralStrength_AllSteel()
+        public DesignResult ComputeFlexuralStrength_AllSteel(double Mu)
         {
-            return ComputeFlexuralStrength_AllSteel(Width, Depth, Fck, Fy, Es, TensionRebars, CompressionRebars, EpsilonCu);
+            return ComputeFlexuralStrength_AllSteel(Mu, Width, Depth, Fck, Fy, Es, TensionRebars, CompressionRebars, EpsilonCu);
         }
 
-        public DesignResult ComputeFlexuralStrength_AllSteel(double b, double depth, double Fck, double Fy, double Es,
+        public DesignResult ComputeFlexuralStrength_AllSteel(double Mu, double b, double depth, double Fck, double Fy, double Es,
             List<RebarLayer> TensionRebars, List<RebarLayer> CompressionRebars, double EpsilonCu = 0.003)
         {
             double beta1 = GetBeta1(Fck);
@@ -124,113 +124,76 @@ namespace ACI318_19Library
 
             // Solve using dynamically constructed F
             Fx_eq = BuildSumFxFunction(concreteFactor, AsC, dPrime, AsT, d);
-            double Xsol = SolveForX(Fx_eq, xMin: 0.001, xMax: 5.0 * depth);
-            warnings +=$"\nNeutral Axis location solver = {Xsol:F6}";
+            double c = SolveForX(Fx_eq, xMin: 0.001, xMax: 5.0 * depth);
+            warnings +=$"\nNeutral Axis location solver = {c:F6}";
 
+            // compute stresses in steel
+            double eps_comp = -EpsilonCu + dPrime / c * EpsilonCu;
+            double eps_tens = -EpsilonCu + d / c * EpsilonCu;
+            warnings += $"\neps_s_prime = {eps_comp:F6} and eps_tens = {eps_tens:F6}";
 
+            // compute stresses in steel
+            double fs_prime = Math.Min(Math.Abs(eps_comp) * Es / 1000.0, Fy / 1000.0);
+            double comp_sign = eps_comp / Math.Abs(eps_comp);
 
+            double fs = Math.Min(Math.Abs(eps_tens) * Es / 1000.0, Fy / 1000.0);
+            warnings += $"\nfs_prime = {comp_sign * fs_prime:F2} ksi  and fs = {fs:F2} ksi";
 
+            // compute forces
+            double Cconc = 0.85 * Fck / 1000.0 * b * beta1 * c;
+            double Csteel = comp_sign * fs_prime * AsC;
+            double Tsteel = fs * AsT;
 
+            warnings += $"\nCconc = {Cconc:F2} kips  and Csteel = {Csteel:F2} kips  and Tsteel = {Tsteel:F2} kips";
 
+            // moments about top fiber -- compressive forcs are negative, tensile forces are positive
+            double Mconc = -Cconc * beta1 * c / 2.0;
+            double Msteel_comp = comp_sign * fs_prime * AsC * dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
+            double Msteel_tens = fs * AsT * d;
+            double Mn = Mconc + Msteel_comp + Msteel_tens;
 
+            warnings += $"\nMtot = {Mn:F2} kip-in  and Mconc = {Mconc:F2} kip-in  and Msteel = {Msteel_comp:F2} kip-in  and Msteel = {Msteel_tens:F2} kip-in";
 
+            // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
+            // -- search for the TensionRebar with the largest "Depth" value
+            double maxDepth = TensionRebars.Max(r => r.Depth);
+            double eps_y = Fy / 1000.0 / Es;
+            double eps_tens_max = -EpsilonCu + maxDepth / c * EpsilonCu;
+            warnings += $"\nSteel yield strain = {eps_y:F6}  Max steel tensile strain = {eps_tens_max:F6}";
 
-
-            // Total tension steel
-            double trialAs = TensionRebars.Sum(r => r.SteelArea);
-
-            // Bisection bounds for neutral axis
-            double cLow = 0.001;
-            double cHigh = d * 5.0;
-            double c = 0.0;
-            int iter = 0;
-
-            while (iter < maxIter)
+            // now compute phi
+            double phi = 0.9;
+            if(eps_tens_max >= 0.005) { phi = 0.9; }
+            else if (eps_tens_max >= 0.002) { phi = 0.65; }
+            else
             {
-                c = 0.5 * (cLow + cHigh);
-                double a = beta1 * c;
-
-                // Concrete compressive force
-                double Cconc = 0.85 * Fck * b * a;
-
-                // Steel forces (all layers)
-                double Fsteel = 0.0;
-                foreach (var layer in TensionRebars.Concat(CompressionRebars))
-                {
-                    double eps = EpsilonCu * (layer.Depth - c) / c;
-                    double fs = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
-                    Fsteel += layer.SteelArea * fs;
-                }
-
-                // Equilibrium: concrete + steel vs zero axial load
-                double F = Cconc - Fsteel;
-
-                if (Math.Abs(F) < tolerance) break;
-
-                if (F > 0)
-                    cHigh = c; // forces too high, reduce c
-                else
-                    cLow = c;  // forces too low, increase c
-
-                iter++;
+                phi = 0.65 + (eps_tens_max - 0.002) / (0.003) * (0.90 - 0.65);
             }
+            warnings += $"\nphi = {phi:F3}";
 
-            double aFinal = beta1 * c;
-
-            // Concrete moment about tension face
-            double Mconcrete = 0.85 * Fck * b * aFinal * (d - aFinal / 2.0);
-
-            // Steel moment contribution (all layers)
-            double SteelMoment = 0.0;
-            double tensile_steel = 0.0;
-            double compression_steel = 0.0;
-
-            foreach (var layer in TensionRebars.Concat(CompressionRebars))
-            {
-                double eps = EpsilonCu * (layer.Depth - c) / c;
-                double fs = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
-                double leverArm = layer.Depth - aFinal / 2.0;
-                SteelMoment += layer.SteelArea * fs * leverArm;
-
-                if (fs < Fy && layer.Depth < c)
-                    warnings += $"\nCompression steel at {layer.Depth:F2} in did not yield; ";
-
-                if (TensionRebars.Contains(layer))
-                {
-                    tensile_steel += layer.SteelArea;
-                } else if (CompressionRebars.Contains(layer))
-                {
-                    compression_steel += layer.SteelArea;
-                }
-            }
-
-            double Mn = Mconcrete + SteelMoment;
-
-            // φ factor per ACI318-19
-            double epsTmax = 0.005;
-            double epsT = (TensionRebars.Count > 0) ? EpsilonCu * (d - c) / c : 0.006;
-            double phi = (epsT >= epsTmax) ? 0.9 : Math.Max(0.65, 0.65 + 0.25 * (epsT / epsTmax));
-
-            double Mu = Mn * phi;
+            // compute nominal moment
+            double phi_Mn = Mn * phi;
 
             // Balanced ratio
-            double rhoActual = trialAs / (b * d);
-            double rhoBal = 0.85 * Fck * b * beta1 * c / (Fy * d);
+            double rhoActual = AsT / (b * d);
+            double rhoBal = 0.85 * Fck * beta1 / Fy * (EpsilonCu / (EpsilonCu + eps_y));
             if (rhoActual > rhoBal)
                 warnings += "\nSection is over-reinforced; ";
 
             return new DesignResult
             {
+                crossSection = this,
+                Mu = Mu,
                 Mn = Mn / 12.0,           // convert in-lb to kip-ft
-                Mu = Mu / 12.0,           // kip-ft
                 Phi = phi,
                 NeutralAxis = c,
-                RequiredAs = trialAs,
-                ProvidedAs_Tension = tensile_steel,
-                ProvidedAs_Compression = compression_steel,
-                Iterations = iter,
+                CompressionRebars = CompressionRebars,
+                TensionRebars = TensionRebars,
                 Warnings = warnings,
-                eps_T = epsT
+                eps_T = eps_tens_max,
+                RhoActual = rhoActual,
+                RhoBalanced = rhoBal,
+                Beta1 = beta1
             };
         }
 
