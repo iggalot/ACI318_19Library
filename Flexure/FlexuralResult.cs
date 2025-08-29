@@ -39,11 +39,17 @@
         /// <summary>Effective tension steel centroid d (in) from top fiber</summary>
         public double d { get; set; }
 
+        /// <summary> Effective compression steel centroid c (in) from top fiber</summary>
+        public double c { get; set; }
+
         /// <summary>Compression steel centroid d' (in) from top fiber</summary>
         public double dPrime { get; set; }
 
         /// <summary>Steel yield strain EpsY = Fy/Es</summary>
         public double EpsY { get; set; }
+
+        /// <summary>Steel yield strain EpsY = Fy/Es</summary>
+        public double EpsT { get; set; }
 
         /// <summary>Concrete stress block factor β1</summary>
         public double Beta1 { get; set; }

@@ -240,6 +240,8 @@ namespace ACI318_19Library
                 Phi = finalResult.Phi,
                 Iterations = iter,
                 Warnings = finalResult.Warnings,
+                NeutralAxis = finalResult.c,
+                eps_T = finalResult.EpsT
             };
         }
 
@@ -369,6 +371,7 @@ namespace ACI318_19Library
                 NeutralAxis = c,
                 AsT = trialAs,
                 AsC = AsC,
+                c = c,
                 d = d,
                 dPrime = dPrime,
                 Beta1 = beta1,
@@ -381,7 +384,8 @@ namespace ACI318_19Library
                 CompressionMoment = compressionMoment,
                 Iterations = iter,
                 Warnings = warnings,
-                EpsY = Fy / Es
+                EpsY = Fy / Es,
+                EpsT = epsT
             };
         }
 

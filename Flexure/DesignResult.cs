@@ -33,6 +33,12 @@ namespace ACI318_19Library
         /// <summary>Final phi used</summary>
         public double Phi { get; set; }
 
+        // <summary>Neutral axis location, c (in)</summary>
+        public double NeutralAxis { get; set; }
+
+        /// <summary>strain at tensile steel</summary>
+        public double eps_T { get; set; }
+
         /// <summary>Iterations used in solver</summary>
         public int Iterations { get; set; }
 
