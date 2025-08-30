@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
 
@@ -65,29 +66,12 @@ namespace ACI318_19Library
             CompressionRebars.Add(new RebarLayer(barSize, count, rebar, dPrime));
         }
 
-        private static string AppendWarning(string existing, string add)
-        {
-            if (string.IsNullOrWhiteSpace(existing)) return add;
-            return existing + " " + add;
-        }
-
-        /// <summary>
-        /// Helper: sum all tension steel areas
-        /// </summary>
-        private double AsT_total()
-        {
-            return TensionRebars.Sum(r => r.SteelArea);
-        }
-
-
         // Helper: effective tension steel centroid
         private double dEffective()
         {
             if (TensionRebars.Count == 0) return Depth - Cover - 0.5;
-            return TensionRebars.Sum(l => l.SteelArea * l.Depth) / TensionRebars.Sum(l => l.SteelArea);
+            return TensionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / TensionRebars.Sum(l => l.SteelArea);
         }
-
-
 
         private double GetBeta1(double fck)
         {
@@ -97,23 +81,22 @@ namespace ACI318_19Library
             return 0.85 - 0.05 * ((fck - 4000.0) / 1000.0);
         }
 
-        public DesignResult ComputeFlexuralStrength_AllSteel(double Mu)
+        public DesignResult ComputeFlexuralStrength(double Mu)
         {
-            return ComputeFlexuralStrength_AllSteel(Mu, Width, Depth, Fck, Fy, Es, TensionRebars, CompressionRebars, EpsilonCu);
+            return ComputeFlexuralStrength(Mu, Width, Depth, Fck, Fy, Es, TensionRebars, CompressionRebars, EpsilonCu);
         }
 
-        public DesignResult ComputeFlexuralStrength_AllSteel(double Mu, double b, double depth, double Fck, double Fy, double Es,
+        public DesignResult ComputeFlexuralStrength(double Mu_kipft, double b, double depth, double Fck, double Fy, double Es,
             List<RebarLayer> TensionRebars, List<RebarLayer> CompressionRebars, double EpsilonCu = 0.003)
         {
             double beta1 = GetBeta1(Fck);
             double tolerance = 1e-6;
-            int maxIter = 200;
             string warnings = "";
 
 
             // Centroid of compression steel (d') and total Area of compression steel, Asc
             double AsC = CompressionRebars.Sum(r => r.SteelArea);
-            double dPrime = (AsC > 0) ? CompressionRebars.Sum(r => r.SteelArea * r.Depth) / AsC : 0.0;
+            double dPrime = (AsC > 0) ? CompressionRebars.Sum(r => r.SteelArea * r.DepthFromTop) / AsC : 0.0;
 
             // Centroid of tension steel and total area of tension steel, AsT
             double AsT = TensionRebars.Sum(r => r.SteelArea);
@@ -122,44 +105,96 @@ namespace ACI318_19Library
             // concrete factor = 0.85 * f'c * b * Beta1
             double concreteFactor = 0.85 * Fck / 1000 * b * beta1;
 
-            // Solve using dynamically constructed F
-            Fx_eq = BuildSumFxFunction(concreteFactor, AsC, dPrime, AsT, d);
-            double c = SolveForX(Fx_eq, xMin: 0.001, xMax: 5.0 * depth);
+            // Sum forces in x-dir = 0 equation writer
+            Fx_eq = BuildSumFxFunction(concreteFactor, AsC, dPrime, AsT, d, b, beta1, Fck / 1000.0, Fy / 1000.0, Es / 1000.0);
+
+            // Solve using dynamically constructed F -- use Bisection method
+            //double c = SolveForX(Fx_eq, xMin: 0.001, xMax: 5.0 * depth);
+
+            // Use quadratic solveer
+            //double c = SolveForNeutralAxisQuadratic(AsC, dPrime, AsT, d, b, beta1, Fck / 1000.0, Fy / 1000.0, Es / 1000.0, EpsilonCu);
+
+            // Use a new method:
+            Func<double, double> F = c1 =>
+            {
+                // Concrete compressive force
+                double a1 = beta1 * c1;
+                double Cconc1 = 0.85 * Fck * b * a1;
+
+                // Compression steel contribution
+                double Csteel1 = 0.0;
+                foreach (var layer in CompressionRebars)
+                {
+                    double eps = EpsilonCu * (c1 - layer.DepthFromTop) / c1;
+                    double fs1 = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                    Csteel1 += layer.SteelArea * fs1;
+                }
+
+                // Tension steel contribution
+                double Tsteel1 = 0.0;
+                foreach (var layer in TensionRebars)
+                {
+                    double eps = EpsilonCu * (layer.DepthFromTop - c1) / c1;
+                    double fs2 = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                    Tsteel1 += layer.SteelArea * fs2;
+                }
+
+                // Equilibrium: sum of compressive forces minus tensile forces
+                return Cconc1 + Csteel1 - Tsteel1;
+            };
+
+            var roots = FindAllPositiveRoots(F, 0.001, 5.0 * depth);
+            warnings += $"\nRoots: ";
+            foreach(var r in roots)
+            {
+                warnings += $"{r:F6} , ";
+            }
+
+            double c = roots.Min();
             warnings +=$"\nNeutral Axis location solver = {c:F6}";
 
-            // compute stresses in steel
-            double eps_comp = -EpsilonCu + dPrime / c * EpsilonCu;
-            double eps_tens = -EpsilonCu + d / c * EpsilonCu;
+            double a = beta1 * c;
+
+            // compute stresses in steel  (negative for tension, positive for compression)
+            double eps_comp = EpsilonCu * (c -  dPrime) / c;
+            double eps_tens = -EpsilonCu * (d - c) / c ;
             warnings += $"\neps_s_prime = {eps_comp:F6} and eps_tens = {eps_tens:F6}";
 
             // compute stresses in steel
-            double fs_prime = Math.Min(Math.Abs(eps_comp) * Es / 1000.0, Fy / 1000.0);
-            double comp_sign = eps_comp / Math.Abs(eps_comp);
-
-            double fs = Math.Min(Math.Abs(eps_tens) * Es / 1000.0, Fy / 1000.0);
-            warnings += $"\nfs_prime = {comp_sign * fs_prime:F2} ksi  and fs = {fs:F2} ksi";
+            double fs = Math.Sign(eps_tens) * Math.Min(Math.Abs(eps_tens * Es), Fy);
+            double fs_prime = Math.Sign(eps_comp) * Math.Min(Math.Abs(eps_comp * Es), Fy);
+            warnings += $"\nfs_prime = {fs_prime:F2} ksi  and fs = {fs:F2} ksi";
 
             // compute forces
-            double Cconc = 0.85 * Fck / 1000.0 * b * beta1 * c;
-            double Csteel = comp_sign * fs_prime * AsC;
+            double Cconc = 0.85 * Fck * b * a;
+            double Csteel = fs_prime * AsC;
             double Tsteel = fs * AsT;
-
             warnings += $"\nCconc = {Cconc:F2} kips  and Csteel = {Csteel:F2} kips  and Tsteel = {Tsteel:F2} kips";
 
             // moments about top fiber -- compressive forcs are negative, tensile forces are positive
-            double Mconc = -Cconc * beta1 * c / 2.0;
-            double Msteel_comp = comp_sign * fs_prime * AsC * dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
+            double Mconc = Cconc * a / 2.0;
+            double Msteel_comp = fs_prime * AsC * dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
             double Msteel_tens = fs * AsT * d;
             double Mn = Mconc + Msteel_comp + Msteel_tens;
+            warnings += $"\nMtot = {Mn:F2} kip-in  and Mconc = {Mconc:F2} kip-in  and Msteel_comp = {Msteel_comp:F2} kip-in  and Msteel = {Msteel_tens:F2} kip-in";
 
-            warnings += $"\nMtot = {Mn:F2} kip-in  and Mconc = {Mconc:F2} kip-in  and Msteel = {Msteel_comp:F2} kip-in  and Msteel = {Msteel_tens:F2} kip-in";
+            // alternative method -- compute about the Tensile steel
+            double Mconc2 = Cconc * (d - a / 2);
+            double Msteel_comp2 = fs_prime * AsC * (d - dPrime); // comp_sign needed incase the "compression" steel actually ends up being tensile
+            double Mn2 = Mconc2 + Msteel_comp2;
+            warnings += $"\nMtot = {Mn2:F2} kip-in  and Mconc = {Mconc2:F2} kip-in  and Msteel_comp_2 = {Msteel_comp2:F2} kip-in";
+
+            // verify they mathch
+            double diff = Mn - Mn2;
+            warnings += $"\nMtot = {Mn:F2} kip-in  and Mtot_2 = {Mn2:F2} kip-in  and diff = {diff:F2} kip-in";
+
 
             // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
-            // -- search for the TensionRebar with the largest "Depth" value
-            double maxDepth = TensionRebars.Max(r => r.Depth);
-            double eps_y = Fy / 1000.0 / Es;
+            // -- search for the TensionRebar with the largest "DepthFromTop" value
+            double maxDepth = TensionRebars.Max(r => r.DepthFromTop);
+            double eps_y = Fy / Es;
             double eps_tens_max = -EpsilonCu + maxDepth / c * EpsilonCu;
-            warnings += $"\nSteel yield strain = {eps_y:F6}  Max steel tensile strain = {eps_tens_max:F6}";
+            warnings += $"\nConcrete strain = {EpsilonCu:F6}    Steel yield strain = {eps_y:F6}  Max actual steel tensile strain = {eps_tens_max:F6}";
 
             // now compute phi
             double phi = 0.9;
@@ -183,8 +218,8 @@ namespace ACI318_19Library
             return new DesignResult
             {
                 crossSection = this,
-                Mu = Mu,
-                Mn = Mn / 12.0,           // convert in-lb to kip-ft
+                Mu = Mu_kipft,
+                Mn = Mn,           // convert in-lb to kip-ft
                 Phi = phi,
                 NeutralAxis = c,
                 CompressionRebars = CompressionRebars,
@@ -197,73 +232,48 @@ namespace ACI318_19Library
             };
         }
 
-
-        ///// <summary>
-        ///// Helper: compute trial φMn for a given AsT without permanently modifying TensionRebars
-        ///// </summary>
-        //private FlexuralResult ComputeTrialFlexuralStrength(double AsT, double b, double d, double dPrime, double AsC)
-        //{
-        //    var tempLayers = new List<RebarLayer>
-        //    {
-        //        new RebarLayer( AsT, d)
-        //    };
-
-        //    var originalTension = TensionRebars.ToList();
-        //    TensionRebars.Clear();
-        //    TensionRebars.AddRange(tempLayers);
-
-        //    var result = ComputeFlexuralStrengthPerLayer(b);
-
-        //    // Restore original layers
-        //    TensionRebars.Clear();
-        //    TensionRebars.AddRange(originalTension);
-
-        //    return result;
-        //}
-
         public string DisplayInfo()
         {
             return
                 $"Width: {Width} in\n" +
-                $"Depth: {Depth} in\n" +
+                $"DepthFromTop: {Depth} in\n" +
                 $"Cover: {Cover} in\n" +
                 $"Fck: {Fck} psi\n" +
-                $"Fy: {Fy} psi\n";
+                $"fy_ksi: {Fy} psi\n";
         }
 
-        public Func<double, double> BuildSumFxFunction(double concreteFactor, double as_c, double centroid_c, double as_t, double centroid_t)
+        public Func<double, double> BuildSumFxFunction(double concreteFactor, double AsC, double dPrime, double AsT, double d, double width,double beta1, double fck_ksi, double fy_ksi, double Es_ksi)
         {
-            // Define a list of terms as Func<double,double>
-            var terms = new List<Func<double, double>>();
-
-            // Example: original terms
-            double A1 = 10, A2 = 20, A3 = 15, C1 = 0.1, D1 = 0.05;
-
-            // Add concrete term
-            A1 = concreteFactor;
-            terms.Add(x => A1 * x);
-
-            // Add compressive steel term
-            if (as_c > 0)
+            // Return F(c) = Cc + Cs - Ts
+            return c =>
             {
-                A2 = as_c * 29000;  // area of compresive steel As' * Es
-                C1 = 0.003 * centroid_c;  // eps_cu*d'
-                terms.Add(x => (-0.003 + C1 / x) * A2);
-            }
+                // Whitney block depth
+                double a = beta1 * c;
 
-            // Add tensile steel term
-            if (as_t > 0)
-            {
-                A3 = as_t * 29000;  // As*Es   area of tensile steel
-                D1 = 0.003 * centroid_t;
-                terms.Add(x => -((-0.003 + D1 / x) * A3));
-            }
+                // Concrete compressive force
+                double Cc = 0.85 * fck_ksi * width * a; // kips if fck_ksi in ksi, b and a in in
 
-            // You can dynamically add more terms
-            // terms.Add(x => ...);
+                // Compressive steel force (if any)
+                double Cs = 0.0;
+                if (AsC > 0)
+                {
+                    double epsC = EpsilonCu * (c - dPrime) / c;
+                    double fsC = Math.Sign(epsC) * Math.Min(Math.Abs(epsC * Es_ksi), fy_ksi);
+                    Cs = fsC * AsC; // kips
+                }
 
-            // Combine all terms into a single function
-            return x => terms.Sum(term => term(x));
+                // Tensile steel force
+                double Ts = 0.0;
+                if (AsT > 0)
+                {
+                    double epsT = EpsilonCu * (d - c) / c;
+                    double fsT = Math.Sign(epsT) * Math.Min(Math.Abs(epsT * Es_ksi), fy_ksi);
+                    Ts = fsT * AsT; // kips
+                }
+
+                // Equilibrium: compressive forces minus tensile forces
+                return Cc + Cs - Ts;
+            };
         }
 
         /// <summary>
@@ -276,6 +286,8 @@ namespace ACI318_19Library
         /// <param name="maxIter"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
+
+
         double SolveForX(Func<double, double> f, double xMin = 0.001, double xMax = 100.0,
                  double tol = 1e-6, int maxIter = 1000)
         {
@@ -309,5 +321,98 @@ namespace ACI318_19Library
             }
             return mid;
         }
+
+        /// (double concreteFactor, double AsC, double dPrime, double AsT, double d, double width,double beta1, double fck_ksi, double fy_ksi, double Es_ksi)
+
+        public double SolveForNeutralAxisQuadratic(
+            double AsC, double dPrime,
+            double AsT, double d,
+            double b, double beta1, double fck_ksi, double fy_ksi,
+            double Es_ksi, double EpsilonCu)
+        {
+            // ----- Step 1: compute steel properties -----
+            // -- already provided by function call
+
+
+            // ----- Step 2: quadratic coefficients -----
+            // Quadratic coefficients (elastic assumption)
+            double A = 0.85 * fck_ksi * beta1 * b;
+            double B = AsC * Es_ksi + AsT * Es_ksi;
+            double C = AsT * Es_ksi * d + AsC * Es_ksi * dPrime;
+
+            double discriminant = B * B - 4 * A * C;
+            if (discriminant < 0)
+                throw new Exception("No real neutral axis root found!");
+
+            double sqrtDisc = Math.Sqrt(discriminant);
+            double r1 = (-B + sqrtDisc) / (2 * A);
+            double r2 = (-B - sqrtDisc) / (2 * A);
+
+            // Collect positive roots
+            var positiveRoots = new List<double>();
+            if (r1 > 0) positiveRoots.Add(r1);
+            if (r2 > 0) positiveRoots.Add(r2);
+
+            if (positiveRoots.Count == 0)
+                throw new Exception("No positive neutral axis found");
+
+            // Pick smallest positive root
+            return positiveRoots.Min();
+        }
+
+        public List<double> FindAllPositiveRoots(Func<double, double> F, double cMin, double cMax, int samples = 1000)
+        {
+            var roots = new List<double>();
+            double prevC = cMin;
+            double prevF = F(prevC);
+
+            for (int i = 1; i <= samples; i++)
+            {
+                double c = cMin + i * (cMax - cMin) / samples;
+                double f = F(c);
+
+                if (prevF * f < 0) // sign change detected
+                {
+                    // Refine using bisection
+                    double root = RefineRootBisection(F, prevC, c);
+                    if (root > 0) roots.Add(root);
+                }
+
+                prevC = c;
+                prevF = f;
+            }
+
+            return roots;
+        }
+
+        private double RefineRootBisection(Func<double, double> F, double low, double high, double tol = 1e-6, int maxIter = 100)
+        {
+            double fLow = F(low);
+            double fHigh = F(high);
+
+            if (fLow * fHigh > 0) throw new Exception("No sign change");
+
+            double mid = 0.0;
+            for (int iter = 0; iter < maxIter; iter++)
+            {
+                mid = 0.5 * (low + high);
+                double fMid = F(mid);
+
+                if (Math.Abs(fMid) < tol) return mid;
+
+                if (fLow * fMid < 0)
+                {
+                    high = mid;
+                    fHigh = fMid;
+                }
+                else
+                {
+                    low = mid;
+                    fLow = fMid;
+                }
+            }
+            return mid;
+        }
+
     }
 }

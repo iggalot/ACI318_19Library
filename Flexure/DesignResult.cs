@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -63,6 +64,35 @@ namespace ACI318_19Library
                     if (prop.Name == nameof(ConcreteDesignInfo)) continue;
 
                     object value = prop.GetValue(this);
+
+                    if (prop.Name == nameof(TensionRebars))
+                    {
+                        List<RebarLayer> tens_rebar_obj = value as List<RebarLayer>;
+
+
+                        string str = String.Empty;
+                        for (int i = 0; i < tens_rebar_obj.Count; i++)
+                        {
+                            str += $"({tens_rebar_obj[i].Qty})-{tens_rebar_obj[i].BarSize} at {tens_rebar_obj[i].DepthFromTop},  ";
+                        }
+                        sb.AppendLine($"{prop.Name}: {tens_rebar_obj.Count} tension rebar layers -- {str}");
+                        continue;
+                    }
+
+                    if (prop.Name == nameof(CompressionRebars))
+                    {
+                        List<RebarLayer> comp_rebar_obj = value as List<RebarLayer>;
+
+                        string str = String.Empty;
+                        for(int i = 0; i < comp_rebar_obj.Count; i++)
+                        {
+                            str += $"({comp_rebar_obj[i].Qty})-{comp_rebar_obj[i].BarSize} at {comp_rebar_obj[i].DepthFromTop},  ";
+                        }
+                        sb.AppendLine($"{prop.Name}: {comp_rebar_obj.Count} compression rebar layers -- {str}");
+                        continue;
+                    }
+
+
 
                     if (value == null)
                     {
