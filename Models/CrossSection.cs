@@ -37,6 +37,17 @@ namespace ACI318_19Library
         private const double EpsilonCu = 0.003;       // ultimate concrete strain
         private const double Es = 29000000.0;         // psi (modulus of steel)
 
+        public CrossSection BaseClone(CrossSection section)
+        {
+            return new CrossSection()
+            {
+                Width = section.Width,
+                Depth = section.Depth,
+                Cover = section.Cover,
+                Fck = section.Fck,
+                Fy = section.Fy,
+            };
+        }
         // default constructor
         public CrossSection() { }
 
