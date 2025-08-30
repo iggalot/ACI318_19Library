@@ -7,7 +7,7 @@ using System.Text;
 namespace ACI318_19Library
 {
     // Add this container class (returns design output)
-    public class DesignResult
+    public class DesignResultModel
     {
         /// <summary>Concrete cross section</summary>
         public CrossSection crossSection { get; set; }

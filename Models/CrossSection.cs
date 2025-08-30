@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 
 namespace ACI318_19Library
 {
@@ -118,12 +116,12 @@ namespace ACI318_19Library
             return 0.85 - 0.05 * ((fck - 4000.0) / 1000.0);
         }
 
-        public DesignResult ComputeFlexuralStrength()
+        public DesignResultModel ComputeFlexuralStrength()
         {
             return ComputeFlexuralStrength(Width, Depth, TensionRebars, CompressionRebars, Fck_psi, Fy_psi, Es_psi, EpsilonCu);
         }
 
-        public DesignResult ComputeFlexuralStrength(double b, double depth, 
+        public DesignResultModel ComputeFlexuralStrength(double b, double depth, 
             List<RebarLayer> TensionRebars, List<RebarLayer> CompressionRebars, double fck=4000, double fy=60000, double es=29000000, double EpsilonCu = 0.003)
         {
             double beta1 = GetBeta1(fck);
@@ -251,7 +249,7 @@ namespace ACI318_19Library
             if (rhoActual > rhoBal)
                 warnings += "\nSection is over-reinforced; ";
 
-            return new DesignResult
+            return new DesignResultModel
             {
                 crossSection = this,
                 Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft

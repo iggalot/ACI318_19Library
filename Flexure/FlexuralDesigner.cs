@@ -9,14 +9,14 @@ namespace ACI318_19Library
         /// Iterates through all candidate section dimensions and steel layers,
         /// returning a list of all combinations that meet or exceed the target moment.
         /// </summary>
-        public List<DesignResult> DesignAllSections(
+        public List<DesignResultModel> DesignAllSections(
             double MuTarget_kipft,                  // target factored moment
 
             double cover,
 
             double fck = 4000, double fy = 60000, double es = 29000000)
         {
-            List<DesignResult> successfulSections = new List<DesignResult>();
+            List<DesignResultModel> successfulSections = new List<DesignResultModel>();
             double MuTarget_kip_in = MuTarget_kipft * 12.0; // convert to kip-in
 
             RebarCatalog catalog = new RebarCatalog();
@@ -33,7 +33,7 @@ namespace ACI318_19Library
 
             foreach (var size in barSizes)
             {
-                for (int qty = 1; qty <= 4; qty++)
+                for (int qty = 1; qty <= 1; qty++)
                     compressionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], cover));
             }
 
@@ -68,14 +68,14 @@ namespace ACI318_19Library
 
                     foreach (var size in barSizes)
                     {
-                        for (int qty = 1; qty <= 4; qty++)
+                        for (int qty = 1; qty <= 1; qty++)
                             tensionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], h - cover));
                     }
 
                     // choose the largest and check if the moment is enough.  If it is, we can iterate through all the bar sizes
                     // otherwise there's no point in continuing with this depth iteration.
                     List<RebarLayer> rebarLayer = tensionOptions.OrderByDescending(x => x.SteelArea).ToList();
-                    DesignResult first_design = null;
+                    DesignResultModel first_design = null;
                     if(rebarLayer.Count > 0)
                     {
                         RebarLayer first_test = rebarLayer[0];
@@ -140,7 +140,7 @@ namespace ACI318_19Library
             }
 
             // filter for unnecessary duplicates of rebar sizes and depths and layers...
-            List<DesignResult> filtered = successfulSections;
+            List<DesignResultModel> filtered = successfulSections;
        //     List<DesignResult> filtered = FilterIdealDesignsByWidth(FilterIdealDesignsByDepth(successfulSections));
 
             // then sort in ascending order of width
@@ -151,7 +151,7 @@ namespace ACI318_19Library
         }
 
 
-        List<DesignResult> FilterIdealDesignsByDepth(List<DesignResult> successfulSections)
+        List<DesignResultModel> FilterIdealDesignsByDepth(List<DesignResultModel> successfulSections)
         {
             RebarCatalog catalog = new RebarCatalog();
 
@@ -172,7 +172,7 @@ namespace ACI318_19Library
             return filtered;
         }
 
-        List<DesignResult> FilterIdealDesignsByWidth(List<DesignResult> successfulSections)
+        List<DesignResultModel> FilterIdealDesignsByWidth(List<DesignResultModel> successfulSections)
         {
             RebarCatalog catalog = new RebarCatalog();
 
