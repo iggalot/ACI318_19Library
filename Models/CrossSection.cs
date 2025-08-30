@@ -171,22 +171,22 @@ namespace ACI318_19Library
             double Tsteel = fs * AsT;
             warnings += $"\nCconc = {Cconc:F2} kips  and Csteel = {Csteel:F2} kips  and Tsteel = {Tsteel:F2} kips";
 
-            // moments about top fiber -- compressive forcs are negative, tensile forces are positive
+            // moments about top fiber -- CW positive -- compressive forcs are negative, tensile forces are positive
             double Mconc = Cconc * a / 2.0;
-            double Msteel_comp = fs_prime * AsC * dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
-            double Msteel_tens = fs * AsT * d;
+            double Msteel_comp = Csteel* dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
+            double Msteel_tens = Tsteel * d;
             double Mn = Mconc + Msteel_comp + Msteel_tens;
             warnings += $"\nMtot = {Mn:F2} kip-in  and Mconc = {Mconc:F2} kip-in  and Msteel_comp = {Msteel_comp:F2} kip-in  and Msteel = {Msteel_tens:F2} kip-in";
 
-            // alternative method -- compute about the Tensile steel
-            double Mconc2 = Cconc * (d - a / 2);
-            double Msteel_comp2 = fs_prime * AsC * (d - dPrime); // comp_sign needed incase the "compression" steel actually ends up being tensile
+            // alternative method -- compute about the Tensile steel -- CW negative...so need to flip the signs
+            double Mconc2 = -Cconc * (d - a / 2);
+            double Msteel_comp2 = -Csteel * (d - dPrime); // comp_sign needed incase the "compression" steel actually ends up being tensile
             double Mn2 = Mconc2 + Msteel_comp2;
             warnings += $"\nMtot = {Mn2:F2} kip-in  and Mconc = {Mconc2:F2} kip-in  and Msteel_comp_2 = {Msteel_comp2:F2} kip-in";
 
             // verify they mathch
             double diff = Mn - Mn2;
-            warnings += $"\nMtot = {Mn:F2} kip-in  and Mtot_2 = {Mn2:F2} kip-in  and diff = {diff:F2} kip-in";
+            warnings += $"\n-- Checking methods for Mn diff = {diff:F2} kip-in";
 
 
             // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
@@ -241,6 +241,7 @@ namespace ACI318_19Library
                 $"Fck: {Fck} psi\n" +
                 $"fy_ksi: {Fy} psi\n";
         }
+
 
         public Func<double, double> BuildSumFxFunction(double concreteFactor, double AsC, double dPrime, double AsT, double d, double width,double beta1, double fck_ksi, double fy_ksi, double Es_ksi)
         {
