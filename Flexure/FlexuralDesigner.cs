@@ -11,8 +11,9 @@ namespace ACI318_19Library
         /// </summary>
         public List<DesignResultModel> DesignAllSections(
             double MuTarget_kipft,                  // target factored moment
-
-            double cover,
+            double tension_cover,
+            double compression_cover,
+            double side_cover,
 
             double fck = 4000, double fy = 60000, double es = 29000000)
         {
@@ -34,7 +35,7 @@ namespace ACI318_19Library
             foreach (var size in barSizes)
             {
                 for (int qty = 1; qty <= 1; qty++)
-                    compressionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], cover));
+                    compressionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], compression_cover));
             }
 
             // load the acceptable widths
@@ -58,7 +59,9 @@ namespace ACI318_19Library
                     {
                         Width = b,
                         Depth = h,
-                        Cover = cover,
+                        TensionCover = tension_cover,
+                        CompressionCover = compression_cover,
+                        SideCover = side_cover,
                         Fck_psi = fck,
                         Fy_psi = fy,
                     };
@@ -69,7 +72,7 @@ namespace ACI318_19Library
                     foreach (var size in barSizes)
                     {
                         for (int qty = 1; qty <= 1; qty++)
-                            tensionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], h - cover));
+                            tensionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], h - tension_cover));
                     }
 
                     // choose the largest and check if the moment is enough.  If it is, we can iterate through all the bar sizes
@@ -116,7 +119,7 @@ namespace ACI318_19Library
                                     trialSection.AddTensionRebar(tensLayer.BarSize, tensLayer.Qty, catalog, tensLayer.DepthFromTop);
 
                                     // compression layer is placed at "cover" depth from top
-                                    trialSection.AddCompressionRebar(compSize, compQty, catalog, cover);
+                                    trialSection.AddCompressionRebar(compSize, compQty, catalog, compression_cover);
 
                                     var result = trialSection.ComputeFlexuralStrength();
 

@@ -21,7 +21,10 @@ namespace ACI318_19Library
         // Geometry
         public double Width { get; set; }   // b, in
         public double Depth { get; set; }   // h, in
-        public double Cover { get; set; }   // in
+        public double TensionCover { get; set; }   // in
+        public double CompressionCover { get; set; }   // in
+        public double SideCover { get; set; } // in
+        public double ClearSpacing { get; set; } // in.
 
         // Materials
         public double Fck_psi { get; set; }     // psi (f'c)
@@ -53,7 +56,10 @@ namespace ACI318_19Library
             {
                 Width = section.Width,
                 Depth = section.Depth,
-                Cover = section.Cover,
+                TensionCover = section.TensionCover,
+                CompressionCover = section.CompressionCover,
+                SideCover = section.SideCover,
+                ClearSpacing = section.ClearSpacing,
                 Fck_psi = section.Fck_psi,
                 Fy_psi = section.Fy_psi,
             };
@@ -61,11 +67,14 @@ namespace ACI318_19Library
         // default constructor
         public CrossSection() { }
 
-        public CrossSection(double width, double depth, double cover, double fck, double fy)
+        public CrossSection(double width, double depth, double tension_cover, double compression_cover, double side_cover, double clear_spacing, double fck, double fy)
         {
             Width = width;
             Depth = depth;
-            Cover = cover;
+            TensionCover = tension_cover;
+            CompressionCover = compression_cover;
+            SideCover = side_cover;
+            ClearSpacing = clear_spacing;
             Fck_psi = fck;
             Fy_psi = fy;
         }
@@ -93,7 +102,7 @@ namespace ACI318_19Library
         // Helper: effective tension steel centroid
         private double dEffective()
         {
-            if (TensionRebars.Count == 0) return Depth - Cover - 0.5;
+            if (TensionRebars.Count == 0) return Depth - TensionCover - 0.5;
             return TensionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / TensionRebars.Sum(l => l.SteelArea);
         }
 
@@ -270,7 +279,10 @@ namespace ACI318_19Library
             return
                 $"Width: {Width} in\n" +
                 $"DepthFromTop: {Depth} in\n" +
-                $"Cover: {Cover} in\n" +
+                $"TensionCover: {TensionCover} in\n" +
+                $"CompressionCover: {CompressionCover} in\n" +
+                $"SideCover: {SideCover} in\n" +
+
                 $"fck: {Fck_psi} psi\n" +
                 $"fy_ksi: {Fy_psi} psi\n";
         }
@@ -454,7 +466,7 @@ namespace ACI318_19Library
         /// </summary>
         public (double AsMax, double MnMax, double PhiMnMax) GetSinglyReinforcedLimit()
         {
-            double dEff = Depth - Cover;
+            double dEff = Depth - TensionCover;
             double b = Width;
             double fc = Fck_psi;
             double fy = Fy_psi;

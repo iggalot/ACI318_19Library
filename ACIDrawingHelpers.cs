@@ -61,9 +61,9 @@ namespace ACI318_19Library
             Line topCover = new Line
             {
                 X1 = offsetX,
-                Y1 = offsetY + section.Cover * scale,
+                Y1 = offsetY + section.CompressionCover * scale,
                 X2 = offsetX + bPix,
-                Y2 = offsetY + section.Cover * scale,
+                Y2 = offsetY + section.CompressionCover * scale,
                 Stroke = Brushes.Green,
                 StrokeThickness = 1,
                 StrokeDashArray = new DoubleCollection() { 2, 2 }
@@ -73,9 +73,9 @@ namespace ACI318_19Library
             Line bottomCover = new Line
             {
                 X1 = offsetX,
-                Y1 = offsetY + (section.Depth - section.Cover) * scale,
+                Y1 = offsetY + (section.Depth - section.TensionCover) * scale,
                 X2 = offsetX + bPix,
-                Y2 = offsetY + (section.Depth - section.Cover) * scale,
+                Y2 = offsetY + (section.Depth - section.TensionCover) * scale,
                 Stroke = Brushes.Green,
                 StrokeThickness = 1,
                 StrokeDashArray = new DoubleCollection() { 2, 2 }
