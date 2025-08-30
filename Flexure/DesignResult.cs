@@ -22,9 +22,6 @@ namespace ACI318_19Library
         /// <summary>Provided area by selection (in^2)</summary>
         public double AsT { get => TensionRebars.Sum(r => r.SteelArea); }
 
-        /// <summary>Final computed Mn (in-lb)</summary>
-        public double Mu { get; set; }
-
         /// <summary>Final computed φMn (in-lb)</summary>
         public double PhiMn { get => Phi * Mn; }
 

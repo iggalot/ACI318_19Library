@@ -46,6 +46,7 @@
     <Compile Include="DevelopmentLength\BaseDevelopmentLength.cs" />
     <Compile Include="DevelopmentLength\HookDevelopmentLength.cs" />
     <Compile Include="Flexure\DesignResult.cs" />
+    <Compile Include="Flexure\FlexuralDesigner.cs" />
     <Compile Include="Models\RebarCatalog.cs" />
     <Compile Include="Models\RebarLayer.cs" />
     <Compile Include="Models\RebarModel.cs" />

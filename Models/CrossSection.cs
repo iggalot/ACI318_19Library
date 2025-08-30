@@ -37,6 +37,9 @@ namespace ACI318_19Library
         private const double EpsilonCu = 0.003;       // ultimate concrete strain
         private const double Es = 29000000.0;         // psi (modulus of steel)
 
+        // default constructor
+        public CrossSection() { }
+
         public CrossSection(double width, double depth, double cover, double fck, double fy)
         {
             Width = width;
@@ -81,18 +84,17 @@ namespace ACI318_19Library
             return 0.85 - 0.05 * ((fck - 4000.0) / 1000.0);
         }
 
-        public DesignResult ComputeFlexuralStrength(double Mu)
+        public DesignResult ComputeFlexuralStrength()
         {
-            return ComputeFlexuralStrength(Mu, Width, Depth, Fck, Fy, Es, TensionRebars, CompressionRebars, EpsilonCu);
+            return ComputeFlexuralStrength(Width, Depth, TensionRebars, CompressionRebars, Fck, Fy, Es, EpsilonCu);
         }
 
-        public DesignResult ComputeFlexuralStrength(double Mu_kipft, double b, double depth, double Fck, double Fy, double Es,
-            List<RebarLayer> TensionRebars, List<RebarLayer> CompressionRebars, double EpsilonCu = 0.003)
+        public DesignResult ComputeFlexuralStrength(double b, double depth, 
+            List<RebarLayer> TensionRebars, List<RebarLayer> CompressionRebars, double fck=4000, double fy=60000, double es=29000000, double EpsilonCu = 0.003)
         {
-            double beta1 = GetBeta1(Fck);
+            double beta1 = GetBeta1(fck);
             double tolerance = 1e-6;
             string warnings = "";
-
 
             // Centroid of compression steel (d') and total Area of compression steel, Asc
             double AsC = CompressionRebars.Sum(r => r.SteelArea);
@@ -103,30 +105,30 @@ namespace ACI318_19Library
             double d = dEffective();
 
             // concrete factor = 0.85 * f'c * b * Beta1
-            double concreteFactor = 0.85 * Fck / 1000 * b * beta1;
+            double concreteFactor = 0.85 * fck / 1000 * b * beta1;
 
             // Sum forces in x-dir = 0 equation writer
-            Fx_eq = BuildSumFxFunction(concreteFactor, AsC, dPrime, AsT, d, b, beta1, Fck / 1000.0, Fy / 1000.0, Es / 1000.0);
+            Fx_eq = BuildSumFxFunction(concreteFactor, AsC, dPrime, AsT, d, b, beta1, fck / 1000.0, fy / 1000.0, es / 1000.0);
 
             // Solve using dynamically constructed F -- use Bisection method
             //double c = SolveForX(Fx_eq, xMin: 0.001, xMax: 5.0 * depth);
 
             // Use quadratic solveer
-            //double c = SolveForNeutralAxisQuadratic(AsC, dPrime, AsT, d, b, beta1, Fck / 1000.0, Fy / 1000.0, Es / 1000.0, EpsilonCu);
+            //double c = SolveForNeutralAxisQuadratic(AsC, dPrime, AsT, d, b, beta1, fck / 1000.0, fy / 1000.0, es / 1000.0, EpsilonCu);
 
             // Use a new method:
             Func<double, double> F = c1 =>
             {
                 // Concrete compressive force
                 double a1 = beta1 * c1;
-                double Cconc1 = 0.85 * Fck * b * a1;
+                double Cconc1 = 0.85 * fck * b * a1;
 
                 // Compression steel contribution
                 double Csteel1 = 0.0;
                 foreach (var layer in CompressionRebars)
                 {
                     double eps = EpsilonCu * (c1 - layer.DepthFromTop) / c1;
-                    double fs1 = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                    double fs1 = Math.Sign(eps) * Math.Min(Math.Abs(eps * es), fy);
                     Csteel1 += layer.SteelArea * fs1;
                 }
 
@@ -135,7 +137,7 @@ namespace ACI318_19Library
                 foreach (var layer in TensionRebars)
                 {
                     double eps = EpsilonCu * (layer.DepthFromTop - c1) / c1;
-                    double fs2 = Math.Sign(eps) * Math.Min(Math.Abs(eps * Es), Fy);
+                    double fs2 = Math.Sign(eps) * Math.Min(Math.Abs(eps * es), fy);
                     Tsteel1 += layer.SteelArea * fs2;
                 }
 
@@ -161,12 +163,12 @@ namespace ACI318_19Library
             warnings += $"\neps_s_prime = {eps_comp:F6} and eps_tens = {eps_tens:F6}";
 
             // compute stresses in steel
-            double fs = Math.Sign(eps_tens) * Math.Min(Math.Abs(eps_tens * Es), Fy);
-            double fs_prime = Math.Sign(eps_comp) * Math.Min(Math.Abs(eps_comp * Es), Fy);
+            double fs = Math.Sign(eps_tens) * Math.Min(Math.Abs(eps_tens * es), fy);
+            double fs_prime = Math.Sign(eps_comp) * Math.Min(Math.Abs(eps_comp * es), fy);
             warnings += $"\nfs_prime = {fs_prime:F2} ksi  and fs = {fs:F2} ksi";
 
             // compute forces
-            double Cconc = 0.85 * Fck * b * a;
+            double Cconc = 0.85 * fck * b * a;
             double Csteel = fs_prime * AsC;
             double Tsteel = fs * AsT;
             warnings += $"\nCconc = {Cconc:F2} kips  and Csteel = {Csteel:F2} kips  and Tsteel = {Tsteel:F2} kips";
@@ -192,7 +194,7 @@ namespace ACI318_19Library
             // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
             // -- search for the TensionRebar with the largest "DepthFromTop" value
             double maxDepth = TensionRebars.Max(r => r.DepthFromTop);
-            double eps_y = Fy / Es;
+            double eps_y = fy / es;
             double eps_tens_max = -EpsilonCu + maxDepth / c * EpsilonCu;
             warnings += $"\nConcrete strain = {EpsilonCu:F6}    Steel yield strain = {eps_y:F6}  Max actual steel tensile strain = {eps_tens_max:F6}";
 
@@ -211,15 +213,14 @@ namespace ACI318_19Library
 
             // Balanced ratio
             double rhoActual = AsT / (b * d);
-            double rhoBal = 0.85 * Fck * beta1 / Fy * (EpsilonCu / (EpsilonCu + eps_y));
+            double rhoBal = 0.85 * fck * beta1 / fy * (EpsilonCu / (EpsilonCu + eps_y));
             if (rhoActual > rhoBal)
                 warnings += "\nSection is over-reinforced; ";
 
             return new DesignResult
             {
                 crossSection = this,
-                Mu = Mu_kipft*12,
-                Mn = Mn_kipin,           // convert in-lb to kip-ft
+                Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
                 Phi = phi,
                 NeutralAxis = c,
                 CompressionRebars = CompressionRebars,
@@ -238,7 +239,7 @@ namespace ACI318_19Library
                 $"Width: {Width} in\n" +
                 $"DepthFromTop: {Depth} in\n" +
                 $"Cover: {Cover} in\n" +
-                $"Fck: {Fck} psi\n" +
+                $"fck: {Fck} psi\n" +
                 $"fy_ksi: {Fy} psi\n";
         }
 
