@@ -172,21 +172,21 @@ namespace ACI318_19Library
             warnings += $"\nCconc = {Cconc:F2} kips  and Csteel = {Csteel:F2} kips  and Tsteel = {Tsteel:F2} kips";
 
             // moments about top fiber -- CW positive -- compressive forcs are negative, tensile forces are positive
-            double Mconc = Cconc * a / 2.0;
-            double Msteel_comp = Csteel* dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
-            double Msteel_tens = Tsteel * d;
-            double Mn = Mconc + Msteel_comp + Msteel_tens;
-            warnings += $"\nMtot = {Mn:F2} kip-in  and Mconc = {Mconc:F2} kip-in  and Msteel_comp = {Msteel_comp:F2} kip-in  and Msteel = {Msteel_tens:F2} kip-in";
+            double Mconc_kipin = Cconc * a / 2.0;
+            double Msteel_comp_kipin = Csteel* dPrime; // comp_sign needed incase the "compression" steel actually ends up being tensile
+            double Msteel_tens__kipin = Tsteel * d;
+            double Mn_kipin = Mconc_kipin + Msteel_comp_kipin + Msteel_tens__kipin;
+            warnings += $"\nMtot = {Mn_kipin:F2} kip-in  and Mconc_kipin = {Mconc_kipin:F2} kip-in  and Msteel_comp_kipin = {Msteel_comp_kipin:F2} kip-in  and Msteel = {Msteel_tens__kipin:F2} kip-in";
 
             // alternative method -- compute about the Tensile steel -- CW negative...so need to flip the signs
-            double Mconc2 = -Cconc * (d - a / 2);
-            double Msteel_comp2 = -Csteel * (d - dPrime); // comp_sign needed incase the "compression" steel actually ends up being tensile
-            double Mn2 = Mconc2 + Msteel_comp2;
-            warnings += $"\nMtot = {Mn2:F2} kip-in  and Mconc = {Mconc2:F2} kip-in  and Msteel_comp_2 = {Msteel_comp2:F2} kip-in";
+            double Mconc2_kipin = -Cconc * (d - a / 2);
+            double Msteel_comp2_kipin = -Csteel * (d - dPrime); // comp_sign needed incase the "compression" steel actually ends up being tensile
+            double Mn2_kipin = Mconc2_kipin + Msteel_comp2_kipin;
+            warnings += $"\nMtot = {Mn2_kipin:F2} kip-in  and Mconc_kipin = {Mconc2_kipin:F2} kip-in  and Msteel_comp_2 = {Msteel_comp2_kipin:F2} kip-in";
 
             // verify they mathch
-            double diff = Mn - Mn2;
-            warnings += $"\n-- Checking methods for Mn diff = {diff:F2} kip-in";
+            double diff = Mn_kipin - Mn2_kipin;
+            warnings += $"\n-- Checking methods for Mn_kipin diff = {diff:F2} kip-in";
 
 
             // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
@@ -207,7 +207,7 @@ namespace ACI318_19Library
             warnings += $"\nphi = {phi:F3}";
 
             // compute nominal moment
-            double phi_Mn = Mn * phi;
+            double phi_Mn = Mn_kipin * phi;
 
             // Balanced ratio
             double rhoActual = AsT / (b * d);
@@ -218,8 +218,8 @@ namespace ACI318_19Library
             return new DesignResult
             {
                 crossSection = this,
-                Mu = Mu_kipft,
-                Mn = Mn,           // convert in-lb to kip-ft
+                Mu = Mu_kipft*12,
+                Mn = Mn_kipin,           // convert in-lb to kip-ft
                 Phi = phi,
                 NeutralAxis = c,
                 CompressionRebars = CompressionRebars,
@@ -414,6 +414,5 @@ namespace ACI318_19Library
             }
             return mid;
         }
-
     }
 }
