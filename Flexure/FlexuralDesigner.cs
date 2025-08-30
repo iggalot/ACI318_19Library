@@ -23,52 +23,19 @@ namespace ACI318_19Library
 
             List<double> widths = new List<double>();                     // candidate widths (in)
             List<double> depths = new List<double>();                     // candidate depths (in)
+
+            // define the tension options for bars at a distance of "h-cover" from the top of the beam
+            // start with the largest first
+            var barSizes = new[] { "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11" };
+
             // candidate compression bars for the top of the beam section
-            List<RebarLayer> compressionOptions = new List<RebarLayer>()
+            List<RebarLayer> compressionOptions = new List<RebarLayer>();
+
+            foreach (var size in barSizes)
             {
-                new RebarLayer("#3", 1, catalog.RebarTable["#3"], cover),
-                new RebarLayer("#4", 1, catalog.RebarTable["#4"], cover),
-                new RebarLayer("#3", 2, catalog.RebarTable["#3"], cover),
-                new RebarLayer("#5", 1, catalog.RebarTable["#5"], cover),
-                new RebarLayer("#3", 3, catalog.RebarTable["#3"], cover),
-                new RebarLayer("#4", 2, catalog.RebarTable["#4"], cover),
-                new RebarLayer("#6", 1, catalog.RebarTable["#6"], cover),
-                new RebarLayer("#3", 4, catalog.RebarTable["#3"], cover),
-                new RebarLayer("#4", 3, catalog.RebarTable["#4"], cover),
-
-                new RebarLayer("#7", 1, catalog.RebarTable["#7"], cover),
-                new RebarLayer("#5", 2, catalog.RebarTable["#5"], cover),
-                new RebarLayer("#8", 1, catalog.RebarTable["#8"], cover),
-                new RebarLayer("#4", 4, catalog.RebarTable["#4"], cover),
-                new RebarLayer("#6", 2, catalog.RebarTable["#6"], cover),
-                new RebarLayer("#5", 3, catalog.RebarTable["#5"], cover),
-                new RebarLayer("#9", 1, catalog.RebarTable["#9"], cover),
-                new RebarLayer("#7", 2, catalog.RebarTable["#7"], cover),
-                new RebarLayer("#10", 1, catalog.RebarTable["#10"], cover),
-
-                new RebarLayer("#5", 4, catalog.RebarTable["#5"], cover),
-                new RebarLayer("#6", 3, catalog.RebarTable["#6"], cover),
-                new RebarLayer("#11", 1, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#8", 2, catalog.RebarTable["#8"], cover),
-                new RebarLayer("#6", 4, catalog.RebarTable["#6"], cover),
-                new RebarLayer("#7", 3, catalog.RebarTable["#7"], cover),
-                new RebarLayer("#9", 2, catalog.RebarTable["#9"], cover),
-                new RebarLayer("#8", 3, catalog.RebarTable["#8"], cover),
-                new RebarLayer("#7", 4, catalog.RebarTable["#7"], cover),
-
-                new RebarLayer("#10", 2, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#11", 2, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#9", 3, catalog.RebarTable["#9"], cover),
-                new RebarLayer("#8", 4, catalog.RebarTable["#8"], cover),
-                new RebarLayer("#10", 3, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#9", 3, catalog.RebarTable["#9"], cover),
-                new RebarLayer("#8", 4, catalog.RebarTable["#8"], cover),
-                new RebarLayer("#10", 3, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#9", 4, catalog.RebarTable["#9"], cover),
-                new RebarLayer("#11", 3, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#10", 4, catalog.RebarTable["#10"], cover),
-                new RebarLayer("#11", 4, catalog.RebarTable["#10"], cover),
-            };
+                for (int qty = 1; qty <= 4; qty++)
+                    compressionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], cover));
+            }
 
             // load the acceptable widths
             for (int i = 0; i < 32; i++)
@@ -92,13 +59,11 @@ namespace ACI318_19Library
                         Width = b,
                         Depth = h,
                         Cover = cover,
-                        Fck = fck,
-                        Fy = fy,
+                        Fck_psi = fck,
+                        Fy_psi = fy,
                     };
 
-                    // define the tension options for bars at a distance of "h-cover" from the top of the beam
-                    // start with the largest first
-                    var barSizes = new[] { "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11" };
+
                     var tensionOptions = new List<RebarLayer>();
 
                     foreach (var size in barSizes)
@@ -118,6 +83,9 @@ namespace ACI318_19Library
                         first_design = section.ComputeFlexuralStrength();
                     }
 
+                    // Try single-layer tension reinforcement first
+                    bool foundTensionOnlySolution = false;
+
                     // Order small to large (try most economical first)
                     foreach (var tensLayer in tensionOptions.OrderBy(opt => opt.SteelArea))
                     {
@@ -129,7 +97,43 @@ namespace ACI318_19Library
                         if (result.PhiMn >= MuTarget_kip_in && result.eps_T > 0.005)
                         {
                             successfulSections.Add(result);
+                            foundTensionOnlySolution = true;
                             break; // optional: stop at first success
+                        }
+                    }
+
+                    // If no pure tension solution, try doubly reinforced
+                    bool success = false;
+                    if (!foundTensionOnlySolution)
+                    {
+                        foreach (var tensLayer in tensionOptions.OrderBy(opt => opt.SteelArea))
+                        {
+                            foreach (var compSize in barSizes)
+                            {
+                                for (int compQty = 1; compQty <= 3; compQty++) // limit compression bars
+                                {
+                                    var trialSection = section.BaseClone(section);
+                                    trialSection.AddTensionRebar(tensLayer.BarSize, tensLayer.Qty, catalog, tensLayer.DepthFromTop);
+
+                                    // compression layer is placed at "cover" depth from top
+                                    trialSection.AddCompressionRebar(compSize, compQty, catalog, cover);
+
+                                    var result = trialSection.ComputeFlexuralStrength();
+
+                                    if (result.PhiMn >= MuTarget_kip_in && result.eps_T > 0.005)
+                                    {
+                                        successfulSections.Add(result);
+                                        success = true;
+                                    }
+
+                                    if (success)
+                                        break;
+                                }
+                                if (success)
+                                    break;
+                            }
+                            if (success)
+                                break; // exit back to depth selection
                         }
                     }
                 }

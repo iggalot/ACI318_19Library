@@ -26,8 +26,20 @@ namespace ACI318_19Library
         public double Cover { get; set; }   // in
 
         // Materials
-        public double Fck { get; set; }     // psi (f'c)
-        public double Fy { get; set; }      // psi
+        public double Fck_psi { get; set; }     // psi (f'c)
+        public double Fy_psi { get; set; }      // psi
+
+        // Balanced reinforcement ratio ρb
+        public double RhoBalanced
+        {
+            get
+            {
+                double eps_y = Fy_psi / Es_psi; // steel yield strain
+                double eps_cu = 0.003;    // concrete crushing strain
+                return (0.85 * Fck_psi * GetBeta1(Fck_psi)) /
+                       (Fy_psi * (1.0 + eps_y / eps_cu));
+            }
+        }
 
         // Reinforcement layers
         public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
@@ -35,7 +47,7 @@ namespace ACI318_19Library
 
         // constants
         private const double EpsilonCu = 0.003;       // ultimate concrete strain
-        private const double Es = 29000000.0;         // psi (modulus of steel)
+        private const double Es_psi = 29000000.0;         // psi (modulus of steel)
 
         public CrossSection BaseClone(CrossSection section)
         {
@@ -44,8 +56,8 @@ namespace ACI318_19Library
                 Width = section.Width,
                 Depth = section.Depth,
                 Cover = section.Cover,
-                Fck = section.Fck,
-                Fy = section.Fy,
+                Fck_psi = section.Fck_psi,
+                Fy_psi = section.Fy_psi,
             };
         }
         // default constructor
@@ -56,8 +68,8 @@ namespace ACI318_19Library
             Width = width;
             Depth = depth;
             Cover = cover;
-            Fck = fck;
-            Fy = fy;
+            Fck_psi = fck;
+            Fy_psi = fy;
         }
 
         public void AddTensionRebar(string barSize, int count, RebarCatalog catalog, double depth)
@@ -87,6 +99,17 @@ namespace ACI318_19Library
             return TensionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / TensionRebars.Sum(l => l.SteelArea);
         }
 
+
+
+        // Max steel ratio (ACI often limits to 0.75ρb)
+        public double RhoMax => 0.75 * RhoBalanced;
+
+        // Current required ratio
+        public double RhoRequired(double As_required)
+        {
+            return As_required / (Width * Depth);
+        }
+
         private double GetBeta1(double fck)
         {
             // ACI 318-19 Table 22.2.2.4.3 approximation
@@ -97,7 +120,7 @@ namespace ACI318_19Library
 
         public DesignResult ComputeFlexuralStrength()
         {
-            return ComputeFlexuralStrength(Width, Depth, TensionRebars, CompressionRebars, Fck, Fy, Es, EpsilonCu);
+            return ComputeFlexuralStrength(Width, Depth, TensionRebars, CompressionRebars, Fck_psi, Fy_psi, Es_psi, EpsilonCu);
         }
 
         public DesignResult ComputeFlexuralStrength(double b, double depth, 
@@ -250,8 +273,8 @@ namespace ACI318_19Library
                 $"Width: {Width} in\n" +
                 $"DepthFromTop: {Depth} in\n" +
                 $"Cover: {Cover} in\n" +
-                $"fck: {Fck} psi\n" +
-                $"fy_ksi: {Fy} psi\n";
+                $"fck: {Fck_psi} psi\n" +
+                $"fy_ksi: {Fy_psi} psi\n";
         }
 
 
@@ -425,6 +448,33 @@ namespace ACI318_19Library
                 }
             }
             return mid;
+        }
+
+        /// <summary>
+        /// Limiting singly-reinforced capacity at ρmax (tension-controlled, φ = 0.90).
+        /// Returns AsMax (in^2), MnMax (in-lb), PhiMnMax (in-lb).
+        /// </summary>
+        public (double AsMax, double MnMax, double PhiMnMax) GetSinglyReinforcedLimit()
+        {
+            double dEff = Depth - Cover;
+            double b = Width;
+            double fc = Fck_psi;
+            double fy = Fy_psi;
+
+            double rhoMax = RhoMax;
+            double AsMax = rhoMax * b * dEff;
+
+            // Whitney block depth
+            double a = (AsMax * fy) / (0.85 * fc * b);
+
+            // Nominal moment (in-lb)
+            double Mn = AsMax * fy * (dEff - a / 2.0);
+
+            // Tension-controlled phi
+            double phi = 0.90;
+            double PhiMn = phi * Mn;
+
+            return (AsMax, Mn, PhiMn);
         }
     }
 }
