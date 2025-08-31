@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace ACI318_19Library
@@ -176,8 +177,8 @@ namespace ACI318_19Library
         {
             double b= section.Width;
             double depth = section.Depth;
-            List<RebarLayer> TensionRebars = section.TensionRebars;
-            List<RebarLayer> CompressionRebars = section.CompressionRebars;
+            ObservableCollection<RebarLayer> TensionRebars = section.TensionRebars;
+            ObservableCollection<RebarLayer> CompressionRebars = section.CompressionRebars;
             double fck = section.Fck_psi;
             double fy = section.Fy_psi;
             double es = CrossSection.Es_psi;

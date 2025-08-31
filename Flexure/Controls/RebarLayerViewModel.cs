@@ -1,21 +1,18 @@
-﻿using ACI318_19Library;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows;
+﻿using System.ComponentModel;
 
 public class RebarLayerViewModel : INotifyPropertyChanged
 {
     public string BarSize { get; set; }
-    public int Count { get; set; }
-    public double Depth { get; set; }
+    public int Qty { get; set; }
+    public double DepthFromTop { get; set; }
 
     public double? LastTensionDepth { get; set; }
 
     public RebarLayerViewModel(string barSize, int count, double depth)
     {
         BarSize = barSize;
-        Count = count;
-        Depth = depth;
+        Qty = count;
+        DepthFromTop = depth;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

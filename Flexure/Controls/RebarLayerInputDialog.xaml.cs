@@ -99,13 +99,13 @@ namespace ACI318_19Library
 
             if (!int.TryParse(CountTextBox.Text, out int cnt) || cnt <= 0)
             {
-                MessageBox.Show(this, "Count must be a positive integer.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, "Qty must be a positive integer.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (!double.TryParse(DepthTextBox.Text, out double depth) || depth <= 0.0)
             {
-                MessageBox.Show(this, "Depth must be a positive number.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, "DepthFromTop must be a positive number.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

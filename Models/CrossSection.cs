@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace ACI318_19Library
@@ -42,8 +43,8 @@ namespace ACI318_19Library
         }
 
         // Reinforcement layers
-        public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
-        public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
+        public ObservableCollection<RebarLayer> TensionRebars { get; set; } = new ObservableCollection<RebarLayer>();
+        public ObservableCollection<RebarLayer> CompressionRebars { get; set; } = new ObservableCollection<RebarLayer>();
 
         // constants
         public const double EpsilonCu = 0.003;       // ultimate concrete strain

@@ -16,11 +16,17 @@
         </Grid.RowDefinitions>
 
         <!-- Scrollable content -->
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Orientation="Horizontal">
             <StackPanel x:Name="spControl">
-                <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
+            <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
             </StackPanel>
-        </ScrollViewer>
+            <StackPanel Orientation="Vertical">
+                <Canvas x:Name="cnvCrossSection" Height="150" Width="150" HorizontalAlignment="Left" Background="White"/>
+                <StackPanel x:Name="spResult">
+                    
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
 
         <!-- Buttons -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Margin="4">
