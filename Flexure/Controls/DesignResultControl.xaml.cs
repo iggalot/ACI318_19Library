@@ -39,13 +39,15 @@ namespace ACI318_19Library
         private void UpdateDisplay()
         {
             // Bind DataContext so XAML TextBlocks work
-            DataContext = Result;
+            //DataContext = Result;
 
-            // Also update canvas drawing
-            cnvSection.Children.Clear();
+
 
             if (Result == null || Result?.crossSection == null)
                 return;
+
+            // Also update canvas drawing
+            cnvSection.Children.Clear();
 
             ACIDrawingHelpers.DrawCrossSection(cnvSection, Result.crossSection);
         }
