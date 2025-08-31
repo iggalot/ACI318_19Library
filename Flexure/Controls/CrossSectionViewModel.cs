@@ -25,7 +25,22 @@ namespace ACI318_19Library
 
         public CrossSection ToCrossSection()
         {
-            return new CrossSection
+            RebarCatalog catalog = new RebarCatalog();
+            ObservableCollection<RebarLayer> tension_rebars = new ObservableCollection<RebarLayer>();
+            ObservableCollection<RebarLayer> compression_rebars = new ObservableCollection<RebarLayer>();
+            foreach (RebarLayerViewModel layer in TensionRebars)
+            {
+                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, catalog.RebarTable[layer.BarSize], layer.DepthFromTop);
+                tension_rebars.Add(temp);
+            }
+
+            foreach (RebarLayerViewModel layer in CompressionRebars)
+            {
+                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, catalog.RebarTable[layer.BarSize], layer.DepthFromTop);
+                compression_rebars.Add(temp);
+            }
+
+            return new CrossSection()
             {
                 Width = Width,
                 Depth = Depth,
@@ -34,7 +49,9 @@ namespace ACI318_19Library
                 SideCover = SideCover,
                 ClearSpacing = ClearSpacing,
                 Fck_psi = Fck,
-                Fy_psi = Fy
+                Fy_psi = Fy,
+                TensionRebars = tension_rebars,
+                CompressionRebars = compression_rebars
             };
         }
 

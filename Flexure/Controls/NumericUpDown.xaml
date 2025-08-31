@@ -13,7 +13,8 @@
                  Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  HorizontalContentAlignment="Right"
                  ToolTip="{Binding ErrorMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                 BorderThickness="1"/>
+                 BorderThickness="1"
+                 TextChanged="TextBoxValue_TextChanged"/>
 
         <!-- Up/Down Buttons -->
         <StackPanel Grid.Column="1" Orientation="Vertical">

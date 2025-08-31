@@ -12,6 +12,19 @@ namespace ACI318_19Library
             TextBoxValue.LostFocus += TextBoxValue_LostFocus;
         }
 
+        public static readonly RoutedEvent ValueChangedEvent =
+            EventManager.RegisterRoutedEvent(
+                nameof(ValueChanged),
+                RoutingStrategy.Bubble,
+                typeof(RoutedEventHandler),
+                typeof(NumericUpDown));
+
+        public event RoutedEventHandler ValueChanged
+        {
+            add => AddHandler(ValueChangedEvent, value);
+            remove => RemoveHandler(ValueChangedEvent, value);
+        }
+
         // Value
         public static readonly DependencyProperty ValueProperty =
             DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumericUpDown),
@@ -48,12 +61,6 @@ namespace ACI318_19Library
 
         // Error message for tooltip
         public string ErrorMessage { get; set; }
-
-        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var control = d as NumericUpDown;
-            control.ValidateValue();
-        }
 
         private void BtnUp_Click(object sender, RoutedEventArgs e)
         {
@@ -94,18 +101,43 @@ namespace ACI318_19Library
             }
         }
 
-        private void ShowError(string message)
+        public void ShowError(string message)
         {
             TextBoxValue.BorderBrush = Brushes.Red;
             ErrorMessage = message;
             ToolTipService.SetToolTip(TextBoxValue, message);
         }
 
-        private void ClearError()
+        public void ClearError()
         {
             TextBoxValue.ClearValue(Border.BorderBrushProperty);
             ErrorMessage = null;
             ToolTipService.SetToolTip(TextBoxValue, null);
         }
+
+        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (NumericUpDown)d;
+            control.ValidateValue();
+            // Raise the event for parent controls
+            control.RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+        }
+
+        private void TextBoxValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (double.TryParse(TextBoxValue.Text, out double val))
+            {
+                Value = val;
+                ClearError();
+            }
+            else
+            {
+                ShowError("Invalid number");
+            }
+
+            // Always notify parent
+            RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+        }
+
     }
 }

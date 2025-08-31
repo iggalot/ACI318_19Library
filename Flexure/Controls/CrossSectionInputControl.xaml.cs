@@ -1,13 +1,20 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace ACI318_19Library
 {
     public partial class CrossSectionInputControl : UserControl
     {
         public CrossSectionViewModel ViewModel { get; private set; }
+        public bool ValidateInputs()
+        {
+            return ValidationHelper.IsValid(this);
+        }
 
         public CrossSectionInputControl()
         {
@@ -15,6 +22,10 @@ namespace ACI318_19Library
             // create a default ViewModel if none provided
             ViewModel = new CrossSectionViewModel();
             DataContext = ViewModel;
+
+            this.Loaded += (s, e) => Update();
+
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
         public CrossSectionInputControl(CrossSectionViewModel vm)
         {
@@ -28,7 +39,120 @@ namespace ACI318_19Library
             Debug.WriteLine("TensionRebars count: " + ViewModel.TensionRebars.Count);
 
             this.Loaded += (s, e) => Update();
+
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
         }
+
+        private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // Only react to relevant properties
+            if (e.PropertyName == nameof(ViewModel.Width) ||
+                e.PropertyName == nameof(ViewModel.Depth) ||
+                e.PropertyName == nameof(ViewModel.TensionCover) ||
+                e.PropertyName == nameof(ViewModel.CompressionCover) ||
+                e.PropertyName == nameof(ViewModel.SideCover) ||
+                e.PropertyName == nameof(ViewModel.ClearSpacing) ||
+                e.PropertyName == nameof(ViewModel.Fck) ||
+                e.PropertyName == nameof(ViewModel.Fy))
+            {
+                Update();
+            }
+        }
+
+        public bool Validate()
+        {
+            bool isValid = true;
+            var errors = new List<string>();
+
+            // Width and Depth
+            if (ViewModel.Width <= 0)
+            {
+                isValid = false;
+                errors.Add("Width must be greater than 0.");
+            }
+            if (ViewModel.Depth <= 0)
+            {
+                isValid = false;
+                errors.Add("Depth must be greater than 0.");
+            }
+
+            // Covers
+            if (ViewModel.TensionCover < 0.5)
+            {
+                isValid = false;
+                errors.Add("Tension cover must be at least 0.5 in.");
+            }
+            if (ViewModel.CompressionCover < 0.5)
+            {
+                isValid = false;
+                errors.Add("Compression cover must be at least 0.5 in.");
+            }
+            if (ViewModel.SideCover < 0.5)
+            {
+                isValid = false;
+                errors.Add("Side cover must be at least 0.5 in.");
+            }
+
+            // Clear spacing
+            if (ViewModel.ClearSpacing < 0.5)
+            {
+                isValid = false;
+                errors.Add("Clear spacing must be at least 0.5 in.");
+            }
+
+            // Material properties
+            if (ViewModel.Fck < 2000 || ViewModel.Fck > 10000)
+            {
+                isValid = false;
+                errors.Add("f'c must be between 2000 and 10000 psi.");
+            }
+            if (ViewModel.Fy < 40000 || ViewModel.Fy > 120000)
+            {
+                isValid = false;
+                errors.Add("fy must be between 40,000 and 120,000 psi.");
+            }
+
+            // Rebar layers
+            foreach (var layer in ViewModel.TensionRebars)
+            {
+                if (layer.Qty <= 0)
+                {
+                    isValid = false;
+                    errors.Add($"Tension rebar layer {layer.BarSize} has invalid quantity.");
+                }
+                if (layer.DepthFromTop <= 0 || layer.DepthFromTop >= ViewModel.Depth)
+                {
+                    isValid = false;
+                    errors.Add($"Tension rebar layer {layer.BarSize} has invalid depth.");
+                }
+            }
+
+            foreach (var layer in ViewModel.CompressionRebars)
+            {
+                if (layer.Qty <= 0)
+                {
+                    isValid = false;
+                    errors.Add($"Compression rebar layer {layer.BarSize} has invalid quantity.");
+                }
+                if (layer.DepthFromTop <= 0 || layer.DepthFromTop >= ViewModel.Depth)
+                {
+                    isValid = false;
+                    errors.Add($"Compression rebar layer {layer.BarSize} has invalid depth.");
+                }
+            }
+
+            // Optionally show errors in Debug or MessageBox
+            if (!isValid)
+            {
+                Debug.WriteLine("Validation errors:");
+                foreach (var err in errors)
+                    Debug.WriteLine(" - " + err);
+            }
+
+            return isValid;
+        }
+
 
         public CrossSection GetCrossSection() => ViewModel.ToCrossSection();
 
@@ -83,55 +207,111 @@ namespace ACI318_19Library
 
         public void Update()
         {
-            RebarCatalog catalog = new RebarCatalog();
-            ObservableCollection<RebarLayer> tension_rebars = new ObservableCollection<RebarLayer>();
-            ObservableCollection<RebarLayer> compression_rebars = new ObservableCollection<RebarLayer>();
-            foreach (RebarLayerViewModel layer in ViewModel.TensionRebars)
-            {
-                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, catalog.RebarTable[layer.BarSize], layer.DepthFromTop);
-                tension_rebars.Add(temp);
-            }
-
-            foreach (RebarLayerViewModel layer in ViewModel.CompressionRebars)
-            {
-                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, catalog.RebarTable[layer.BarSize], layer.DepthFromTop);
-                compression_rebars.Add(temp);
-            }
-
-            CrossSection section = new CrossSection()
-            {
-                Width = ViewModel.Width,
-                Depth = ViewModel.Depth,
-                TensionCover = ViewModel.TensionCover,
-                CompressionCover = ViewModel.CompressionCover,
-                SideCover = ViewModel.SideCover,
-                ClearSpacing = ViewModel.ClearSpacing,
-                Fck_psi = ViewModel.Fck,
-                Fy_psi = ViewModel.Fy,
-                TensionRebars = tension_rebars,
-                CompressionRebars = compression_rebars
-            };
-
-            // Draw the cross section
-            //cnvCrossSection.Children.Clear();
-            //ACIDrawingHelpers.DrawCrossSection(cnvCrossSection, section);
-
-            // Show the design results
+            // Clear the design results control
             spResult.Children.Clear();
 
+            // Validate that all the input in the ViewModel is valid, otherwise dont return
+            if (ValidateInputs() is false) return;
+
+            // get our new section from the ViewModel
+            CrossSection section = GetCrossSection();
+
             // Perform a moment calculation
-            if (tension_rebars.Count == 0) return;
+            if (section.TensionRebars.Count == 0) return;
 
             DesignResultModel design = FlexuralDesigner.ComputeFlexuralStrength(section);
             DesignResultControl control = new DesignResultControl();
             control.Result = design;
             spResult.Children.Add(control);
-
-
-
-
-
         }
+
+
+        public static class ValidationHelper
+        {
+            public static bool IsValid(DependencyObject node)
+            {
+                // Check this node
+                if (Validation.GetHasError(node))
+                {
+                    return false;
+                }
+
+                // Check children
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(node); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(node, i);
+                    if (!IsValid(child))
+                        return false;
+                }
+
+                return true;
+            }
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Force validation immediately
+            var textBox = sender as TextBox;
+            BindingExpression be = textBox.GetBindingExpression(TextBox.TextProperty);
+            be?.UpdateSource();
+
+            // Optionally run your overall control validation
+            bool allValid = ValidationHelper.IsValid(this);
+        }
+
+        private void NumericUpDown_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            Update();
+            //if (AreAllInputsValid())
+            //{
+            //    Update();
+            //}
+        }
+
+        // Validate all inputs in the UI
+        private bool AreAllInputsValid()
+        {
+            bool isValid = true;
+
+            foreach (var numUpDown in FindVisualChildren<NumericUpDown>(this))
+            {
+                if (!double.TryParse(numUpDown.TextBoxValue.Text, out double val) ||
+                    val < numUpDown.Minimum || val > numUpDown.Maximum)
+                {
+                    // Highlight invalid box
+                    numUpDown.ShowError($"Value must be {numUpDown.Minimum}–{numUpDown.Maximum}");
+                    isValid = false;
+                }
+                else
+                {
+                    numUpDown.ClearError();
+                }
+            }
+
+            return isValid;
+        }
+
+        // Visual tree helper
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null && child is T t)
+                    {
+                        yield return t;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
+        }
+
 
     }
 }

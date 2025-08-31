@@ -4,124 +4,141 @@
              xmlns:local="clr-namespace:ACI318_19Library"
              >
 
-        <Grid Margin="8">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <!-- Inputs -->
-                <RowDefinition Height="Auto"/>
-                <!-- Tension Rebars -->
-                <RowDefinition Height="Auto"/>
-                <!-- Compression Rebars -->
-                <RowDefinition Height="*"/>
-                <!-- filler -->
-            </Grid.RowDefinitions>
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Inputs -->
+            <RowDefinition Height="Auto"/>
+            <!-- Tension Rebars -->
+            <RowDefinition Height="Auto"/>
+            <!-- Compression Rebars -->
+            <RowDefinition Height="*"/>
+            <!-- filler -->
+        </Grid.RowDefinitions>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-            <!-- Inputs Grid -->
-            <StackPanel Grid.Column="0">
+        <!-- Inputs Grid -->
+        <StackPanel Grid.Column="0">
 
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- Width -->
-                    <TextBlock Text="Width (in):" Grid.Row="0" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="0" Grid.Column="1"
-                                 Value="{Binding Width}" Minimum="1" Maximum="60" Step="0.25"/>
-                    <!-- Depth -->
-                    <TextBlock Text="Depth (in):" Grid.Row="1" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="1" Grid.Column="1"
-                                 Value="{Binding Depth}" Minimum="1" Maximum="100" Step="0.25"/>
-                    <!-- Tension Cover -->
-                    <TextBlock Text="Tension Cover (in):" Grid.Row="2" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="2" Grid.Column="1"
-                                 Value="{Binding TensionCover}" Minimum="0.5" Maximum="6" Step="0.125"/>
-                    <!-- Compression Cover -->
-                    <TextBlock Text="Compression Cover (in):" Grid.Row="3" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="3" Grid.Column="1"
-                                 Value="{Binding CompressionCover}" Minimum="0.5" Maximum="6" Step="0.125"/>
-                    <!-- Side Cover -->
-                    <TextBlock Text="Side Cover (in):" Grid.Row="4" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="4" Grid.Column="1"
-                                 Value="{Binding SideCover}" Minimum="0.5" Maximum="6" Step="0.125"/>
-                    <!-- Clear Spacing -->
-                    <TextBlock Text="Clear Spacing (in):" Grid.Row="5" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="5" Grid.Column="1"
-                                 Value="{Binding ClearSpacing}" Minimum="0.5" Maximum="12" Step="0.125"/>
-                    <!-- f'c -->
-                    <TextBlock Text="f'c (psi):" Grid.Row="6" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="6" Grid.Column="1"
-                                 Value="{Binding Fck}" Minimum="2000" Maximum="10000" Step="500"/>
-                    <!-- fy -->
-                    <TextBlock Text="fy (psi):" Grid.Row="7" Grid.Column="0" Margin="2"/>
-                    <local:NumericUpDown Grid.Row="7" Grid.Column="1"
-                                 Value="{Binding Fy}" Minimum="40000" Maximum="120000" Step="5000"/>
-                </Grid>
+                <!-- Width -->
+                <TextBlock Text="Width (in):" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="WidthBox" Grid.Row="0" Grid.Column="1"
+                         Value="{Binding Width, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="1" Maximum="36" Step="1.0"
+                                     ValueChanged="NumericUpDown_ValueChanged"/>
 
-                <!-- Tension Rebars -->
-                <Expander Grid.Row="1" Header="Tension Rebars" IsExpanded="True" Margin="0,8,0,0">
-                    <StackPanel>
-                        <DataGrid x:Name="TensionDataGrid"
+                <!-- Depth -->
+                <TextBlock Text="Depth (in):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="DepthBox" Grid.Row="1" Grid.Column="1"
+                         Value="{Binding Depth, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="4" Maximum="60" Step="1.0"
+                                     ValueChanged="NumericUpDown_ValueChanged"/>
+
+                <!-- Tension Cover -->
+                <TextBlock Text="Tension Cover (in):" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="TensionCoverBox" Grid.Row="2" Grid.Column="1"
+                         Value="{Binding TensionCover, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="1.5" Maximum="6" Step="0.25" ValueChanged="NumericUpDown_ValueChanged"/>
+
+                <!-- Compression Cover -->
+                <TextBlock Text="Compression Cover (in):" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="CompressionCoverBox" Grid.Row="3" Grid.Column="1"
+                         Value="{Binding CompressionCover, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="1.5" Maximum="6" Step="0.25" ValueChanged="NumericUpDown_ValueChanged"/>
+
+                <!-- Side Cover -->
+                <TextBlock Text="Side Cover (in):" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="SideCoverBox" Grid.Row="4" Grid.Column="1"
+                         Value="{Binding SideCover, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="1.5" Maximum="6" Step="0.25" ValueChanged="NumericUpDown_ValueChanged"/>
+
+                <!-- Clear Spacing -->
+                <TextBlock Text="Clear Spacing (in):" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="ClearSpacingBox" Grid.Row="5" Grid.Column="1"
+                         Value="{Binding ClearSpacing, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="1.5" Maximum="6" Step="0.25" ValueChanged="NumericUpDown_ValueChanged"/>
+
+                <!-- f'c -->
+                <TextBlock Text="f'c (ksi):" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="FckBox" Grid.Row="6" Grid.Column="1"
+                         Value="{Binding Fck, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="2000" Maximum="10000" Step="1000" ValueChanged="NumericUpDown_ValueChanged"/>
+
+                <!-- Fy -->
+                <TextBlock Text="Fy (ksi):" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center"/>
+                <local:NumericUpDown x:Name="FyBox" Grid.Row="7" Grid.Column="1"
+                         Value="{Binding Fy, UpdateSourceTrigger=PropertyChanged}"
+                         Minimum="40000" Maximum="80000" Step="5000" ValueChanged="NumericUpDown_ValueChanged"/>
+            </Grid>
+
+            <!-- Tension Rebars -->
+            <Expander Grid.Row="1" Header="Tension Rebars" IsExpanded="True" Margin="0,8,0,0">
+                <StackPanel>
+                    <DataGrid x:Name="TensionDataGrid"
                               ItemsSource="{Binding TensionRebars}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               MinHeight="100">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
-                                <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
-                                <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop}" Width="75"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
+                            <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop}" Width="75"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                            <Button Content="Add" Width="50" Click="BtnAddTension_Click"/>
-                            <Button Content="Remove" Width="60" Margin="4,0,0,0" Click="BtnRemoveTension_Click"/>
-                        </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Button Content="Add" Width="50" Click="BtnAddTension_Click"/>
+                        <Button Content="Remove" Width="60" Margin="4,0,0,0" Click="BtnRemoveTension_Click"/>
                     </StackPanel>
-                </Expander>
+                </StackPanel>
+            </Expander>
 
-                <!-- Compression Rebars -->
-                <Expander Grid.Row="2" Header="Compression Rebars" IsExpanded="True" Margin="0,8,0,0">
-                    <StackPanel>
-                        <DataGrid x:Name="CompressionDataGrid"
+            <!-- Compression Rebars -->
+            <Expander Grid.Row="2" Header="Compression Rebars" IsExpanded="True" Margin="0,8,0,0">
+                <StackPanel>
+                    <DataGrid x:Name="CompressionDataGrid"
                               ItemsSource="{Binding CompressionRebars}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               MinHeight="100">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
-                                <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
-                                <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop}" Width="75"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
+                            <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop}" Width="75"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                            <Button Content="Add" Width="50" Click="BtnAddComp_Click"/>
-                            <Button Content="Remove" Width="60" Margin="4,0,0,0" Click="BtnRemoveComp_Click"/>
-                        </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Button Content="Add" Width="50" Click="BtnAddComp_Click"/>
+                        <Button Content="Remove" Width="60" Margin="4,0,0,0" Click="BtnRemoveComp_Click"/>
                     </StackPanel>
-                </Expander>
-            </StackPanel>
-            <!-- Scrollable content -->
-            <StackPanel  Grid.Column="1">
-                <!--<Canvas x:Name="cnvCrossSection" Height="200" Width="200" HorizontalAlignment="Left" Background="White"/>-->
-                <StackPanel x:Name="spResult"/>
-            </StackPanel>
-        </Grid>
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+        <!-- Scrollable content -->
+        <StackPanel  Grid.Column="1">
+            <!--<Canvas x:Name="cnvCrossSection" Height="200" Width="200" HorizontalAlignment="Left" Background="White"/>-->
+            <StackPanel x:Name="spResult"/>
+        </StackPanel>
+    </Grid>
 </UserControl>
