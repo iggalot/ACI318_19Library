@@ -8,16 +8,16 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
-        <!-- TextBox with validation border -->
-        <TextBox Name="TextBoxValue" Grid.Column="0"
-                 Text="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        <!-- TextBox with validation background -->
+        <TextBox x:Name="TextBoxValue"
+                 Grid.Column="0"
                  HorizontalContentAlignment="Right"
-                 ToolTip="{Binding ErrorMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 VerticalContentAlignment="Center"
                  BorderThickness="1"
-                 TextChanged="TextBoxValue_TextChanged"/>
+                 Text="0" />
 
         <!-- Up/Down Buttons -->
-        <StackPanel Grid.Column="1" Orientation="Vertical">
+        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0">
             <Button Content="▲" Height="12" Padding="0" Click="BtnUp_Click"/>
             <Button Content="▼" Height="12" Padding="0" Click="BtnDown_Click"/>
         </StackPanel>

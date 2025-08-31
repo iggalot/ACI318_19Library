@@ -26,6 +26,9 @@ namespace ACI318_19Library
             this.Loaded += (s, e) => Update();
 
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            AttachNumericUpDownEvents();
+
         }
         public CrossSectionInputControl(CrossSectionViewModel vm)
         {
@@ -42,7 +45,17 @@ namespace ACI318_19Library
 
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
+            AttachNumericUpDownEvents();
         }
+
+        private void AttachNumericUpDownEvents()
+        {
+            foreach (var child in FindVisualChildren<NumericUpDown>(this))
+            {
+                child.ValueChanged += NumericUpDown_ValueChanged;
+            }
+        }
+
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -259,56 +272,38 @@ namespace ACI318_19Library
             bool allValid = ValidationHelper.IsValid(this);
         }
 
+
         private void NumericUpDown_ValueChanged(object sender, RoutedEventArgs e)
         {
-            Update();
-            //if (AreAllInputsValid())
-            //{
-            //    Update();
-            //}
+            spResult.Children.Clear();
+            // Only update if all NumericUpDowns are valid
+            if (AreAllNumericInputsValid())
+                Update();
         }
 
-        // Validate all inputs in the UI
-        private bool AreAllInputsValid()
+        private bool AreAllNumericInputsValid()
         {
-            bool isValid = true;
-
             foreach (var numUpDown in FindVisualChildren<NumericUpDown>(this))
             {
-                if (!double.TryParse(numUpDown.TextBoxValue.Text, out double val) ||
-                    val < numUpDown.Minimum || val > numUpDown.Maximum)
-                {
-                    // Highlight invalid box
-                    numUpDown.ShowError($"Value must be {numUpDown.Minimum}–{numUpDown.Maximum}");
-                    isValid = false;
-                }
-                else
-                {
-                    numUpDown.ClearError();
-                }
+                if (!numUpDown.IsValid)
+                    return false;
             }
-
-            return isValid;
+            return true;
         }
 
-        // Visual tree helper
+        // Helper function to enumerate children recursively
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
-            if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T t)
-                    {
-                        yield return t;
-                    }
+            if (depObj == null) yield break;
 
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+                if (child != null && child is T t)
+                    yield return t;
+
+                foreach (T childOfChild in FindVisualChildren<T>(child))
+                    yield return childOfChild;
             }
         }
 

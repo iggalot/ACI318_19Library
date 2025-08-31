@@ -6,12 +6,18 @@ namespace ACI318_19Library
 {
     public partial class NumericUpDown : UserControl
     {
+        private string _textValue = "0";
+        public bool IsValid { get; private set; } = true;
+
         public NumericUpDown()
         {
             InitializeComponent();
-            TextBoxValue.LostFocus += TextBoxValue_LostFocus;
+
+            TextBoxValue.Text = _textValue;
+            TextBoxValue.TextChanged += TextBoxValue_TextChanged;
         }
 
+        // Routed event for parent controls
         public static readonly RoutedEvent ValueChangedEvent =
             EventManager.RegisterRoutedEvent(
                 nameof(ValueChanged),
@@ -25,7 +31,7 @@ namespace ACI318_19Library
             remove => RemoveHandler(ValueChangedEvent, value);
         }
 
-        // Value
+        // Value property
         public static readonly DependencyProperty ValueProperty =
             DependencyProperty.Register(nameof(Value), typeof(double), typeof(NumericUpDown),
                 new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnValueChanged));
@@ -36,7 +42,7 @@ namespace ACI318_19Library
             set => SetValue(ValueProperty, value);
         }
 
-        // Minimum
+        // Minimum property
         public static readonly DependencyProperty MinimumProperty =
             DependencyProperty.Register(nameof(Minimum), typeof(double), typeof(NumericUpDown), new PropertyMetadata(double.MinValue));
 
@@ -46,7 +52,7 @@ namespace ACI318_19Library
             set => SetValue(MinimumProperty, value);
         }
 
-        // Maximum
+        // Maximum property
         public static readonly DependencyProperty MaximumProperty =
             DependencyProperty.Register(nameof(Maximum), typeof(double), typeof(NumericUpDown), new PropertyMetadata(double.MaxValue));
 
@@ -60,84 +66,79 @@ namespace ACI318_19Library
         public double Step { get; set; } = 1.0;
 
         // Error message for tooltip
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; private set; }
 
         private void BtnUp_Click(object sender, RoutedEventArgs e)
         {
             Value += Step;
-            ValidateValue();
+            _textValue = Value.ToString();
+            TextBoxValue.Text = _textValue;
+            ClearError();
+            RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
         }
 
         private void BtnDown_Click(object sender, RoutedEventArgs e)
         {
             Value -= Step;
-            ValidateValue();
-        }
-
-        private void TextBoxValue_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (double.TryParse(TextBoxValue.Text, out double val))
-            {
-                Value = val;
-            }
-            ValidateValue();
-        }
-
-        private void ValidateValue()
-        {
-            if (Value < Minimum)
-            {
-                Value = Minimum;
-                ShowError($"Minimum value is {Minimum}");
-            }
-            else if (Value > Maximum)
-            {
-                Value = Maximum;
-                ShowError($"Maximum value is {Maximum}");
-            }
-            else
-            {
-                ClearError();
-            }
-        }
-
-        public void ShowError(string message)
-        {
-            TextBoxValue.BorderBrush = Brushes.Red;
-            ErrorMessage = message;
-            ToolTipService.SetToolTip(TextBoxValue, message);
-        }
-
-        public void ClearError()
-        {
-            TextBoxValue.ClearValue(Border.BorderBrushProperty);
-            ErrorMessage = null;
-            ToolTipService.SetToolTip(TextBoxValue, null);
-        }
-
-        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var control = (NumericUpDown)d;
-            control.ValidateValue();
-            // Raise the event for parent controls
-            control.RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
+            _textValue = Value.ToString();
+            TextBoxValue.Text = _textValue;
+            ClearError();
+            RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
         }
 
         private void TextBoxValue_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (double.TryParse(TextBoxValue.Text, out double val))
+            _textValue = TextBoxValue.Text;
+
+            if (double.TryParse(_textValue, out double val))
             {
-                Value = val;
-                ClearError();
+                if (val < Minimum)
+                {
+                    ShowError($"Minimum value is {Minimum}");
+                }
+                else if (val > Maximum)
+                {
+                    ShowError($"Maximum value is {Maximum}");
+                }
+                else
+                {
+                    Value = val;
+                    ClearError();
+                }
             }
             else
             {
                 ShowError("Invalid number");
             }
 
-            // Always notify parent
+            // Always notify parent controls
             RaiseEvent(new RoutedEventArgs(ValueChangedEvent));
         }
 
+        public void ShowError(string message)
+        {
+            TextBoxValue.Background = Brushes.LightPink; // entire textbox
+            TextBoxValue.BorderBrush = Brushes.Red;      // optional
+            ErrorMessage = message;
+            ToolTipService.SetToolTip(TextBoxValue, message);
+            IsValid = false;
+        }
+
+        public void ClearError()
+        {
+            TextBoxValue.ClearValue(TextBox.BackgroundProperty);
+            TextBoxValue.ClearValue(TextBox.BorderBrushProperty);
+            ErrorMessage = null;
+            ToolTipService.SetToolTip(TextBoxValue, null);
+            IsValid = true;
+        }
+
+        private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (NumericUpDown)d;
+            control._textValue = control.Value.ToString();
+            control.TextBoxValue.Text = control._textValue;
+            control.ClearError();
+        }
     }
 }
