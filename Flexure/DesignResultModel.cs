@@ -13,19 +13,19 @@ namespace ACI318_19Library
         public CrossSection crossSection { get; set; }
 
         // Reinforcement layers
-        public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
+        //public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
 
         public string TensionRebarSummary
         {
             get
             {
                 string str = String.Empty;
-                if (TensionRebars.Count == 0)
+                if (crossSection.TensionRebars.Count == 0)
                 {
                     return "None";
                 }
 
-                foreach (var layer in TensionRebars)
+                foreach (var layer in crossSection.TensionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
                 }
@@ -38,12 +38,12 @@ namespace ACI318_19Library
             get
             {
                 string str = String.Empty;
-                if (CompressionRebars.Count == 0)
+                if (crossSection.CompressionRebars.Count == 0)
                 {
                     return "None";
                 }
 
-                foreach (var layer in CompressionRebars)
+                foreach (var layer in crossSection.CompressionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
                 }
@@ -51,13 +51,13 @@ namespace ACI318_19Library
             }
         }
 
-        public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
+        //public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double AsC { get => CompressionRebars.Sum(r => r.SteelArea); }
+        public double AsC { get => crossSection.CompressionRebars.Sum(r => r.SteelArea); }
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double AsT { get => TensionRebars.Sum(r => r.SteelArea); }
+        public double AsT { get => crossSection.TensionRebars.Sum(r => r.SteelArea); }
 
         /// <summary>Final computed φMn (in-lb)</summary>
         public double PhiMn { get => Phi * Mn; }
@@ -99,7 +99,7 @@ namespace ACI318_19Library
 
                     object value = prop.GetValue(this);
 
-                    if (prop.Name == nameof(TensionRebars))
+                    if (prop.Name == nameof(crossSection.TensionRebars))
                     {
                         List<RebarLayer> tens_rebar_obj = value as List<RebarLayer>;
 
@@ -113,7 +113,7 @@ namespace ACI318_19Library
                         continue;
                     }
 
-                    if (prop.Name == nameof(CompressionRebars))
+                    if (prop.Name == nameof(crossSection.CompressionRebars))
                     {
                         List<RebarLayer> comp_rebar_obj = value as List<RebarLayer>;
 
@@ -170,7 +170,7 @@ namespace ACI318_19Library
             if(crossSection.TensionRebars.Count > 0)
             {
                 str += " | Tension: ";
-                foreach(var layer in TensionRebars)
+                foreach(var layer in crossSection.TensionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
                 }
@@ -178,7 +178,7 @@ namespace ACI318_19Library
             if (crossSection.CompressionRebars.Count > 0)
             {
                 str += " | Compression: ";
-                foreach (var layer in CompressionRebars)
+                foreach (var layer in crossSection.CompressionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
                 }

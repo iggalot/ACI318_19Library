@@ -314,8 +314,6 @@ namespace ACI318_19Library
                 Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
                 Phi = phi,
                 NeutralAxis = c,
-                CompressionRebars = CompressionRebars,
-                TensionRebars = TensionRebars,
                 Warnings = warnings,
                 eps_T = eps_tens_max,
                 RhoActual = rhoActual,
@@ -361,7 +359,7 @@ namespace ACI318_19Library
                     r.crossSection.Width,
                     // normalize the TensionRebar layers into a comparable signature
                     BarsSignature = string.Join(";",
-                        r.TensionRebars
+                        r.crossSection.TensionRebars
                          .OrderBy(layer => layer.DepthFromTop)
                          .Select(layer => $"{catalog.RebarTable[layer.BarSize].Diameter}")
                     )
@@ -382,7 +380,7 @@ namespace ACI318_19Library
                     r.crossSection.Depth,
                     // normalize the TensionRebar layers into a comparable signature
                     BarsSignature = string.Join(";",
-                        r.TensionRebars
+                        r.crossSection.TensionRebars
                          .OrderBy(layer => layer.DepthFromTop)
                          .Select(layer => $"{catalog.RebarTable[layer.BarSize].Diameter}")
                     )

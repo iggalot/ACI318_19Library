@@ -50,9 +50,23 @@
     <Compile Include="DevelopmentLength\BaseDevelopmentLength.cs" />
     <Compile Include="DevelopmentLength\HookDevelopmentLength.cs" />
     <Compile Include="ACIDrawingHelpers.cs" />
+    <Compile Include="Flexure\Controls\CrossSectionInputControl.xaml.cs">
+      <DependentUpon>CrossSectionInputControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Flexure\Controls\CrossSectionInputDialog.xaml.cs">
+      <DependentUpon>CrossSectionInputDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Flexure\Controls\CrossSectionViewModel.cs" />
     <Compile Include="Flexure\Controls\DesignResultControl.xaml.cs">
       <DependentUpon>DesignResultControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Flexure\Controls\NumericUpDown.xaml.cs">
+      <DependentUpon>NumericUpDown.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Flexure\Controls\RebarLayerInputDialog.xaml.cs">
+      <DependentUpon>RebarLayerInputDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Flexure\Controls\RebarLayerViewModel.cs" />
     <Compile Include="Flexure\DesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesigner.cs" />
     <Compile Include="Models\RebarCatalog.cs" />
@@ -63,7 +77,23 @@
     <Compile Include="Models\CrossSection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Flexure\Controls\CrossSectionInputControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Flexure\Controls\CrossSectionInputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Flexure\Controls\DesignResultControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Flexure\Controls\NumericUpDown.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Flexure\Controls\RebarLayerInputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
