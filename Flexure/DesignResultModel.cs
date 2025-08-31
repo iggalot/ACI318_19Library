@@ -121,6 +121,33 @@ namespace ACI318_19Library
             }
         }
 
+        public string ResultSummary =>
+            crossSection != null
+                ? DisplayModelInfo()
+                : $"(No section) | Mu={PhiMn:F0} kip-in";
+
+        public string DisplayModelInfo()
+        {
+            string str = String.Empty;
+            str += $"W: {crossSection.Width} x D: {crossSection.Depth} | Mu={PhiMn:F0} kip-in";
+            if(crossSection.TensionRebars.Count > 0)
+            {
+                str += " | Tension Rebars: ";
+                foreach(var layer in TensionRebars)
+                {
+                    str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
+                }
+            }
+            if (crossSection.CompressionRebars.Count > 0)
+            {
+                str += " | Compression Rebars: ";
+                foreach (var layer in CompressionRebars)
+                {
+                    str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
+                }
+            }
+            return str;
+        }
     }
 
 }

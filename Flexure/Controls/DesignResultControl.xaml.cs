@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace ACI318_19Library
 {
@@ -47,6 +43,10 @@ namespace ACI318_19Library
 
             // Also update canvas drawing
             cnvSection.Children.Clear();
+
+            if (Result == null || Result?.crossSection == null)
+                return;
+
             ACIDrawingHelpers.DrawCrossSection(cnvSection, Result.crossSection);
         }
     }

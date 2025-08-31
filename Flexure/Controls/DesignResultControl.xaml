@@ -20,16 +20,16 @@
 
                 <UniformGrid Columns="2" Rows="0" Margin="0,8,0,0">
                     <TextBlock Text="ϕMn (kip-in):"/>
-                    <TextBlock Text="{Binding PhiMn, StringFormat={}{0:F0}}"/>
+                    <TextBlock Text="{Binding Result.PhiMn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
 
                     <TextBlock Text="Mn (kip-in):"/>
-                    <TextBlock Text="{Binding Mn, StringFormat={}{0:F0}}"/>
+                    <TextBlock Text="{Binding Result.Mn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
 
                     <TextBlock Text="εt:"/>
-                    <TextBlock Text="{Binding eps_T, StringFormat={}{0:F4}}"/>
+                    <TextBlock Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
 
                     <TextBlock Text="ρ:"/>
-                    <TextBlock Text="{Binding RhoActual, StringFormat={}{0:F4}}"/>
+                    <TextBlock Text="{Binding Result.RhoActual, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
                 </UniformGrid>
 
             </StackPanel>
