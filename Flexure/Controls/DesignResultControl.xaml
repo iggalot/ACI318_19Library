@@ -18,19 +18,41 @@
                 <TextBlock Text="Design Results" FontWeight="Bold" FontSize="14"/>
                 <!--<TextBlock Text="{Binding ResultSummary}" Margin="0,4,0,0"/>-->
 
-                <UniformGrid Columns="2" Rows="0" Margin="0,8,0,0">
-                    <TextBlock Text="ϕMn (kip-in):"/>
-                    <TextBlock Text="{Binding Result.PhiMn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Mn (kip-in):"/>
-                    <TextBlock Text="{Binding Result.Mn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="εt:"/>
-                    <TextBlock Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
+                    <TextBlock Text="ϕMn (kip-in):" Grid.Row="0" Grid.Column="0"/>
+                    <TextBlock Text="{Binding Result.PhiMn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}" Grid.Row="0" Grid.Column="1"/>
 
-                    <TextBlock Text="ρ:"/>
-                    <TextBlock Text="{Binding Result.RhoActual, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}"/>
-                </UniformGrid>
+                    <TextBlock Text="Mn (kip-in):" Grid.Row="1" Grid.Column="0"/>
+                    <TextBlock Text="{Binding Result.Mn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F0}}" Grid.Row="1" Grid.Column="1"/>
+
+                    <TextBlock Text="εt:" Grid.Row="2" Grid.Column="0"/>
+                    <TextBlock Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F4}}" Grid.Row="2" Grid.Column="1"/>
+
+                    <TextBlock Text="ρ:" Grid.Row="3" Grid.Column="0"/>
+                    <TextBlock Text="{Binding Result.RhoActual, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F4}}" Grid.Row="3" Grid.Column="1"/>
+
+                    <TextBlock Text="Tens Bars:" Grid.Row="4" Grid.Column="0"/>
+                    <TextBlock Text="{Binding Result.TensionRebarSummary, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F4}}" Grid.Row="4" Grid.Column="1"/>
+
+                    <TextBlock Text="Comp Bars:" Grid.Row="5" Grid.Column="0"/>
+                    <TextBlock Text="{Binding Result.CompressionRebarSummary, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F4}}" Grid.Row="5" Grid.Column="1"/>
+                </Grid>
+
+
 
             </StackPanel>
             <!-- Cross section canvas -->

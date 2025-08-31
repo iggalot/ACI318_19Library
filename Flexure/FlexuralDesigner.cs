@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ACI318_19Library
 {
     public class FlexuralDesigner
     {
+        const double max_bars_per_layer = 6;
         /// <summary>
         /// Iterates through all candidate section dimensions and steel layers,
         /// returning a list of all combinations that meet or exceed the target moment.
@@ -14,6 +16,7 @@ namespace ACI318_19Library
             double tension_cover,
             double compression_cover,
             double side_cover,
+            double clear_spacing,
 
             double fck = 4000, double fy = 60000, double es = 29000000)
         {
@@ -34,7 +37,7 @@ namespace ACI318_19Library
 
             foreach (var size in barSizes)
             {
-                for (int qty = 1; qty <= 1; qty++)
+                for (int qty = 1; qty <= max_bars_per_layer; qty++)
                     compressionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], compression_cover));
             }
 
@@ -53,8 +56,6 @@ namespace ACI318_19Library
             {
                 foreach (var h in depths)
                 {
-
-
                     var section = new CrossSection
                     {
                         Width = b,
@@ -62,6 +63,7 @@ namespace ACI318_19Library
                         TensionCover = tension_cover,
                         CompressionCover = compression_cover,
                         SideCover = side_cover,
+                        ClearSpacing = clear_spacing,
                         Fck_psi = fck,
                         Fy_psi = fy,
                     };
@@ -71,13 +73,15 @@ namespace ACI318_19Library
 
                     foreach (var size in barSizes)
                     {
-                        for (int qty = 1; qty <= 1; qty++)
+                        for (int qty = 1; qty <= max_bars_per_layer; qty++)
                             tensionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], h - tension_cover));
                     }
 
                     // choose the largest and check if the moment is enough.  If it is, we can iterate through all the bar sizes
                     // otherwise there's no point in continuing with this depth iteration.
                     List<RebarLayer> rebarLayer = tensionOptions.OrderByDescending(x => x.SteelArea).ToList();
+
+
                     DesignResultModel first_design = null;
                     if(rebarLayer.Count > 0)
                     {
@@ -94,6 +98,12 @@ namespace ACI318_19Library
                     {
                         var trialSection = section.BaseClone(section); // copy the section without the rebar
                         trialSection.AddTensionRebar(tensLayer.BarSize, tensLayer.Qty, catalog, tensLayer.DepthFromTop);
+
+                        // does the rebar fit in the width of the current section
+                        if (RebarFitsInWidth(trialSection) is false)
+                        {
+                            continue;
+                        }
 
                         var result = trialSection.ComputeFlexuralStrength();
 
@@ -120,6 +130,12 @@ namespace ACI318_19Library
 
                                     // compression layer is placed at "cover" depth from top
                                     trialSection.AddCompressionRebar(compSize, compQty, catalog, compression_cover);
+                                    
+                                    // do the rebar layers fit in the width of the current section
+                                    if (RebarFitsInWidth(trialSection) is false)
+                                    {
+                                        continue;
+                                    }
 
                                     var result = trialSection.ComputeFlexuralStrength();
 
@@ -144,7 +160,7 @@ namespace ACI318_19Library
 
             // filter for unnecessary duplicates of rebar sizes and depths and layers...
             List<DesignResultModel> filtered = successfulSections;
-       //     List<DesignResult> filtered = FilterIdealDesignsByWidth(FilterIdealDesignsByDepth(successfulSections));
+            //List<DesignResultModel> filtered = FilterIdealDesignsByWidth(FilterIdealDesignsByDepth(successfulSections));
 
             // then sort in ascending order of width
             return filtered
@@ -153,6 +169,23 @@ namespace ACI318_19Library
                 .ToList();
         }
 
+        private bool RebarFitsInWidth(CrossSection trialSection)
+        {
+            if (trialSection.TensionRebars.Count > 0)
+            {
+                foreach(var layer in trialSection.TensionRebars)
+                {
+                    if (layer.Bar.Diameter * layer.Qty + 2.0 * trialSection.SideCover + (layer.Qty - 1) * trialSection.ClearSpacing > trialSection.Width)
+                        return false;
+                }
+                foreach (var layer in trialSection.CompressionRebars)
+                {
+                    if (layer.Bar.Diameter * layer.Qty + 2.0 * trialSection.SideCover + (layer.Qty - 1) * trialSection.ClearSpacing > trialSection.Width)
+                        return false;
+                }
+            }
+            return true;
+        }
 
         List<DesignResultModel> FilterIdealDesignsByDepth(List<DesignResultModel> successfulSections)
         {

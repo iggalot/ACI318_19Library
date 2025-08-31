@@ -48,13 +48,13 @@ namespace ACI318_19Library
             // Draw Tension Bars
             foreach (var layer in section.TensionRebars)
             {
-                DrawBarLayer(cnv, layer, catalog, scale, offsetX, offsetY, section.Width, Brushes.Red);
+                DrawBarLayer(cnv, layer, section.SideCover, catalog, scale, offsetX, offsetY, section.Width, Brushes.Red);
             }
 
             // Draw Compression Bars
             foreach (var layer in section.CompressionRebars)
             {
-                DrawBarLayer(cnv, layer, catalog, scale, offsetX, offsetY, section.Width, Brushes.Blue);
+                DrawBarLayer(cnv, layer, section.SideCover,catalog, scale, offsetX, offsetY, section.Width, Brushes.Blue);
             }
 
             // Optionally draw cover lines
@@ -83,30 +83,47 @@ namespace ACI318_19Library
             cnv.Children.Add(bottomCover);
         }
 
-        private static void DrawBarLayer(Canvas cnv, RebarLayer layer, RebarCatalog catalog, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
+        private static void DrawBarLayer(Canvas cnv, RebarLayer layer, double side_cover, RebarCatalog catalog, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
         {
             if (layer == null || layer.Qty == 0) return;
 
             double dia = catalog.RebarTable[layer.BarSize].Diameter * scale;
-            double totalBarsWidth = dia * layer.Qty; // sum of bar diameters
-            double spacing = layer.Qty > 1 ? (sectionWidth * scale - totalBarsWidth) / (layer.Qty - 1) : 0;
-
-            // Start X so bars are centered
-            double startX = offsetX + (sectionWidth * scale - (totalBarsWidth + spacing * (layer.Qty - 1))) / 2.0;
-
+            double sectionWidthScaled = sectionWidth * scale;
             double y = offsetY + layer.DepthFromTop * scale;
+
+            if (layer.Qty == 1)
+            {
+                // Single bar centered
+                double x = offsetX + (sectionWidthScaled - dia) / 2.0;
+                Ellipse circle = new Ellipse { Width = dia, Height = dia, Fill = fill, Stroke = Brushes.Black, StrokeThickness = 1 };
+                Canvas.SetLeft(circle, x);
+                Canvas.SetTop(circle, y - dia / 2);
+                cnv.Children.Add(circle);
+                return;
+            }
+
+            // Multiple bars
+            double totalBarsWidth = dia * layer.Qty;
+            double spacing = 0;
+            double usableWidth = sectionWidthScaled - 2 * side_cover * scale;
+
+            if (layer.Qty == 2)
+            {
+                spacing = usableWidth - totalBarsWidth; // 2 bars: spacing between them
+            }
+            else
+            {
+                spacing = (usableWidth - totalBarsWidth) / (layer.Qty - 1); // 3+ bars: even spacing
+            }
+
+            // Center pattern horizontally
+            double patternWidth = totalBarsWidth + spacing * (layer.Qty - 1);
+            double startX = offsetX + (sectionWidthScaled - patternWidth) / 2.0;
 
             for (int i = 0; i < layer.Qty; i++)
             {
                 double x = startX + i * (dia + spacing);
-                Ellipse circle = new Ellipse
-                {
-                    Width = dia,
-                    Height = dia,
-                    Fill = fill,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1
-                };
+                Ellipse circle = new Ellipse { Width = dia, Height = dia, Fill = fill, Stroke = Brushes.Black, StrokeThickness = 1 };
                 Canvas.SetLeft(circle, x);
                 Canvas.SetTop(circle, y - dia / 2);
                 cnv.Children.Add(circle);

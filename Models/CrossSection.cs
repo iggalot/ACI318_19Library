@@ -406,7 +406,7 @@ namespace ACI318_19Library
             return positiveRoots.Min();
         }
 
-        public List<double> FindAllPositiveRoots(Func<double, double> F, double cMin, double cMax, int samples = 1000)
+        public List<double> FindAllPositiveRoots(Func<double, double> F, double cMin, double cMax, int samples = 250)
         {
             var roots = new List<double>();
             double prevC = cMin;

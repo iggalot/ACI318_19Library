@@ -14,6 +14,43 @@ namespace ACI318_19Library
 
         // Reinforcement layers
         public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
+
+        public string TensionRebarSummary
+        {
+            get
+            {
+                string str = String.Empty;
+                if (TensionRebars.Count == 0)
+                {
+                    return "None";
+                }
+
+                foreach (var layer in TensionRebars)
+                {
+                    str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
+                }
+                return str;
+            }
+        }
+
+        public string CompressionRebarSummary
+        {
+            get
+            {
+                string str = String.Empty;
+                if (CompressionRebars.Count == 0)
+                {
+                    return "None";
+                }
+
+                foreach (var layer in CompressionRebars)
+                {
+                    str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
+                }
+                return str;
+            }
+        }
+
         public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
 
         /// <summary>Provided area by selection (in^2)</summary>
@@ -129,10 +166,10 @@ namespace ACI318_19Library
         public string DisplayModelInfo()
         {
             string str = String.Empty;
-            str += $"W: {crossSection.Width} x D: {crossSection.Depth} | Mu={PhiMn:F0} kip-in";
+            str += $"W: {crossSection.Width} x D: {crossSection.Depth} | PhiMn={PhiMn:F0} kip-in";
             if(crossSection.TensionRebars.Count > 0)
             {
-                str += " | Tension Rebars: ";
+                str += " | Tension: ";
                 foreach(var layer in TensionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
@@ -140,7 +177,7 @@ namespace ACI318_19Library
             }
             if (crossSection.CompressionRebars.Count > 0)
             {
-                str += " | Compression Rebars: ";
+                str += " | Compression: ";
                 foreach (var layer in CompressionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";

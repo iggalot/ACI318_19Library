@@ -29,27 +29,14 @@ namespace ACI318_19Library
         {
             var control = (DesignResultControl)d;
             control.UpdateDisplay();
-            //if (d is DesignResultControl control && e.NewValue is DesignResultModel model)
-            //{
-            //    control.DataContext = model;
-            //    control.DrawCrossSection(model.crossSection);
-            //}
         }
 
         private void UpdateDisplay()
         {
-            // Bind DataContext so XAML TextBlocks work
-            //DataContext = Result;
-
-
-
-            if (Result == null || Result?.crossSection == null)
-                return;
-
-            // Also update canvas drawing
             cnvSection.Children.Clear();
 
-            ACIDrawingHelpers.DrawCrossSection(cnvSection, Result.crossSection);
+            if (Result != null)
+                ACIDrawingHelpers.DrawCrossSection(cnvSection, Result.crossSection);
         }
     }
 }
