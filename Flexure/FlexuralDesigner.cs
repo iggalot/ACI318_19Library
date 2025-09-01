@@ -181,8 +181,8 @@ namespace ACI318_19Library
             ObservableCollection<RebarLayer> CompressionRebars = section.CompressionRebars;
             double fck = section.Fck_psi;
             double fy = section.Fy_psi;
-            double es = CrossSection.Es_psi;
-            double EpsilonCu = CrossSection.EpsilonCu;
+            double es = section.Es_psi;
+            double EpsilonCu = section.EpsilonCu;
 
             double beta1 = GetBeta1(fck);
             double tolerance = 1e-6;
@@ -293,7 +293,7 @@ namespace ACI318_19Library
             // now compute phi
             double phi = 0.9;
             if (eps_tens_max >= 0.005) { phi = 0.9; }
-            else if (eps_tens_max >= 0.002) { phi = 0.65; }
+            else if (eps_tens_max <= 0.002) { phi = 0.65; }
             else
             {
                 phi = 0.65 + (eps_tens_max - 0.002) / (0.003) * (0.90 - 0.65);
@@ -303,13 +303,8 @@ namespace ACI318_19Library
             // compute nominal moment
             double phi_Mn = Mn_kipin * phi;
 
-            // Balanced ratio
-            double rhoActual = AsT / (b * d);
-            double rhoBal = 0.85 * fck * beta1 / fy * (EpsilonCu / (EpsilonCu + eps_y));
-            if (rhoActual > rhoBal)
-                warnings += "\nSection is over-reinforced; ";
-
-            return new DesignResultModel
+       
+            DesignResultModel design = new DesignResultModel()
             {
                 crossSection = section,
                 Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
@@ -317,10 +312,13 @@ namespace ACI318_19Library
                 NeutralAxis = c,
                 Warnings = warnings,
                 eps_T = eps_tens_max,
-                RhoActual = rhoActual,
-                RhoBalanced = rhoBal,
-                Beta1 = beta1
             };
+
+            // Check the overreinforcement status
+            if (design.IsOverreinforced is true)
+                warnings += "\nSection is over-reinforced; ";
+
+            return design; ;
         }
 
         public static double GetBeta1(double fck)

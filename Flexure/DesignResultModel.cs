@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Windows.Documents;
 
 namespace ACI318_19Library
 {
@@ -53,11 +54,7 @@ namespace ACI318_19Library
 
         //public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
 
-        /// <summary>Provided area by selection (in^2)</summary>
-        public double AsC { get => crossSection.CompressionRebars.Sum(r => r.SteelArea); }
 
-        /// <summary>Provided area by selection (in^2)</summary>
-        public double AsT { get => crossSection.TensionRebars.Sum(r => r.SteelArea); }
 
         /// <summary>Final computed φMn (in-lb)</summary>
         public double PhiMn { get => Phi * Mn; }
@@ -74,14 +71,21 @@ namespace ACI318_19Library
         /// <summary>tensile strain at extreme tension bar</summary>
         public double eps_T { get; set; }
 
-        /// <summary>Concrete stress block factor β1</summary>
-        public double Beta1 { get; set; }
 
-        /// <summary>Balanced steel ratio ρb</summary>
-        public double RhoBalanced { get; set; }
+
+        /// <summary>Provided area by selection (in^2)</summary>
+        public double AsC { get => crossSection.CompressionRebars.Sum(r => r.SteelArea); }
+
+        /// <summary>Provided area by selection (in^2)</summary>
+        public double AsT { get => crossSection.TensionRebars.Sum(r => r.SteelArea); }
+
+        /// <summary>Concrete stress block factor β1</summary>
+        public double Beta1 { get => FlexuralDesigner.GetBeta1(crossSection.Fck_psi); }
 
         /// <summary>Actual steel ratio ρ = AsT / (b*d)</summary>
-        public double RhoActual { get; set; }
+        public double RhoActual { get => AsT / crossSection.AreaGross; }
+
+        public bool IsOverreinforced { get => RhoActual > crossSection.RhoBalanced; }
 
         /// <summary>Warnings (e.g. over-reinforced, compression steel not yielded)</summary>
         public string Warnings { get; set; }

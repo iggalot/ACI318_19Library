@@ -26,7 +26,13 @@ namespace ACI318_19Library
         public double SideCover { get; set; } // in
         public double ClearSpacing { get; set; } // in.
 
-        // Materials
+        // Reinforcement layers
+        public ObservableCollection<RebarLayer> TensionRebars { get; set; } = new ObservableCollection<RebarLayer>();
+        public ObservableCollection<RebarLayer> CompressionRebars { get; set; } = new ObservableCollection<RebarLayer>();
+
+        // constants
+        public double EpsilonCu { get; set; } = 0.003;       // ultimate concrete strain
+        public double Es_psi { get; set; } = 29000000.0;         // psi (modulus of steel)
         public double Fck_psi { get; set; }     // psi (f'c)
         public double Fy_psi { get; set; }      // psi
 
@@ -42,13 +48,16 @@ namespace ACI318_19Library
             }
         }
 
-        // Reinforcement layers
-        public ObservableCollection<RebarLayer> TensionRebars { get; set; } = new ObservableCollection<RebarLayer>();
-        public ObservableCollection<RebarLayer> CompressionRebars { get; set; } = new ObservableCollection<RebarLayer>();
 
-        // constants
-        public const double EpsilonCu = 0.003;       // ultimate concrete strain
-        public const double Es_psi = 29000000.0;         // psi (modulus of steel)
+        // Max steel ratio (ACI often limits to 0.75ρb)
+        public double RhoMax => 0.75 * RhoBalanced;
+
+        /// <summary>
+        /// tensile yield strain
+        /// </summary>
+        public double Eps_Y { get => Fy_psi / Es_psi; }
+
+        public double AreaGross { get => Width * Depth; }
 
         public CrossSection BaseClone(CrossSection section)
         {
@@ -62,12 +71,16 @@ namespace ACI318_19Library
                 ClearSpacing = section.ClearSpacing,
                 Fck_psi = section.Fck_psi,
                 Fy_psi = section.Fy_psi,
+                EpsilonCu = section.EpsilonCu,
+                Es_psi = section.Es_psi,
+                TensionRebars = new ObservableCollection<RebarLayer>(section.TensionRebars),
+                CompressionRebars = new ObservableCollection<RebarLayer>(section.CompressionRebars)
             };
         }
         // default constructor
         public CrossSection() { }
 
-        public CrossSection(double width, double depth, double tension_cover, double compression_cover, double side_cover, double clear_spacing, double fck, double fy)
+        public CrossSection(double width, double depth, double tension_cover, double compression_cover, double side_cover, double clear_spacing, double fck=4000, double fy=60000, double epsilon_cu=0.003, double es_psi=29000000.0)
         {
             Width = width;
             Depth = depth;
@@ -77,6 +90,8 @@ namespace ACI318_19Library
             ClearSpacing = clear_spacing;
             Fck_psi = fck;
             Fy_psi = fy;
+            EpsilonCu = epsilon_cu;
+            Es_psi = es_psi;
         }
 
         public void AddTensionRebar(string barSize, int count, RebarCatalog catalog, double depth)
@@ -108,14 +123,9 @@ namespace ACI318_19Library
 
 
 
-        // Max steel ratio (ACI often limits to 0.75ρb)
-        public double RhoMax => 0.75 * RhoBalanced;
 
-        // Current required ratio
-        public double RhoRequired(double As_required)
-        {
-            return As_required / (Width * Depth);
-        }
+
+
 
 
 

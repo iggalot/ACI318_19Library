@@ -36,7 +36,7 @@ namespace ACI318_19Library
             ViewModel = vm;
             DataContext = ViewModel;
 
-            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#5", 2, 1.5));
+            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#5", 2, 10.5));
 
             Debug.WriteLine("DataContext is null? " + (DataContext == null));
             Debug.WriteLine("TensionRebars count: " + ViewModel.TensionRebars.Count);
