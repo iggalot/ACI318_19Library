@@ -36,7 +36,10 @@ namespace ACI318_19Library
             cnvSection.Children.Clear();
 
             if (Result != null)
-                ACIDrawingHelpers.DrawCrossSection(cnvSection, Result.crossSection);
+            {
+                ACIDrawingHelpers.DrawCrossSection(cnvSection, Result);
+                ACIDrawingHelpers.DrawStrainDiagram(cnvStrainDiagram, Result);
+            }
         }
     }
 }

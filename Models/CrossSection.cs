@@ -121,6 +121,13 @@ namespace ACI318_19Library
             return TensionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / TensionRebars.Sum(l => l.SteelArea);
         }
 
+        // Helper: effective compression steel centroid
+        public double dPrimeEffective()
+        {
+            if (TensionRebars.Count == 0) return Depth - CompressionCover ;
+            return CompressionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / CompressionRebars.Sum(l => l.SteelArea);
+        }
+
 
 
 

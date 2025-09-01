@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,7 +35,12 @@ namespace ACI318_19Library
             ViewModel = vm;
             DataContext = ViewModel;
 
-            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#5", 2, 10.5));
+            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#8", 2, 10.5));
+            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 9.0));
+
+            ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#4", 2, 1.5));
+            ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#6", 2, 3.0));
+
 
             Debug.WriteLine("DataContext is null? " + (DataContext == null));
             Debug.WriteLine("TensionRebars count: " + ViewModel.TensionRebars.Count);

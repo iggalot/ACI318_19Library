@@ -22,7 +22,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100"/>
                     <!-- Label -->
-                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="170"/>
                     <!-- Value -->
                     <ColumnDefinition Width="100"/>
                     <!-- Second label -->
@@ -78,10 +78,10 @@
         </StackPanel>
 
         <!-- Right: Canvas -->
-        <StackPanel Grid.Row="2"  Orientation="Horizontal">
-            <Canvas x:Name="cnvSection" Height="150" Width="150" HorizontalAlignment="Left" Background="LightGoldenrodYellow"/>
-            <Canvas x:Name="cnvStrainDiagram" Height="150" Width="150" HorizontalAlignment="Left" Background="LightBlue"/>
-            <Canvas x:Name="cnvWhitneyBlock" Height="150" Width="150" HorizontalAlignment="Left" Background="LightCoral"/>
+        <StackPanel Grid.Row="2"  Orientation="Horizontal" Margin="0,10,0,0">
+            <Canvas x:Name="cnvSection" Height="150" Width="150" HorizontalAlignment="Left" Margin="10"/>
+            <Canvas x:Name="cnvStrainDiagram" Height="150" Width="150" HorizontalAlignment="Left" Margin="10"/>
+            <!--<Canvas x:Name="cnvWhitneyBlock" Height="150" Width="150" HorizontalAlignment="Left" Background="LightCoral"/>-->
         </StackPanel>
     </Grid>
 </UserControl>

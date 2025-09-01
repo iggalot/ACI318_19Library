@@ -71,6 +71,9 @@ namespace ACI318_19Library
         /// <summary>tensile strain at extreme tension bar</summary>
         public double eps_T { get; set; }
 
+        /// <summary>depth in cross section to extreme tension bar</summary>
+        public double DepthToEpsT { get; set; }
+
 
 
         /// <summary>Provided area by selection (in^2)</summary>

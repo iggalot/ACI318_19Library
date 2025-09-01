@@ -303,7 +303,7 @@ namespace ACI318_19Library
             // compute nominal moment
             double phi_Mn = Mn_kipin * phi;
 
-       
+
             DesignResultModel design = new DesignResultModel()
             {
                 crossSection = section,
@@ -312,6 +312,7 @@ namespace ACI318_19Library
                 NeutralAxis = c,
                 Warnings = warnings,
                 eps_T = eps_tens_max,
+                DepthToEpsT = maxDepth
             };
 
             // Check the overreinforcement status
