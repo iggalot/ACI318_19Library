@@ -19,8 +19,8 @@ namespace ACI318_19Library
     {
 
         // Geometry
-        public double Width { get; set; }   // b, in
-        public double Depth { get; set; }   // h, in
+        public double Width { get; set; }   // b, in -- total width of the cross section
+        public double Height { get; set; }   // h, in -- total height of the cross section
         public double TensionCover { get; set; }   // in
         public double CompressionCover { get; set; }   // in
         public double SideCover { get; set; } // in
@@ -32,9 +32,9 @@ namespace ACI318_19Library
 
         // constants
         public double EpsilonCu { get; set; } = 0.003;       // ultimate concrete strain
-        public double Es_psi { get; set; } = 29000000.0;         // psi (modulus of steel)
-        public double Fck_psi { get; set; }     // psi (f'c)
-        public double Fy_psi { get; set; }      // psi
+        public double Es_psi { get; set; } = 29000000;         // psi (modulus of steel)
+        public double Fck_psi { get; set; } = 4000;     // psi (f'c)
+        public double Fy_psi { get; set; } = 60000;      // psi
 
         // Balanced reinforcement ratio ρb
         public double RhoBalanced
@@ -57,14 +57,14 @@ namespace ACI318_19Library
         /// </summary>
         public double Eps_Y { get => Fy_psi / Es_psi; }
 
-        public double AreaGross { get => Width * Depth; }
+        public double AreaGross { get => Width * Height; }
 
         public CrossSection BaseClone(CrossSection section)
         {
             return new CrossSection()
             {
                 Width = section.Width,
-                Depth = section.Depth,
+                Height = section.Height,
                 TensionCover = section.TensionCover,
                 CompressionCover = section.CompressionCover,
                 SideCover = section.SideCover,
@@ -83,7 +83,7 @@ namespace ACI318_19Library
         public CrossSection(double width, double depth, double tension_cover, double compression_cover, double side_cover, double clear_spacing, double fck=4000, double fy=60000, double epsilon_cu=0.003, double es_psi=29000000.0)
         {
             Width = width;
-            Depth = depth;
+            Height = depth;
             TensionCover = tension_cover;
             CompressionCover = compression_cover;
             SideCover = side_cover;
@@ -117,14 +117,14 @@ namespace ACI318_19Library
         // Helper: effective tension steel centroid
         public double dEffective()
         {
-            if (TensionRebars.Count == 0) return Depth - TensionCover - 0.5;
+            if (TensionRebars.Count == 0) return Height - TensionCover - 0.5;
             return TensionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / TensionRebars.Sum(l => l.SteelArea);
         }
 
         // Helper: effective compression steel centroid
         public double dPrimeEffective()
         {
-            if (TensionRebars.Count == 0) return Depth - CompressionCover ;
+            if (TensionRebars.Count == 0) return Height - CompressionCover ;
             return CompressionRebars.Sum(l => l.SteelArea * l.DepthFromTop) / CompressionRebars.Sum(l => l.SteelArea);
         }
 
@@ -142,7 +142,7 @@ namespace ACI318_19Library
         {
             return
                 $"Width: {Width} in\n" +
-                $"DepthFromTop: {Depth} in\n" +
+                $"DepthFromTop: {Height} in\n" +
                 $"TensionCover: {TensionCover} in\n" +
                 $"CompressionCover: {CompressionCover} in\n" +
                 $"SideCover: {SideCover} in\n" +

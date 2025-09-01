@@ -28,15 +28,15 @@ namespace ACI318_19Library
 
             // Compute scale to fit section inside canvas
             double scaleX = (canvasW - 2 * margin) / section.Width;
-            double scaleY = (canvasH - 2 * margin) / section.Depth;
+            double scaleY = (canvasH - 2 * margin) / section.Height;
             double scale = Math.Min(scaleX, scaleY);
 
             // Center offsets
             double offsetX = (canvasW - section.Width * scale) / 2.0;
-            double offsetY = (canvasH - section.Depth * scale) / 2.0;
+            double offsetY = (canvasH - section.Height * scale) / 2.0;
 
             double bPix = section.Width * scale;
-            double hPix = section.Depth * scale;
+            double hPix = section.Height * scale;
 
             // Draw concrete rectangle
             Rectangle rect = new Rectangle
@@ -94,9 +94,9 @@ namespace ACI318_19Library
             Line bottomCover = new Line
             {
                 X1 = offsetX,
-                Y1 = offsetY + (section.Depth - section.TensionCover) * scale,
+                Y1 = offsetY + (section.Height - section.TensionCover) * scale,
                 X2 = offsetX + bPix,
-                Y2 = offsetY + (section.Depth - section.TensionCover) * scale,
+                Y2 = offsetY + (section.Height - section.TensionCover) * scale,
                 Stroke = Brushes.Green,
                 StrokeThickness = 1,
                 StrokeDashArray = new DoubleCollection() { 2, 2 }
@@ -208,15 +208,15 @@ namespace ACI318_19Library
 
             // Compute scale to fit section inside canvas
             double scaleX = (canvasW - 2 * margin) / section.Width;
-            double scaleY = (canvasH - 2 * margin) / section.Depth;
+            double scaleY = (canvasH - 2 * margin) / section.Height;
             double scale = Math.Min(scaleX, scaleY);
 
             // Center offsets
             double offsetX = (canvasW - section.Width * scale) / 2.0;
-            double offsetY = (canvasH - section.Depth * scale) / 2.0;
+            double offsetY = (canvasH - section.Height * scale) / 2.0;
 
             double bPix = section.Width * scale;
-            double hPix = section.Depth * scale;
+            double hPix = section.Height * scale;
 
             Line line = new Line()
             {
@@ -317,14 +317,14 @@ namespace ACI318_19Library
             {
                 foreach (RebarLayer layer in section.TensionRebars)
                 {
-                    DrawHorizontalStrainLine(cnv, layer.DepthFromTop, 0, design.DepthToEpsT, section.Depth, section.EpsilonCu, design.eps_T, canvasW, canvasH, margin, color_tension);
+                    DrawHorizontalStrainLine(cnv, layer.DepthFromTop, 0, design.DepthToEpsT, section.Height, section.EpsilonCu, design.eps_T, canvasW, canvasH, margin, color_tension);
                 }
             }
             if (section.CompressionRebars.Count > 0)
             {
                 foreach (RebarLayer layer in section.CompressionRebars)
                 {
-                    DrawHorizontalStrainLine(cnv, layer.DepthFromTop, 0, design.DepthToEpsT, section.Depth, section.EpsilonCu, design.eps_T, canvasW, canvasH, margin, color_compressive);
+                    DrawHorizontalStrainLine(cnv, layer.DepthFromTop, 0, design.DepthToEpsT, section.Height, section.EpsilonCu, design.eps_T, canvasW, canvasH, margin, color_compressive);
                 }
             }
         }
@@ -333,7 +333,7 @@ namespace ACI318_19Library
         /// Draws a horizontal line from the vertical zero-strain line to the strain line at a given depth.
         /// </summary>
         /// <param name="cnv">Canvas to draw on</param>
-        /// <param name="depthFromTop">Depth from top of section (same units as section)</param>
+        /// <param name="depthFromTop">Height from top of section (same units as section)</param>
         /// <param name="x0">X coordinate of zero-strain vertical line</param>
         /// <param name="offsetY">Y coordinate of top of section on canvas</param>
         /// <param name="yBottom">Y coordinate of eps_t of section on canvas</param>

@@ -68,6 +68,9 @@ namespace ACI318_19Library
         // <summary>Neutral axis location, c (in)</summary>
         public double NeutralAxis { get; set; }
 
+        // whitney block depth 'a'
+        public double a { get => NeutralAxis * Beta1; }
+
         /// <summary>tensile strain at extreme tension bar</summary>
         public double eps_T { get; set; }
 
@@ -173,7 +176,7 @@ namespace ACI318_19Library
         public string DisplayModelInfo()
         {
             string str = String.Empty;
-            str += $"W: {crossSection.Width} x D: {crossSection.Depth} | PhiMn={PhiMn:F0} kip-in";
+            str += $"W: {crossSection.Width} x D: {crossSection.Height} | PhiMn={PhiMn:F0} kip-in";
             if(crossSection.TensionRebars.Count > 0)
             {
                 str += " | Tension: ";

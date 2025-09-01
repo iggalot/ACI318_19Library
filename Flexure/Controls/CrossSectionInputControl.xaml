@@ -41,14 +41,14 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Width -->
-                <TextBlock Text="Width (in):" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                <TextBlock Text="Width, b (in):" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
                 <local:NumericUpDown x:Name="WidthBox" Grid.Row="0" Grid.Column="1"
                          Value="{Binding Width, UpdateSourceTrigger=PropertyChanged}"
                          Minimum="1" Maximum="36" Step="1.0"
                                      ValueChanged="NumericUpDown_ValueChanged"/>
 
                 <!-- Depth -->
-                <TextBlock Text="Depth (in):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+                <TextBlock Text="Height, h (in):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
                 <local:NumericUpDown x:Name="DepthBox" Grid.Row="1" Grid.Column="1"
                          Value="{Binding Depth, UpdateSourceTrigger=PropertyChanged}"
                          Minimum="4" Maximum="60" Step="1.0"

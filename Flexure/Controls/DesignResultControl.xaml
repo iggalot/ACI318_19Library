@@ -38,6 +38,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+
                 </Grid.RowDefinitions>
 
                 <!-- Row 0 -->
@@ -48,32 +50,40 @@
                 <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Mn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <!-- Row 1 -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="ϕ:" Margin="2"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.Phi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="c (in):" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.NeutralAxis, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="2" Text="εt:" Margin="2"/>
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="a (in):" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Result.a, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
 
                 <!-- Row 2 -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="εy:" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.crossSection.Eps_Y, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="ϕ:" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.Phi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="fy (psi):" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.crossSection.Fy_psi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="εt:" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
 
                 <!-- Row 3 -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="εc:" Margin="2"/>
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Result.crossSection.EpsilonCu, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="εy:" Margin="2"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Result.crossSection.Eps_Y, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
 
-                <TextBlock Grid.Row="3" Grid.Column="2" Text="f'c (psi):" Margin="2"/>
-                <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding Result.crossSection.Fck_psi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="fy (psi):" Margin="2"/>
+                <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding Result.crossSection.Fy_psi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <!-- Row 4 -->
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Tens Bars:" Margin="2"/>
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Result.TensionRebarSummary, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="εc:" Margin="2"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Result.crossSection.EpsilonCu, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Comp Bars:" Margin="2"/>
-                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Result.CompressionRebarSummary, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="2"/>
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="f'c (psi):" Margin="2"/>
+                <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding Result.crossSection.Fck_psi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+
+                <!-- Row 5 -->
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="Tens Bars:" Margin="2"/>
+                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Result.TensionRebarSummary, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="2"/>
+
+                <!-- Row 6 -->
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Comp Bars:" Margin="2"/>
+                <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Result.CompressionRebarSummary, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="2"/>
             </Grid>
         </StackPanel>
 

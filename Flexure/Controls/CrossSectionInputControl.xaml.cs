@@ -67,11 +67,10 @@ namespace ACI318_19Library
             ViewModel = vm;
             DataContext = ViewModel;
 
-            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#8", 2, 10.5));
-            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 9.0));
+            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 14.75));
+            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 17.25));
 
-            ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#4", 2, 1.5));
-            ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#6", 2, 3.0));
+            ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#6", 2, 2.5));
 
 
             Debug.WriteLine("DataContext is null? " + (DataContext == null));
@@ -171,7 +170,7 @@ namespace ACI318_19Library
             bool isValid = true;
             var errors = new List<string>();
 
-            // Width and Depth
+            // Width and Height
             if (ViewModel.Width <= 0)
             {
                 isValid = false;
@@ -180,7 +179,7 @@ namespace ACI318_19Library
             if (ViewModel.Depth <= 0)
             {
                 isValid = false;
-                errors.Add("Depth must be greater than 0.");
+                errors.Add("Height must be greater than 0.");
             }
 
             // Covers

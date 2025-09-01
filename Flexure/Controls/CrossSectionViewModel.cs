@@ -43,7 +43,7 @@ namespace ACI318_19Library
             return new CrossSection()
             {
                 Width = Width,
-                Depth = Depth,
+                Height = Depth,
                 TensionCover = TensionCover,
                 CompressionCover = CompressionCover,
                 SideCover = SideCover,
