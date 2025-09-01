@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,9 +28,39 @@ namespace ACI318_19Library
 
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
+
+
             AttachNumericUpDownEvents();
 
+            TensionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            CompressionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            TensionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+            CompressionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+
+            foreach (var layer in ViewModel.TensionRebars)
+                layer.PropertyChanged += Layer_PropertyChanged;
+
+            ViewModel.TensionRebars.CollectionChanged += (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (RebarLayerViewModel layer in e.NewItems)
+                        layer.PropertyChanged += Layer_PropertyChanged;
+            };
+
+
+            foreach (var layer in ViewModel.CompressionRebars)
+                layer.PropertyChanged += Layer_PropertyChanged;
+
+            ViewModel.CompressionRebars.CollectionChanged += (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (RebarLayerViewModel layer in e.NewItems)
+                        layer.PropertyChanged += Layer_PropertyChanged;
+            };
         }
+
+
+
         public CrossSectionInputControl(CrossSectionViewModel vm)
         {
             InitializeComponent();
@@ -50,6 +82,32 @@ namespace ACI318_19Library
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
             AttachNumericUpDownEvents();
+
+            TensionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            CompressionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            TensionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+            CompressionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+
+            foreach (var layer in ViewModel.TensionRebars)
+                layer.PropertyChanged += Layer_PropertyChanged;
+
+            ViewModel.TensionRebars.CollectionChanged += (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (RebarLayerViewModel layer in e.NewItems)
+                        layer.PropertyChanged += Layer_PropertyChanged;
+            };
+
+
+            foreach (var layer in ViewModel.CompressionRebars)
+                layer.PropertyChanged += Layer_PropertyChanged;
+
+            ViewModel.CompressionRebars.CollectionChanged += (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (RebarLayerViewModel layer in e.NewItems)
+                        layer.PropertyChanged += Layer_PropertyChanged;
+            };
         }
 
         private void AttachNumericUpDownEvents()
@@ -58,6 +116,37 @@ namespace ACI318_19Library
             {
                 child.ValueChanged += NumericUpDown_ValueChanged;
             }
+        }
+
+        private void Layer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            Update();
+        }
+
+        private void DataGrid_CurrentCellChanged(object sender, EventArgs e)
+        {
+            var grid = sender as DataGrid;
+            if (grid == null) return;
+
+            // Commit any pending edit
+            grid.CommitEdit(DataGridEditingUnit.Cell, true);
+            grid.CommitEdit(DataGridEditingUnit.Row, true);
+
+            // Now update your diagram
+            Update();
+        }
+
+        private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            // Force the binding to update immediately
+            if (e.EditingElement is TextBox tb)
+            {
+                var binding = tb.GetBindingExpression(TextBox.TextProperty);
+                binding?.UpdateSource();
+            }
+
+            // Update the control after the edit
+            Dispatcher.BeginInvoke(new Action(() => Update()));
         }
 
 

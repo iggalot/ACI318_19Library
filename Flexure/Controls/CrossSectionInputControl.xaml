@@ -120,7 +120,8 @@
                               ItemsSource="{Binding CompressionRebars}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
-                              MinHeight="100">
+                              MinHeight="100"
+                              >
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
                             <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
