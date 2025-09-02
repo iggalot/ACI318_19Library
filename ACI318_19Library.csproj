@@ -53,13 +53,18 @@
     <Compile Include="Flexure\Controls\CrossSectionInputControl.xaml.cs">
       <DependentUpon>CrossSectionInputControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Flexure\Controls\DesignAllInputDialog.xaml.cs">
+      <DependentUpon>DesignAllInputDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Flexure\Controls\CrossSectionInputDialog.xaml.cs">
       <DependentUpon>CrossSectionInputDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Flexure\Controls\CrossSectionViewModel.cs" />
+    <Compile Include="Flexure\Controls\DesignAllInputViewModel.cs" />
     <Compile Include="Flexure\Controls\DesignResultControl.xaml.cs">
       <DependentUpon>DesignResultControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Flexure\Controls\DoubleValidationRule.cs" />
     <Compile Include="Flexure\Controls\NumericUpDown.xaml.cs">
       <DependentUpon>NumericUpDown.xaml</DependentUpon>
     </Compile>
@@ -81,6 +86,10 @@
     <Page Include="Flexure\Controls\CrossSectionInputControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Flexure\Controls\DesignAllInputDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Flexure\Controls\CrossSectionInputDialog.xaml">
       <SubType>Designer</SubType>

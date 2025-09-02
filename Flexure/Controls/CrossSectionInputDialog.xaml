@@ -21,7 +21,7 @@
             <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
             </StackPanel>
             <StackPanel Orientation="Vertical">
-                <Canvas x:Name="cnvCrossSection" Height="150" Width="150" HorizontalAlignment="Left" Background="White"/>
+                <!--<Canvas x:Name="cnvCrossSection" Height="150" Width="150" HorizontalAlignment="Left" Background="White"/>-->
                 <StackPanel x:Name="spResult">
                     
                 </StackPanel>

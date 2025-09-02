@@ -28,7 +28,11 @@ namespace ACI318_19Library
         private static void OnResultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (DesignResultControl)d;
-            control.UpdateDisplay();
+            var model = e.NewValue as DesignResultModel;
+            if (model != null)
+            {
+                control.UpdateDisplay(); // method in your control to populate UI
+            }
         }
 
         private void UpdateDisplay()

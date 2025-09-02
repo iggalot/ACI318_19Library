@@ -1,0 +1,62 @@
+﻿<Window x:Class="ACI318_19Library.DesignAllInputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ACI318_19Library"
+        xmlns:flex="clr-namespace:ACI318_19Library"
+        Title="Design All Input"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        >
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- input -->
+            <RowDefinition Height="Auto"/>
+            <!-- list + details -->
+        </Grid.RowDefinitions>
+
+        <!-- Mu Input -->
+        <TextBox Grid.Row ="0" Margin="5"
+                 Width="100"
+                 HorizontalContentAlignment="Left">
+            <TextBox.Text>
+                <Binding Path="DesignMomentMu"
+                         Mode="TwoWay"
+                         UpdateSourceTrigger="PropertyChanged"
+                         ValidatesOnDataErrors="True"
+                         NotifyOnValidationError="True">
+                    <Binding.ValidationRules>
+                        <local:DoubleValidationRule ValidationStep="RawProposedValue"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+
+        <!-- Designs + Result -->
+        <Grid  Grid.Row="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- List of designs -->
+            <ScrollViewer Grid.Column="0" MaxHeight="300">
+                <ListBox 
+                     ItemsSource="{Binding ValidDesigns}"
+                     SelectedItem="{Binding SelectedDesign, Mode=TwoWay}"
+                     />
+            </ScrollViewer>
+
+                <StackPanel Grid.Column="1" x:Name="spResult">
+                    <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
+                </StackPanel>
+                <!--<StackPanel Orientation="Vertical">
+                    <Canvas x:Name="cnvCrossSection" Height="150" Width="150" HorizontalAlignment="Left" Background="White"/>
+                    <StackPanel x:Name="spResult">
+
+                    </StackPanel>
+                </StackPanel>-->
+        </Grid>
+    </Grid>
+</Window>
