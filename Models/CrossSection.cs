@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Controls.Primitives;
 
 namespace ACI318_19Library
 {
@@ -48,6 +49,49 @@ namespace ACI318_19Library
             }
         }
 
+        /// <summary>
+        /// Establishes a rho_min for the cross section
+        /// </summary>
+        public double RhoMin_Materials
+        {
+            get
+            {
+                return 3.0 * Math.Sqrt(Fck_psi) / Fy_psi;
+            }
+        }
+
+        /// <summary>
+        /// Establishes a rho_min for the cross section dimensions
+        /// </summary>
+        public double RhoMin_Area
+        {
+            get
+            {
+                return 200.0 / Fy_psi;
+            }
+        }
+
+        public double RhoMin
+        {
+            get
+            {
+                return Math.Max(RhoMin_Materials, RhoMin_Area);
+            }
+        }
+
+
+        /// <summary>
+        /// Computes the rho at a specified strain.
+        /// -- 0.005 ensures ductile behavior and phi=0.9
+        /// </summary>
+        /// <param name="strain"></param>
+        /// <returns></returns>
+        public double RhoAtStrain(double strain)
+        {
+                double eps_cu = EpsilonCu;    // concrete crushing strain
+                return (0.85 * Fck_psi * FlexuralDesigner.GetBeta1(Fck_psi)) /
+                       (Fy_psi * (1.0 + strain / eps_cu));
+        }
 
         // Max steel ratio (ACI often limits to 0.75ρb)
         public double RhoMax => 0.75 * RhoBalanced;
@@ -58,6 +102,26 @@ namespace ACI318_19Library
         public double Eps_Y { get => Fy_psi / Es_psi; }
 
         public double AreaGross { get => Width * Height; }
+
+        // default constructor
+        public CrossSection() { }
+
+        public CrossSection(double width, double depth,
+            double fck_psi = 4000, double fy_psi = 60000, double epsilon_cu = 0.003, double es_psi = 29000000.0,
+            double tension_cover = 1.5, double compression_cover=1.5, double side_cover=1.5, double clear_spacing=1.5
+            )
+        {
+            Width = width;
+            Height = depth;
+            TensionCover = tension_cover;
+            CompressionCover = compression_cover;
+            SideCover = side_cover;
+            ClearSpacing = clear_spacing;
+            Fck_psi = fck_psi;
+            Fy_psi = fy_psi;
+            EpsilonCu = epsilon_cu;
+            Es_psi = es_psi;
+        }
 
         public CrossSection BaseClone(CrossSection section)
         {
@@ -76,22 +140,6 @@ namespace ACI318_19Library
                 TensionRebars = new ObservableCollection<RebarLayer>(section.TensionRebars),
                 CompressionRebars = new ObservableCollection<RebarLayer>(section.CompressionRebars)
             };
-        }
-        // default constructor
-        public CrossSection() { }
-
-        public CrossSection(double width, double depth, double tension_cover, double compression_cover, double side_cover, double clear_spacing, double fck=4000, double fy=60000, double epsilon_cu=0.003, double es_psi=29000000.0)
-        {
-            Width = width;
-            Height = depth;
-            TensionCover = tension_cover;
-            CompressionCover = compression_cover;
-            SideCover = side_cover;
-            ClearSpacing = clear_spacing;
-            Fck_psi = fck;
-            Fy_psi = fy;
-            EpsilonCu = epsilon_cu;
-            Es_psi = es_psi;
         }
 
         public void AddTensionRebar(string barSize, int count, RebarCatalog catalog, double depth)
@@ -129,15 +177,6 @@ namespace ACI318_19Library
         }
 
 
-
-
-
-
-
-
-
-
-
         public string DisplayInfo()
         {
             return
@@ -150,7 +189,5 @@ namespace ACI318_19Library
                 $"fck: {Fck_psi} psi\n" +
                 $"fy_ksi: {Fy_psi} psi\n";
         }
-
-
     }
 }
