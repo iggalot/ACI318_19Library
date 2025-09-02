@@ -263,7 +263,7 @@ namespace ACI318_19Library
 
         private void BtnAddTension_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new RebarLayerInputDialog(ViewModel.Catalog.RebarTable.Keys,
+            var dialog = new RebarLayerInputDialog(RebarCatalog.RebarTable.Keys,
                                                    isTension: true,
                                                    sectionDepth: ViewModel.Depth,
                                                    cover: ViewModel.TensionCover);
@@ -280,7 +280,7 @@ namespace ACI318_19Library
 
         private void BtnAddComp_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new RebarLayerInputDialog(ViewModel.Catalog.RebarTable.Keys,
+            var dialog = new RebarLayerInputDialog(RebarCatalog.RebarTable.Keys,
                                                    isTension: false,
                                                    sectionDepth: ViewModel.Depth,
                                                    cover: ViewModel.CompressionCover);

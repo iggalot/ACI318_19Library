@@ -18,7 +18,6 @@ namespace ACI318_19Library
 
             if (section == null || cnv == null) return;
 
-            RebarCatalog catalog = new RebarCatalog();
             cnv.Children.Clear();
 
             double margin = 10; // pixels around edges
@@ -54,13 +53,13 @@ namespace ACI318_19Library
             // Draw Tension Bars
             foreach (var layer in section.TensionRebars)
             {
-                DrawBarLayer(cnv, layer, section.SideCover, catalog, scale, offsetX, offsetY, section.Width, color_tension);
+                DrawBarLayer(cnv, layer, section.SideCover, scale, offsetX, offsetY, section.Width, color_tension);
             }
 
             // Draw Compression Bars
             foreach (var layer in section.CompressionRebars)
             {
-                DrawBarLayer(cnv, layer, section.SideCover,catalog, scale, offsetX, offsetY, section.Width, color_compressive);
+                DrawBarLayer(cnv, layer, section.SideCover, scale, offsetX, offsetY, section.Width, color_compressive);
             }
 
             // Effective depth location (from top)
@@ -69,11 +68,11 @@ namespace ACI318_19Library
 
             if (section.TensionRebars.Count > 0)
             {
-                DrawRebarCentroidMarker(cnv, dEff, section.SideCover, catalog, scale, offsetX, offsetY, section.Width, color_tension);
+                DrawRebarCentroidMarker(cnv, dEff, section.SideCover, scale, offsetX, offsetY, section.Width, color_tension);
             }
             if (section.CompressionRebars.Count > 0)
             {
-                DrawRebarCentroidMarker(cnv, dPrimeEff, section.SideCover, catalog, scale, offsetX, offsetY, section.Width, color_compressive);
+                DrawRebarCentroidMarker(cnv, dPrimeEff, section.SideCover, scale, offsetX, offsetY, section.Width, color_compressive);
             }
 
 
@@ -104,7 +103,7 @@ namespace ACI318_19Library
             cnv.Children.Add(bottomCover);
         }
 
-        private static void DrawRebarCentroidMarker(Canvas cnv, double loc, double side_cover, RebarCatalog catalog, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
+        private static void DrawRebarCentroidMarker(Canvas cnv, double loc, double side_cover, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
         {
             // Effective depth location (from top)
             double dEff = loc;
@@ -141,11 +140,11 @@ namespace ACI318_19Library
             cnv.Children.Add(vert);
         }
 
-        private static void DrawBarLayer(Canvas cnv, RebarLayer layer, double side_cover, RebarCatalog catalog, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
+        private static void DrawBarLayer(Canvas cnv, RebarLayer layer, double side_cover, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
         {
             if (layer == null || layer.Qty == 0) return;
 
-            double dia = catalog.RebarTable[layer.BarSize].Diameter * scale;
+            double dia = RebarCatalog.RebarTable[layer.BarSize].Diameter * scale;
             double sectionWidthScaled = sectionWidth * scale;
             double y = offsetY + layer.DepthFromTop * scale;
 
@@ -191,14 +190,10 @@ namespace ACI318_19Library
         // Assume "this" is your Window/UserControl with Canvas named cnvCrossSection
         public static void DrawStrainDiagram(Canvas cnv, DesignResultModel design)
         {
-
-
-
             CrossSection section = design.crossSection;
 
             if (section == null || cnv == null) return;
 
-            RebarCatalog catalog = new RebarCatalog();
             cnv.Children.Clear();
 
             double margin = 10; // pixels around edges

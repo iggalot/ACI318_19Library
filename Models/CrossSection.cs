@@ -105,15 +105,26 @@ namespace ACI318_19Library
         public double AreaGross { get => Width * Height; }
 
         // default constructor
-        public CrossSection() { }
+        public CrossSection(double fck_psi = 4000, double fy_psi = 60000, double epsilon_cu = 0.003, double es_psi = 29000000.0,
+            double tension_cover = 1.5, double compression_cover = 1.5, double side_cover = 1.5, double clear_spacing = 1.5)
+        {
+            TensionCover = tension_cover;
+            CompressionCover = compression_cover;
+            SideCover = side_cover;
+            ClearSpacing = clear_spacing;
+            Fck_psi = fck_psi;
+            Fy_psi = fy_psi;
+            EpsilonCu = epsilon_cu;
+            Es_psi = es_psi;
+        }
 
-        public CrossSection(double width, double depth,
+        public CrossSection(double width, double height,
             double fck_psi = 4000, double fy_psi = 60000, double epsilon_cu = 0.003, double es_psi = 29000000.0,
             double tension_cover = 1.5, double compression_cover=1.5, double side_cover=1.5, double clear_spacing=1.5
             )
         {
             Width = width;
-            Height = depth;
+            Height = height;
             TensionCover = tension_cover;
             CompressionCover = compression_cover;
             SideCover = side_cover;
@@ -143,23 +154,23 @@ namespace ACI318_19Library
             };
         }
 
-        public void AddTensionRebar(string barSize, int count, RebarCatalog catalog, double depth)
+        public void AddTensionRebar(string barSize, int count, double depth)
         {
-            if (!catalog.RebarTable.ContainsKey(barSize))
+            if (!RebarCatalog.RebarTable.ContainsKey(barSize))
                 throw new ArgumentException("Unknown bar size: " + barSize);
 
-            var rebar = catalog.RebarTable[barSize];
-            double d = depth; // centroid depth from top compression fiber
+            var rebar = RebarCatalog.RebarTable[barSize];
+            double d = depth; // centroid height from top compression fiber
             TensionRebars.Add(new RebarLayer(barSize, count, rebar, d));
         }
 
-        public void AddCompressionRebar(string barSize, int count, RebarCatalog catalog, double depth)
+        public void AddCompressionRebar(string barSize, int count, double depth)
         {
-            if (!catalog.RebarTable.ContainsKey(barSize))
+            if (!RebarCatalog.RebarTable.ContainsKey(barSize))
                 throw new ArgumentException("Unknown bar size: " + barSize);
 
-            var rebar = catalog.RebarTable[barSize];
-            double dPrime = depth; // centroid depth from top compression fiber
+            var rebar = RebarCatalog.RebarTable[barSize];
+            double dPrime = depth; // centroid height from top compression fiber
             CompressionRebars.Add(new RebarLayer(barSize, count, rebar, dPrime));
         }
 

@@ -38,7 +38,7 @@
             </TextBox>
             <TextBlock Text=" kip-ft or (" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding DesignMomentMu_kipin}"  FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-            <TextBlock Text=" kip-i)" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text=" kip-in.)" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
 
         </StackPanel>
 

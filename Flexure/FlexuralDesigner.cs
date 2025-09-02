@@ -263,7 +263,6 @@ namespace ACI318_19Library
     double clear_spacing = 1.5)
         {
             double MuTarget_kip_in = MuTarget_kipft * 12.0;
-            RebarCatalog catalog = new RebarCatalog();
 
             CrossSection baseSection = new CrossSection();
             List<DesignResultModel> successfulDesigns = new List<DesignResultModel>();
@@ -278,9 +277,9 @@ namespace ACI318_19Library
                 List<DesignResultModel> localResults = new List<DesignResultModel>();
 
                 // Estimate R for ideal rho
-                CrossSection tempSection = baseSection.BaseClone(baseSection);
-                tempSection.Width = b;
-                tempSection.Height = depths.Min();
+                CrossSection tempSection = new CrossSection(width: b, height: depths.Min());
+                //tempSection.Width = b;
+                //tempSection.Height = depths.Min();
                 double rho_ideal = 0.01;
                 rho_ideal = Math.Max(tempSection.RhoMin, Math.Min(rho_ideal, tempSection.RhoMax));
 
@@ -290,7 +289,7 @@ namespace ACI318_19Library
 
                 foreach (var h in depths.Where(h => h >= d_min_required))
                 {
-                    CrossSection section = baseSection.BaseClone(baseSection);
+                    CrossSection section = tempSection.BaseClone(tempSection);
                     section.Width = b;
                     section.Height = h;
 
@@ -302,12 +301,21 @@ namespace ACI318_19Library
                     List<RebarLayer> tensionOptions = new List<RebarLayer>();
                     foreach (var size in barSizes)
                     {
-                        double As_bar = catalog.RebarTable[size].Area;
+                        double As_bar = RebarCatalog.RebarTable[size].Area;
                         int minQty = (int)Math.Ceiling(area_steel_min / As_bar);
                         int maxQty = Math.Min(max_bars_per_layer, (int)Math.Floor(area_steel_max / As_bar));
 
                         for (int qty = minQty; qty <= maxQty; qty++)
-                            tensionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], h - tension_cover));
+                        {
+                            if (RebarSpacingIsValid(section, size, qty))
+                            {
+                                tensionOptions.Add(new RebarLayer(size, qty, RebarCatalog.RebarTable[size], h - tension_cover));
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
                     }
 
                     var rebarLayers = tensionOptions.OrderBy(x => x.SteelArea);
@@ -317,7 +325,7 @@ namespace ACI318_19Library
                     foreach (var layer in rebarLayers)
                     {
                         section.TensionRebars.Clear();
-                        section.AddTensionRebar(layer.BarSize, layer.Qty, catalog, layer.DepthFromTop);
+                        section.AddTensionRebar(layer.BarSize, layer.Qty, layer.DepthFromTop);
 
                         var designResult = ComputeFlexuralStrength(section);
 
@@ -345,8 +353,8 @@ namespace ACI318_19Library
                                     section.TensionRebars.Clear();
                                     section.CompressionRebars.Clear();
 
-                                    section.AddTensionRebar(layer.BarSize, layer.Qty, catalog, layer.DepthFromTop);
-                                    section.AddCompressionRebar(compSize, compQty, catalog, compression_cover);
+                                    section.AddTensionRebar(layer.BarSize, layer.Qty, layer.DepthFromTop);
+                                    section.AddCompressionRebar(compSize, compQty, compression_cover);
 
                                     var designResult = ComputeFlexuralStrength(section);
 
@@ -380,6 +388,10 @@ namespace ACI318_19Library
                 .ToList();
         }
 
+        private static bool RebarSpacingIsValid(CrossSection section, string size, int qty)
+        {
+            return (qty - 1) * section.ClearSpacing + 2.0 * section.SideCover + qty * RebarCatalog.RebarTable[size].Diameter < section.Width;
+        }
 
         private static double ComputeRfromRho(double fck_psi, double fy_psi, double rho)
         {
@@ -560,8 +572,6 @@ namespace ACI318_19Library
 
         List<DesignResultModel> FilterIdealDesignsByDepth(List<DesignResultModel> successfulSections)
         {
-            RebarCatalog catalog = new RebarCatalog();
-
             var filtered = successfulSections
                 .GroupBy(r => new
                 {
@@ -570,7 +580,7 @@ namespace ACI318_19Library
                     BarsSignature = string.Join(";",
                         r.crossSection.TensionRebars
                          .OrderBy(layer => layer.DepthFromTop)
-                         .Select(layer => $"{catalog.RebarTable[layer.BarSize].Diameter}")
+                         .Select(layer => $"{RebarCatalog.RebarTable[layer.BarSize].Diameter}")
                     )
                 })
                 .Select(g => g.OrderBy(r => r.crossSection.Height).First()) // smallest depth wins
@@ -581,8 +591,6 @@ namespace ACI318_19Library
 
         List<DesignResultModel> FilterIdealDesignsByWidth(List<DesignResultModel> successfulSections)
         {
-            RebarCatalog catalog = new RebarCatalog();
-
             var filtered = successfulSections
                 .GroupBy(r => new
                 {
@@ -591,7 +599,7 @@ namespace ACI318_19Library
                     BarsSignature = string.Join(";",
                         r.crossSection.TensionRebars
                          .OrderBy(layer => layer.DepthFromTop)
-                         .Select(layer => $"{catalog.RebarTable[layer.BarSize].Diameter}")
+                         .Select(layer => $"{RebarCatalog.RebarTable[layer.BarSize].Diameter}")
                     )
                 })
                 .Select(g => g.OrderBy(r => r.crossSection.Width).First()) // smallest depth wins

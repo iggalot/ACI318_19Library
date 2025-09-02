@@ -25,18 +25,17 @@ namespace ACI318_19Library
 
         public CrossSection ToCrossSection()
         {
-            RebarCatalog catalog = new RebarCatalog();
             ObservableCollection<RebarLayer> tension_rebars = new ObservableCollection<RebarLayer>();
             ObservableCollection<RebarLayer> compression_rebars = new ObservableCollection<RebarLayer>();
             foreach (RebarLayerViewModel layer in TensionRebars)
             {
-                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, catalog.RebarTable[layer.BarSize], layer.DepthFromTop);
+                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, RebarCatalog.RebarTable[layer.BarSize], layer.DepthFromTop);
                 tension_rebars.Add(temp);
             }
 
             foreach (RebarLayerViewModel layer in CompressionRebars)
             {
-                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, catalog.RebarTable[layer.BarSize], layer.DepthFromTop);
+                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, RebarCatalog.RebarTable[layer.BarSize], layer.DepthFromTop);
                 compression_rebars.Add(temp);
             }
 
@@ -87,21 +86,18 @@ namespace ACI318_19Library
         public ObservableCollection<RebarLayerViewModel> CompressionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
 
         // Example rebar catalog (in a real app, pass it in)
-        public RebarCatalog Catalog { get; set; } = new RebarCatalog();
-
-
 
         // Add tension layer
         public void AddTensionRebar(string barSize, int count, double depth)
         {
-            if (!Catalog.RebarTable.ContainsKey(barSize)) return;
+            if (!RebarCatalog.RebarTable.ContainsKey(barSize)) return;
             TensionRebars.Add(new RebarLayerViewModel(barSize, count, depth));
         }
 
         // Add compression layer
         public void AddCompressionRebar(string barSize, int count, double depth)
         {
-            if (!Catalog.RebarTable.ContainsKey(barSize)) return;
+            if (!RebarCatalog.RebarTable.ContainsKey(barSize)) return;
             CompressionRebars.Add(new RebarLayerViewModel(barSize, count, depth));
         }
 
