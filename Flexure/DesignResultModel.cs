@@ -84,6 +84,8 @@ namespace ACI318_19Library
         /// <summary>Provided area by selection (in^2)</summary>
         public double AsT { get => crossSection.TensionRebars.Sum(r => r.SteelArea); }
 
+        public double AreaGross { get => crossSection.AreaGross; }
+
         /// <summary>Concrete stress block factor β1</summary>
         public double Beta1 { get => FlexuralDesigner.GetBeta1(crossSection.Fck_psi); }
 

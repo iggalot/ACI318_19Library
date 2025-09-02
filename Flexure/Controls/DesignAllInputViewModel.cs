@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Data;
@@ -7,6 +8,21 @@ namespace ACI318_19Library.Flexure.Controls
 {
     public class DesignAllInputViewModel : INotifyPropertyChanged
     {
+        private bool _sortByArea;
+        public bool SortByArea
+        {
+            get => _sortByArea;
+            set
+            {
+                if (_sortByArea != value)
+                {
+                    _sortByArea = value;
+                    OnPropertyChanged(nameof(SortByArea));
+                    ApplySorting();
+                }
+            }
+        }
+
         private bool _filterWidth12;
         public bool FilterWidth12
         {
@@ -17,26 +33,46 @@ namespace ACI318_19Library.Flexure.Controls
                 {
                     _filterWidth12 = value;
                     OnPropertyChanged(nameof(FilterWidth12));
-                    // Refresh the view whenever the filter changes
-                    ValidDesignsView.Refresh();
+                    // Refresh the view whenever the filter changes (guarded)
+                    ValidDesignsView?.Refresh();
                     OnPropertyChanged(nameof(NumValidDesignsString));
                 }
             }
         }
 
+        // A filter for the list such that the maximum allowed rebar size is #7
+        private bool _filterMaxBar7;
+        public bool FilterMaxBar7
+        {
+            get => _filterMaxBar7;
+            set
+            {
+                if (_filterMaxBar7 != value)
+                {
+                    _filterMaxBar7 = value;
+                    OnPropertyChanged(nameof(FilterMaxBar7));
+                    // Refresh the view whenever the filter changes (guarded)
+                    ValidDesignsView?.Refresh();
+                    OnPropertyChanged(nameof(NumValidDesignsString));
+                }
+            }
+        }
 
         private double _designMomentMu_kipft = 50;
         public double DesignMomentMu_kipft
         {
             get => _designMomentMu_kipft;
-            set { 
-                _designMomentMu_kipft = value; 
-                OnPropertyChanged(nameof(DesignMomentMu_kipft));
-                OnPropertyChanged(nameof(DesignMomentMu_kipin));
+            set
+            {
+                if (_designMomentMu_kipft != value)
+                {
+                    _designMomentMu_kipft = value;
+                    OnPropertyChanged(nameof(DesignMomentMu_kipft));
+                    OnPropertyChanged(nameof(DesignMomentMu_kipin));
 
-                // Run Update logic
-                Update();
-            
+                    // Run Update logic
+                    Update();
+                }
             }
         }
 
@@ -45,30 +81,41 @@ namespace ACI318_19Library.Flexure.Controls
             get => _designMomentMu_kipft * 12.0;
             set
             {
-                _designMomentMu_kipft = value;
-                OnPropertyChanged(nameof(DesignMomentMu_kipft));
-                OnPropertyChanged(nameof(DesignMomentMu_kipin));
+                var newKipFt = value / 12.0;
+                if (_designMomentMu_kipft != newKipFt)
+                {
+                    _designMomentMu_kipft = newKipFt;
+                    OnPropertyChanged(nameof(DesignMomentMu_kipft));
+                    OnPropertyChanged(nameof(DesignMomentMu_kipin));
 
-                // Run Update logic
-                Update();
-
+                    // Run Update logic
+                    Update();
+                }
             }
         }
 
-        //public string NumValidDesignsString { get => ValidDesigns.Count.ToString() + " valid designs"; }
-        public string NumValidDesignsString { get => ValidDesignsView.Cast<object>().Count() + " valid designs"; }
-
+        // Count string uses the view so it reflects filtering
+        public string NumValidDesignsString => $"{ValidDesignsView.Cast<object>().Count()} valid designs";
 
         public ICollectionView ValidDesignsView { get; private set; }
-
 
         private ObservableCollection<DesignResultModel> _validDesigns;
         public ObservableCollection<DesignResultModel> ValidDesigns
         {
             get => _validDesigns;
-            set { 
-                _validDesigns = value; 
-                OnPropertyChanged(nameof(ValidDesigns));
+            set
+            {
+                if (_validDesigns != value)
+                {
+                    _validDesigns = value;
+                    OnPropertyChanged(nameof(ValidDesigns));
+                    // Re-create the view if someone replaces the collection at runtime
+                    ValidDesignsView = CollectionViewSource.GetDefaultView(_validDesigns);
+                    ValidDesignsView.Filter = FilterDesigns;
+                    ApplySorting();
+                    ValidDesignsView.Refresh();
+                    OnPropertyChanged(nameof(NumValidDesignsString));
+                }
             }
         }
 
@@ -76,15 +123,32 @@ namespace ACI318_19Library.Flexure.Controls
         public DesignResultModel SelectedDesign
         {
             get => _selectedDesign;
-            set { _selectedDesign = value; OnPropertyChanged(nameof(SelectedDesign)); }
+            set
+            {
+                if (_selectedDesign != value)
+                {
+                    _selectedDesign = value;
+                    OnPropertyChanged(nameof(SelectedDesign));
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
+        public DesignAllInputViewModel()
+        {
+            _validDesigns = new ObservableCollection<DesignResultModel>();
+            ValidDesignsView = CollectionViewSource.GetDefaultView(_validDesigns);
+
+            // set the Filter ONCE
+            ValidDesignsView.Filter = FilterDesigns;
+        }
+
         public void Update()
         {
+            // Repopulate ValidDesigns with newly computed designs
             ValidDesigns.Clear();
 
             FlexuralDesigner flex_design = new FlexuralDesigner();
@@ -95,30 +159,66 @@ namespace ACI318_19Library.Flexure.Controls
                 ValidDesigns.Add(d);
             }
 
-            // Default selection only if user hasn't chosen anything yet
-            if (SelectedDesign == null && ValidDesigns.Count > 0)
-                SelectedDesign = ValidDesigns[0];
+            // Ensure filters and sorting are applied after repopulation
+            ValidDesignsView?.Refresh();
 
+            // Default selection: pick the first *visible* item from the view, not necessarily the first in the collection
+            if (SelectedDesign == null)
+            {
+                SelectedDesign = ValidDesignsView.Cast<DesignResultModel>().FirstOrDefault();
+            }
+            else
+            {
+                // If the currently selected item is filtered out, pick the first visible one
+                var selectedStillVisible = ValidDesignsView.Cast<DesignResultModel>().Any(d => d == SelectedDesign);
+                if (!selectedStillVisible)
+                    SelectedDesign = ValidDesignsView.Cast<DesignResultModel>().FirstOrDefault();
+            }
 
             OnPropertyChanged(nameof(NumValidDesignsString));
-
-        }
-
-        public DesignAllInputViewModel()
-        {
-            _validDesigns = new ObservableCollection<DesignResultModel>();
-            ValidDesignsView = CollectionViewSource.GetDefaultView(_validDesigns);
-            ValidDesignsView.Filter = FilterDesigns;
         }
 
         private bool FilterDesigns(object obj)
         {
             if (!(obj is DesignResultModel design)) return false;
 
-            if (FilterWidth12 && design.crossSection.Width != 12)
-                return false;
+            // Width filter
+            bool widthOk = !FilterWidth12 || design.crossSection.Width == 12;
 
-            return true;
+            // Bar filter (combine tension + compression rebars, check any bar > #7)
+            bool has_bar_greater7 = design.crossSection
+                .TensionRebars.Concat(design.crossSection.CompressionRebars)
+                .Any(d =>
+                {
+                    // Be defensive: ensure table contains the key
+                    if (!RebarCatalog.RebarTable.ContainsKey(d.BarSize) || !RebarCatalog.RebarTable.ContainsKey("#7"))
+                        return false;
+                    return RebarCatalog.RebarTable[d.BarSize].Diameter >
+                           RebarCatalog.RebarTable["#7"].Diameter;
+                });
+
+            bool barOk = !FilterMaxBar7 || !has_bar_greater7;
+
+            return widthOk && barOk;
+        }
+
+        private void ApplySorting()
+        {
+            if (ValidDesignsView == null) return;
+
+            using (ValidDesignsView.DeferRefresh())
+            {
+                ValidDesignsView.SortDescriptions.Clear();
+
+                if (SortByArea)
+                {
+                    ValidDesignsView.SortDescriptions.Add(
+                        new SortDescription(nameof(DesignResultModel.AreaGross), ListSortDirection.Ascending));
+                    // sort by your property; keep the property name you used earlier (AsT)
+                    ValidDesignsView.SortDescriptions.Add(
+                        new SortDescription(nameof(DesignResultModel.AsT), ListSortDirection.Ascending));
+                }
+            }
         }
     }
 }
