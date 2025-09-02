@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,244 +22,13 @@ namespace ACI318_19Library
 
         private static Func<double, double> Fx_eq;  // The sum of forces X = 0 equation for all our terms -- this equation is needed by the solver
 
-        /// <summary>
-        /// Iterates through all candidate section dimensions and steel layers,
-        /// returning a list of all combinations that meet or exceed the target moment.
-        /// </summary>
-        //       public List<DesignResultModel> DesignAllSections(
-        //           double MuTarget_kipft,                  // target factored moment
-        //           double fck_psi = 4000, double fy_psi = 60000, double eps_cu = 0.003, double es_psi = 29000000,
-
-        //           double tension_cover=1.5,
-        //           double compression_cover=1.5,
-        //           double side_cover=1.5,
-        //           double clear_spacing = 1.5)
-        //       {
-        //           double MuTarget_kip_in = MuTarget_kipft * 12.0; // convert to kip-in
-
-        //           RebarCatalog catalog = new RebarCatalog();
-
-        //           List<double> widths = new List<double>();                     // candidate widths (in)
-        //           List<double> depths = new List<double>();                     // candidate depths (in)
-
-        //           CrossSection baseSection = new CrossSection();
-        //           List<DesignResultModel> successfulSections = new List<DesignResultModel>();
-        //           List<DesignResultModel> successfulDesigns = new List<DesignResultModel>();
-
-        //           // Find candidate cross sections for flexural design, as governed by rho_min and rho_max limitations
-        //           // load the acceptable widths
-        //           for (int i = 0; i < 32; i++)
-        //           {
-        //               widths.Add(4 + 1.0 * i);
-        //           }
-        //           // load the acceptable depths
-        //           for (int i = 0; i < 32; i++)
-        //           {
-        //               depths.Add(4 + 1.0 * i);
-        //           }
-
-        //           foreach (var b in widths)
-        //           {
-        //               foreach (var h in depths)
-        //               {
-        //                   CrossSection trialSection = baseSection.BaseClone(baseSection);
-        //                   trialSection.Width = b;
-        //                   trialSection.Height = h;
-
-        //                   double rho = 0.01;  // try 1% of bd as ideal
-        //                   double rho_min_materials = trialSection.RhoMin_Materials;
-        //                   double rho_min_area = trialSection.RhoMin_Area;
-        //                   double rho_balanced = trialSection.RhoBalanced;
-
-        //                   double rho_min = trialSection.RhoMin;
-        //                   double rho_max = trialSection.RhoMax;
-
-        //                   if (rho < rho_min) {
-        //                       rho = rho_min;
-        //                   } else if (rho > rho_max) {
-        //                       rho = rho_max;
-        //                   }
-
-        //                   double R_psi = ComputeRfromRho(fck_psi, fy_psi, rho);
-        //                   double bdd_req = MuTarget_kip_in * 1000 / R_psi;
-
-        //                   // guess b and d
-        //                   double bdd = b * trialSection.dEffective() * trialSection.dEffective(); ;
-        //                   double Mn_min_kipin = R_psi / 1000.0 * bdd;
-
-        //                   if (bdd > bdd_req)
-        //                   {
-        //                       string str = $"\nb: {b}, h: {h}, Mn_min_kipin: {Mn_min_kipin} kip-in";
-        //                       Debug.WriteLine(str);
-
-        //                       DesignResultModel model = new DesignResultModel();
-        //                       model.crossSection = trialSection;
-        //                       successfulSections.Add(model);
-        //                   }
-
-        //                   else
-        //                   {
-        //                       continue; 
-        //                   }
-
-        //               }
-        //           }
-
-
-
-        //           // define the tension options for bars at a distance of "h-cover" from the top of the beam
-        //           // start with the largest first
-        //           var barSizes = new[] { "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11" };
-
-        //           // candidate compression bars for the top of the beam section
-        //           List<RebarLayer> compressionOptions = new List<RebarLayer>();
-
-        //           foreach (var size in barSizes)
-        //           {
-        //               for (int qty = 1; qty <= max_bars_per_layer; qty++)
-        //                   compressionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], compression_cover));
-        //           }
-
-        //           List<RebarLayer> tensionOptions = new List<RebarLayer>();
-
-
-
-        //           foreach (var design in successfulSections)
-        //           {
-        //               CrossSection section = design.crossSection;
-        //               double area_steel_min = section.RhoMin * section.Width * section.Height;
-        //               double area_steel_max = section.RhoMax * section.Width * section.Height;
-
-        //               foreach (var size in barSizes)
-        //               {
-        //                   for (int qty = 1; qty <= max_bars_per_layer; qty++)
-        //                       tensionOptions.Add(new RebarLayer(size, qty, catalog.RebarTable[size], section.Height - tension_cover));
-        //               }
-
-        //               // choose the largest and check if the moment is enough.  If it is, we can iterate through all the bar sizes
-        //               // otherwise there's no point in continuing with this depth iteration.
-        //               List < RebarLayer > rebarLayer = tensionOptions
-        //                   .Where(x=> x.SteelArea >= area_steel_min && x.SteelArea <= area_steel_max)
-        //                   .OrderBy(x => x.SteelArea)
-        //                   .ToList();
-
-        //               // check for SRR beams
-        //               foreach(var layer in rebarLayer)
-        //               {
-        //                   design.crossSection.TensionRebars.Clear();
-        //                   design.crossSection.AddTensionRebar(layer.BarSize, layer.Qty, catalog, layer.DepthFromTop);
-        //                   design.DepthToEpsT = layer.DepthFromTop;
-
-        //                   var designResult = ComputeFlexuralStrength(design.crossSection);
-
-        //                   if (designResult.eps_T < 0.005)
-        //                   {
-        //                       // only keeping the fully tensile behavior options -- more steel will decrease eps_t, so we don't have any more candidates in this group
-        //                       break;
-        //                   }
-
-        //                   if (designResult.PhiMn >= MuTarget_kip_in)
-        //                   {
-        //                       successfulDesigns.Add(designResult);
-        ////                       break;  // found our optimal for this cross section size -- all other steel areas are larer for each successive loop
-        //                   }
-
-        //               }
-
-
-        //               //DesignResultModel first_design = null;
-        //               //if (rebarLayer.Count > 0)
-        //               //{
-        //               //    RebarLayer first_test = rebarLayer[0];
-        //               //    section.AddTensionRebar(first_test.BarSize, first_test.Qty, catalog, first_test.DepthFromTop);
-        //               //    first_design = ComputeFlexuralStrength(section);
-        //               }
-
-        //               //        // Try single-layer tension reinforcement first
-        //               //        bool foundTensionOnlySolution = false;
-
-        //               //        // Order small to large (try most economical first)
-        //               //        foreach (var tensLayer in tensionOptions.OrderBy(opt => opt.SteelArea))
-        //               //        {
-        //               //            var trialSection = section.BaseClone(section); // copy the section without the rebar
-        //               //            trialSection.AddTensionRebar(tensLayer.BarSize, tensLayer.Qty, catalog, tensLayer.DepthFromTop);
-
-        //               //            // does the rebar fit in the width of the current section
-        //               //            if (RebarLayerFitsInWidth(trialSection) is false)
-        //               //            {
-        //               //                continue;
-        //               //            }
-
-        //               //            var result = ComputeFlexuralStrength(trialSection);
-
-        //               //            if (result.PhiMn >= MuTarget_kip_in && result.eps_T > 0.005)
-        //               //            {
-        //               //                successfulSections.Add(result);
-        //               //                foundTensionOnlySolution = true;
-        //               //                break; // optional: stop at first success
-        //               //            }
-        //               //        }
-
-        //               //        // If no pure tension solution, try doubly reinforced
-        //               //        bool success = false;
-        //               //        if (!foundTensionOnlySolution)
-        //               //        {
-        //               //            foreach (var tensLayer in tensionOptions.OrderBy(opt => opt.SteelArea))
-        //               //            {
-        //               //                foreach (var compSize in barSizes)
-        //               //                {
-        //               //                    for (int compQty = 1; compQty <= 3; compQty++) // limit compression bars
-        //               //                    {
-        //               //                        var trialSection = section.BaseClone(section);
-        //               //                        trialSection.AddTensionRebar(tensLayer.BarSize, tensLayer.Qty, catalog, tensLayer.DepthFromTop);
-
-        //               //                        // compression layer is placed at "cover" depth from top
-        //               //                        trialSection.AddCompressionRebar(compSize, compQty, catalog, compression_cover);
-
-        //               //                        // do the rebar layers fit in the width of the current section
-        //               //                        if (RebarLayerFitsInWidth(trialSection) is false)
-        //               //                        {
-        //               //                            continue;
-        //               //                        }
-
-        //               //                        var result = ComputeFlexuralStrength(trialSection);
-
-        //               //                        if (result.PhiMn >= MuTarget_kip_in && result.eps_T > 0.005)
-        //               //                        {
-        //               //                            successfulSections.Add(result);
-        //               //                            success = true;
-        //               //                        }
-
-        //               //                        if (success)
-        //               //                            break;
-        //               //                    }
-        //               //                    if (success)
-        //               //                        break;
-        //               //                }
-        //               //                if (success)
-        //               //                    break; // exit back to depth selection
-        //               //            }
-        //               //        }
-        //               //    }
-        //               //}
-        //           // filter for unnecessary duplicates of rebar sizes and depths and layers...
-        //           List<DesignResultModel> filtered = successfulDesigns;
-        //           //List<DesignResultModel> filtered = FilterIdealDesignsByWidth(FilterIdealDesignsByDepth(successfulSections));
-
-        //           // then sort in ascending order of width
-        //           return filtered
-        //               .OrderBy(r => r.crossSection.Width)
-        //               .ThenBy(r => r.crossSection.Height)
-        //               .ToList();
-        //       }
-
         public List<DesignResultModel> DesignAllSections(
-    double MuTarget_kipft,
-    double fck_psi = 4000, double fy_psi = 60000, double eps_cu = 0.003, double es_psi = 29000000,
-    double tension_cover = 1.5,
-    double compression_cover = 1.5,
-    double side_cover = 1.5,
-    double clear_spacing = 1.5)
+            double MuTarget_kipft,
+            double fck_psi = 4000, double fy_psi = 60000, double eps_cu = 0.003, double es_psi = 29000000,
+            double tension_cover = 1.5,
+            double compression_cover = 1.5,
+            double side_cover = 1.5,
+            double clear_spacing = 1.5)
         {
             double MuTarget_kip_in = MuTarget_kipft * 12.0;
 
@@ -307,7 +75,7 @@ namespace ACI318_19Library
 
                         for (int qty = minQty; qty <= maxQty; qty++)
                         {
-                            if (RebarSpacingIsValid(section, size, qty))
+                            if (RebarSpacingHorizontalIsValid(section, size, qty))
                             {
                                 tensionOptions.Add(new RebarLayer(size, qty, RebarCatalog.RebarTable[size], h - tension_cover));
                             }
@@ -388,7 +156,7 @@ namespace ACI318_19Library
                 .ToList();
         }
 
-        private static bool RebarSpacingIsValid(CrossSection section, string size, int qty)
+        private static bool RebarSpacingHorizontalIsValid(CrossSection section, string size, int qty)
         {
             return (qty - 1) * section.ClearSpacing + 2.0 * section.SideCover + qty * RebarCatalog.RebarTable[size].Diameter < section.Width;
         }

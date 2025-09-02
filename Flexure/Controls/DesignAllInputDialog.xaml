@@ -13,6 +13,8 @@
             <RowDefinition Height="Auto"/>
             <!-- input -->
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+
             <!-- list + details -->
         </Grid.RowDefinitions>
 
@@ -39,11 +41,14 @@
             <TextBlock Text=" kip-ft or (" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding DesignMomentMu_kipin}"  FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
             <TextBlock Text=" kip-in.)" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-
         </StackPanel>
-
+        <StackPanel Grid.Row="1">
+            <CheckBox Margin="10,0,0,0"
+                  Content="Show only unit widths (width=12)"
+                  IsChecked="{Binding FilterWidth12, Mode=TwoWay}"/>
+        </StackPanel>
         <!-- Designs + Result -->
-        <Grid  Grid.Row="1" Margin="5">
+        <Grid  Grid.Row="2" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="400"/>
                 <ColumnDefinition Width="*"/>
@@ -54,7 +59,7 @@
                 <TextBlock Text="{Binding NumValidDesignsString}"/>
                 <ScrollViewer Grid.Column="0" MaxHeight="300">
                     <ListBox x:Name="listValidDesigns"
-                     ItemsSource="{Binding ValidDesigns}"
+                     ItemsSource="{Binding ValidDesignsView}"
                      SelectedItem="{Binding SelectedDesign, Mode=TwoWay}"
                              DisplayMemberPath="ResultSummary" 
                      />
