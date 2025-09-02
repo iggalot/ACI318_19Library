@@ -14,7 +14,7 @@ namespace ACI318_19Library
 
         // Reinforcement layers
         //public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
-
+        
         public string TensionRebarSummary
         {
             get
@@ -167,10 +167,19 @@ namespace ACI318_19Library
             }
         }
 
-        public string ResultSummary =>
-            crossSection != null
-                ? DisplayModelInfo()
-                : $"(No section) | Mu={PhiMn:F0} kip-in";
+        public string ResultSummary
+        {
+            get
+            {
+                string str = string.Empty;
+                str += crossSection != null
+                    ? DisplayModelInfo()
+                    : $"(No section) | Mu={PhiMn:F0} kip-in";
+
+                return str;
+            }
+        }
+
 
         public string DisplayModelInfo()
         {

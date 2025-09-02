@@ -17,46 +17,53 @@
         </Grid.RowDefinitions>
 
         <!-- Mu Input -->
-        <TextBox Grid.Row ="0" Margin="5"
+        <StackPanel Orientation="horizontal"  Grid.Row="0">
+            <TextBlock Text=" Applied Mu: " FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBox Margin="5"
                  Width="100"
+                     VerticalAlignment="Center"
+                     FontSize="12" FontWeight="Bold"
                  HorizontalContentAlignment="Left">
-            <TextBox.Text>
-                <Binding Path="DesignMomentMu"
+                <TextBox.Text>
+                    <Binding Path="DesignMomentMu_kipft"
                          Mode="TwoWay"
                          UpdateSourceTrigger="PropertyChanged"
                          ValidatesOnDataErrors="True"
                          NotifyOnValidationError="True">
-                    <Binding.ValidationRules>
-                        <local:DoubleValidationRule ValidationStep="RawProposedValue"/>
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
-        </TextBox>
+                        <Binding.ValidationRules>
+                            <local:DoubleValidationRule ValidationStep="RawProposedValue"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock Text=" kip-ft or (" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding DesignMomentMu_kipin}"  FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+            <TextBlock Text=" kip-i)" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+
+        </StackPanel>
 
         <!-- Designs + Result -->
         <Grid  Grid.Row="1" Margin="5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="400"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- List of designs -->
-            <ScrollViewer Grid.Column="0" MaxHeight="300">
-                <ListBox 
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding NumValidDesignsString}"/>
+                <ScrollViewer Grid.Column="0" MaxHeight="300">
+                    <ListBox x:Name="listValidDesigns"
                      ItemsSource="{Binding ValidDesigns}"
                      SelectedItem="{Binding SelectedDesign, Mode=TwoWay}"
+                             DisplayMemberPath="ResultSummary" 
                      />
-            </ScrollViewer>
+                </ScrollViewer>
+            </StackPanel>
 
-                <StackPanel Grid.Column="1" x:Name="spResult">
-                    <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
-                </StackPanel>
-                <!--<StackPanel Orientation="Vertical">
-                    <Canvas x:Name="cnvCrossSection" Height="150" Width="150" HorizontalAlignment="Left" Background="White"/>
-                    <StackPanel x:Name="spResult">
-
-                    </StackPanel>
-                </StackPanel>-->
+            <StackPanel Grid.Column="1" x:Name="spResult">
+                <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

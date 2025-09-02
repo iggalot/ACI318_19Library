@@ -20,6 +20,9 @@ namespace ACI318_19Library
             this.Loaded += (s, e) => UpdateDefaultStyle();
 
             ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            ViewModel.Update();
+            Update();
         }
 
         public double DesignMomentMu

@@ -31,6 +31,7 @@ namespace ACI318_19Library
         public ObservableCollection<RebarLayer> TensionRebars { get; set; } = new ObservableCollection<RebarLayer>();
         public ObservableCollection<RebarLayer> CompressionRebars { get; set; } = new ObservableCollection<RebarLayer>();
 
+        public string SectionSummaryString { get => $"{Width} in. x {Height} in."; }
         // constants
         public double EpsilonCu { get; set; } = 0.003;       // ultimate concrete strain
         public double Es_psi { get; set; } = 29000000;         // psi (modulus of steel)

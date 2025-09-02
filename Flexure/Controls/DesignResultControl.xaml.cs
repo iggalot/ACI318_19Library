@@ -23,6 +23,8 @@ namespace ACI318_19Library
         public DesignResultControl()
         {
             InitializeComponent();
+
+
         }
 
         private static void OnResultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
