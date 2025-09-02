@@ -72,8 +72,10 @@
       <DependentUpon>RebarLayerInputDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Flexure\Controls\RebarLayerViewModel.cs" />
+    <Compile Include="Flexure\ShearDesignResultModel.cs" />
     <Compile Include="Flexure\DesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesigner.cs" />
+    <Compile Include="Flexure\ShearDesigner.cs" />
     <Compile Include="MemberDimensionProportioner.cs" />
     <Compile Include="Models\RebarCatalog.cs" />
     <Compile Include="Models\RebarLayer.cs" />

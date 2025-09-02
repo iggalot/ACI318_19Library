@@ -152,7 +152,7 @@ namespace ACI318_19Library.Flexure.Controls
             ValidDesigns.Clear();
 
             FlexuralDesigner flex_design = new FlexuralDesigner();
-            var newDesigns = new ObservableCollection<DesignResultModel>(flex_design.DesignAllSections(_designMomentMu_kipft));
+            var newDesigns = new ObservableCollection<DesignResultModel>(flex_design.DesignAllSectionsForMu(_designMomentMu_kipft));
 
             foreach (var d in newDesigns)
             {

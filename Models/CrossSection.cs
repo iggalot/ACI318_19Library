@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows.Controls.Primitives;
 
 namespace ACI318_19Library
 {
@@ -31,7 +29,12 @@ namespace ACI318_19Library
         public ObservableCollection<RebarLayer> TensionRebars { get; set; } = new ObservableCollection<RebarLayer>();
         public ObservableCollection<RebarLayer> CompressionRebars { get; set; } = new ObservableCollection<RebarLayer>();
 
-        public string SectionSummaryString { get => $"{Width} in. x {Height} in."; }
+        // Shear reinforcement properties
+        public string Av_barSize { get; set; } = "#4"; // in^2 per stirrup set
+        public double ShearSpacing { get; set; } = double.PositiveInfinity; // in
+        public int StirrupsLegs { get; set; } = 0; // typically 2 legs
+
+        public string SectionSummaryString { get => $"{Width} in. x {Height} in. = {AreaGross} sq. in."; }
         // constants
         public double EpsilonCu { get; set; } = 0.003;       // ultimate concrete strain
         public double Es_psi { get; set; } = 29000000;         // psi (modulus of steel)
@@ -172,6 +175,17 @@ namespace ACI318_19Library
             var rebar = RebarCatalog.RebarTable[barSize];
             double dPrime = depth; // centroid height from top compression fiber
             CompressionRebars.Add(new RebarLayer(barSize, count, rebar, dPrime));
+        }
+
+        public void AddShearReinforcement(string barSize, int legs, double spacing)
+        {
+            if (!RebarCatalog.RebarTable.ContainsKey(barSize))
+                throw new ArgumentException("Unknown bar size: " + barSize);
+
+            var rebar = RebarCatalog.RebarTable[barSize];
+            Av_barSize = barSize; // total barSize 
+            StirrupsLegs = legs;
+            ShearSpacing = spacing;
         }
 
         // Helper: effective tension steel centroid

@@ -321,10 +321,20 @@ namespace ACI318_19Library
             // get our new section from the ViewModel
             CrossSection section = GetCrossSection();
 
+            if (section == null)
+                return;
+
+            section.Av_barSize = "#4";
+            section.ShearSpacing = 12;
+            section.StirrupsLegs = 2;
+
+            ShearDesignResultModel shear_model = ShearDesigner.ComputeShearCapacity(section);
+
+
             // Perform a moment calculation
             if (section.TensionRebars.Count == 0) return;
 
-            DesignResultModel design = FlexuralDesigner.ComputeFlexuralStrength(section);
+            DesignResultModel design = FlexuralDesigner.ComputeMomentCapacity(section);
             DesignResultControl control = new DesignResultControl();
             control.Result = design;
             spResult.Children.Add(control);

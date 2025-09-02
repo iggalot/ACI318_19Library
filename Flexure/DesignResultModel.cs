@@ -12,9 +12,10 @@ namespace ACI318_19Library
         /// <summary>Concrete cross section</summary>
         public CrossSection crossSection { get; set; }
 
-        // Reinforcement layers
-        //public List<RebarLayer> TensionRebars { get; set; } = new List<RebarLayer>();
-        
+        // ======================
+        // FLEXURE SUMMARY
+        // ======================
+
         public string TensionRebarSummary
         {
             get
@@ -51,18 +52,14 @@ namespace ACI318_19Library
             }
         }
 
-        //public List<RebarLayer> CompressionRebars { get; set; } = new List<RebarLayer>();
-
-
-
         /// <summary>Final computed φMn (in-lb)</summary>
-        public double PhiMn { get => Phi * Mn; }
+        public double PhiMn { get => PhiFlexure * Mn; }
 
         /// <summary>Final computed Mn (in-lb)</summary>
         public double Mn { get; set; }
 
-        /// <summary>Final phi used</summary>
-        public double Phi { get; set; }
+        /// <summary>Final phi used for flexure</summary>
+        public double PhiFlexure { get; set; } = 0.9;
 
         // <summary>Neutral axis location, c (in)</summary>
         public double NeutralAxis { get; set; }
@@ -75,8 +72,6 @@ namespace ACI318_19Library
 
         /// <summary>depth in cross section to extreme tension bar</summary>
         public double DepthToEpsT { get; set; }
-
-
 
         /// <summary>Provided area by selection (in^2)</summary>
         public double AsC { get => crossSection.CompressionRebars.Sum(r => r.SteelArea); }
@@ -97,6 +92,29 @@ namespace ACI318_19Library
         /// <summary>Warnings (e.g. over-reinforced, compression steel not yielded)</summary>
         public string Warnings { get; set; }
 
+        // ======================
+        // SHEAR SUMMARY
+        // ======================
+
+        /// <summary>Concrete shear contribution Vc (kips)</summary>
+        public double Vc { get; set; }
+
+        /// <summary>Steel shear contribution Vs (kips)</summary>
+        public double Vs { get; set; }
+
+        /// <summary>Nominal shear capacity Vn (kips)</summary>
+        public double Vn { get; set; }
+
+        /// <summary>Strength reduction factor for shear (φ)</summary>
+        public double PhiShear { get; set; } = 0.75;
+
+        /// <summary>Design shear strength φVn (kips)</summary>
+        public double PhiVn { get => PhiShear * Vn; }
+
+        // ======================
+        // REFLECTION-BASED DISPLAY
+        // ======================
+
         public string ConcreteDesignInfo
         {
             get
@@ -114,7 +132,6 @@ namespace ACI318_19Library
                     {
                         List<RebarLayer> tens_rebar_obj = value as List<RebarLayer>;
 
-
                         string str = String.Empty;
                         for (int i = 0; i < tens_rebar_obj.Count; i++)
                         {
@@ -129,15 +146,13 @@ namespace ACI318_19Library
                         List<RebarLayer> comp_rebar_obj = value as List<RebarLayer>;
 
                         string str = String.Empty;
-                        for(int i = 0; i < comp_rebar_obj.Count; i++)
+                        for (int i = 0; i < comp_rebar_obj.Count; i++)
                         {
                             str += $"({comp_rebar_obj[i].Qty})-{comp_rebar_obj[i].BarSize} at {comp_rebar_obj[i].DepthFromTop},  ";
                         }
                         sb.AppendLine($"{prop.Name}: {comp_rebar_obj.Count} compression rebar layers -- {str}");
                         continue;
                     }
-
-
 
                     if (value == null)
                     {
@@ -169,6 +184,10 @@ namespace ACI318_19Library
             }
         }
 
+        // ======================
+        // RESULT SUMMARY FOR DISPLAY
+        // ======================
+
         public string ResultSummary
         {
             get
@@ -182,15 +201,15 @@ namespace ACI318_19Library
             }
         }
 
-
         public string DisplayModelInfo()
         {
-            string str = String.Empty;
-            str += $"W: {crossSection.Width} x D: {crossSection.Height} | PhiMn={PhiMn:F0} kip-in";
-            if(crossSection.TensionRebars.Count > 0)
+            string str = string.Empty;
+            str += $"W: {crossSection.Width} x D: {crossSection.Height} | Ag = {crossSection.AreaGross} sq.in. | PhiMn={PhiMn:F0} kip-in";
+
+            if (crossSection.TensionRebars.Count > 0)
             {
                 str += " | Tension: ";
-                foreach(var layer in crossSection.TensionRebars)
+                foreach (var layer in crossSection.TensionRebars)
                 {
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
                 }
@@ -203,8 +222,17 @@ namespace ACI318_19Library
                     str += $"{layer.Qty}-{layer.BarSize} at {layer.DepthFromTop}, ";
                 }
             }
+
+            // Shear display
+            if (Vn > 0)
+            {
+                str += $" | φVn = {PhiVn:F1} kips (Vc={Vc:F1}, Vs={Vs:F1})";
+            }
+
+            if (!string.IsNullOrWhiteSpace(Warnings))
+                str += $" | Warnings: {Warnings}";
+
             return str;
         }
     }
-
 }

@@ -22,7 +22,7 @@ namespace ACI318_19Library
 
         private static Func<double, double> Fx_eq;  // The sum of forces X = 0 equation for all our terms -- this equation is needed by the solver
 
-        public List<DesignResultModel> DesignAllSections(
+        public List<DesignResultModel> DesignAllSectionsForMu(
             double MuTarget_kipft,
             double fck_psi = 4000, double fy_psi = 60000, double eps_cu = 0.003, double es_psi = 29000000,
             double tension_cover = 1.5,
@@ -95,7 +95,7 @@ namespace ACI318_19Library
                         section.TensionRebars.Clear();
                         section.AddTensionRebar(layer.BarSize, layer.Qty, layer.DepthFromTop);
 
-                        var designResult = ComputeFlexuralStrength(section);
+                        var designResult = ComputeMomentCapacity(section);
 
                         if (designResult.eps_T < 0.005)
                             break;
@@ -124,7 +124,7 @@ namespace ACI318_19Library
                                     section.AddTensionRebar(layer.BarSize, layer.Qty, layer.DepthFromTop);
                                     section.AddCompressionRebar(compSize, compQty, compression_cover);
 
-                                    var designResult = ComputeFlexuralStrength(section);
+                                    var designResult = ComputeMomentCapacity(section);
 
                                     if (designResult.eps_T < 0.005)
                                         break;
@@ -166,7 +166,7 @@ namespace ACI318_19Library
             return rho * fy_psi * (1 - 0.59 * rho * fy_psi / fck_psi);
         }
 
-        public static DesignResultModel ComputeFlexuralStrength(CrossSection section)
+        public static DesignResultModel ComputeMomentCapacity(CrossSection section)
         {
             double b= section.Width;
             double depth = section.Height;
@@ -297,7 +297,7 @@ namespace ACI318_19Library
             {
                 crossSection = section,
                 Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
-                Phi = phi,
+                PhiFlexure = phi,
                 NeutralAxis = c,
                 Warnings = warnings,
                 eps_T = eps_tens_max,
@@ -310,6 +310,7 @@ namespace ACI318_19Library
 
             return design; ;
         }
+
 
         public static double GetBeta1(double fck)
         {
