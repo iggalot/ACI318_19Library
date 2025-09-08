@@ -76,6 +76,7 @@
     <Compile Include="Flexure\DesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesigner.cs" />
     <Compile Include="Flexure\ShearDesigner.cs" />
+    <Compile Include="Flexure\ValueConverters\NumberToBackgroundConverter.cs" />
     <Compile Include="MemberDimensionProportioner.cs" />
     <Compile Include="Models\RebarCatalog.cs" />
     <Compile Include="Models\RebarLayer.cs" />

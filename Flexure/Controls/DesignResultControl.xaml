@@ -3,6 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:ACI318_19Library"
              Height="Auto" Width="Auto">
+    <UserControl.Resources>
+        <local:NumberToBackgroundConverter x:Key="NumberToBackgroundConverter"/>
+    </UserControl.Resources>
+    
     <Grid Margin="8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -67,10 +71,20 @@
 
                 <!-- Row 2 -->
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="ϕ:" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.PhiFlexure, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.PhiFlexure, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}"
+                            Background="{Binding Result.PhiFlexure, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                              Converter={StaticResource NumberToBackgroundConverter}, 
+                              ConverterParameter='0.65,0.8999,1.00'}"
+                           Margin="2"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="εt:" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="εt:" Margin="2"
+                           
+                           />
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" 
+                            Background="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                              Converter={StaticResource NumberToBackgroundConverter}, 
+                              ConverterParameter='0.001999,0.004999,10.0'}"
+                           Margin="2"/>
 
                 <!-- Row 3 -->
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="εy:" Margin="2"/>

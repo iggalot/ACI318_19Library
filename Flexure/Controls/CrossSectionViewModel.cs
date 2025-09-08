@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 
 namespace ACI318_19Library
 {
@@ -15,11 +16,11 @@ namespace ACI318_19Library
         private double _fy = 60000;  // psi
 
         public double Width { get => _width; set { _width = value; OnPropertyChanged(nameof(Width)); } }
-        public double Height 
-        { 
-            get => _height; 
-            set 
-            { 
+        public double Height
+        {
+            get => _height;
+            set
+            {
                 // hold the rebar locations so that the bottom dimension is constant in the cross section.
                 // i.e. if we change the depth of the section, the bottom bars adjust accordingly.
                 foreach (var item in TensionRebars)
@@ -29,8 +30,8 @@ namespace ACI318_19Library
                     var bottom_dist = current_height - depth;
                     item.DepthFromTop = value - bottom_dist;
                 }
-                _height = value; OnPropertyChanged(nameof(Height)); 
-            } 
+                _height = value; OnPropertyChanged(nameof(Height));
+            }
         }
         public double TensionCover { get => _tensionCover; set { _tensionCover = value; OnPropertyChanged(nameof(TensionCover)); } }
         public double CompressionCover { get => _compressionCover; set { _compressionCover = value; OnPropertyChanged(nameof(CompressionCover)); } }
@@ -46,7 +47,7 @@ namespace ACI318_19Library
 
         public CrossSectionViewModel()
         {
-                
+
         }
 
         public CrossSectionViewModel(CrossSection section)
@@ -59,7 +60,7 @@ namespace ACI318_19Library
             CompressionCover = section.CompressionCover;
             Fck_psi = section.Fck_psi;
 
-            foreach(var layer in section.TensionRebars)
+            foreach (var layer in section.TensionRebars)
             {
                 TensionRebars.Add(new RebarLayerViewModel(layer.BarSize, layer.Qty, layer.DepthFromTop));
             }
@@ -76,14 +77,31 @@ namespace ACI318_19Library
             ObservableCollection<RebarLayer> compression_rebars = new ObservableCollection<RebarLayer>();
             foreach (RebarLayerViewModel layer in TensionRebars)
             {
-                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, RebarCatalog.RebarTable[layer.BarSize], layer.DepthFromTop);
-                tension_rebars.Add(temp);
+                try
+                {
+                    RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, RebarCatalog.RebarTable[layer.BarSize], layer.DepthFromTop);
+                    tension_rebars.Add(temp);
+                }
+                catch
+                {
+                    MessageBox.Show("Error in adding tension rebar data value");
+                    return null;
+                }
+
             }
 
             foreach (RebarLayerViewModel layer in CompressionRebars)
             {
-                RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, RebarCatalog.RebarTable[layer.BarSize], layer.DepthFromTop);
-                compression_rebars.Add(temp);
+                try
+                {
+                    RebarLayer temp = new RebarLayer(layer.BarSize, layer.Qty, RebarCatalog.RebarTable[layer.BarSize], layer.DepthFromTop);
+                    compression_rebars.Add(temp);
+                }
+                catch
+                {
+                    MessageBox.Show("Error in adding rebar data value");
+                    return null;
+                }
             }
 
             return new CrossSection()
