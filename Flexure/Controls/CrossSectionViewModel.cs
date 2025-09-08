@@ -99,7 +99,7 @@ namespace ACI318_19Library
                 }
                 catch
                 {
-                    MessageBox.Show("Error in adding rebar data value");
+                    MessageBox.Show("Error in adding compression rebar data value");
                     return null;
                 }
             }
