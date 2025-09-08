@@ -2,11 +2,48 @@
 
 public class RebarLayerViewModel : INotifyPropertyChanged
 {
-    public string BarSize { get; set; }
-    public int Qty { get; set; }
-    public double DepthFromTop { get; set; }
+    private string _barSize;
+    private int _qty;
+    private double _depthFromTop;
 
-    public double? LastTensionDepth { get; set; }
+    public string BarSize
+    {
+        get => _barSize;
+        set
+        {
+            if (_barSize != value)
+            {
+                _barSize = value;
+                OnPropertyChanged(nameof(BarSize));
+            }
+        }
+    }
+
+    public int Qty
+    {
+        get => _qty;
+        set
+        {
+            if (_qty != value)
+            {
+                _qty = value;
+                OnPropertyChanged(nameof(Qty));
+            }
+        }
+    }
+
+    public double DepthFromTop
+    {
+        get => _depthFromTop;
+        set
+        {
+            if (_depthFromTop != value)
+            {
+                _depthFromTop = value;
+                OnPropertyChanged(nameof(DepthFromTop));
+            }
+        }
+    }
 
     public RebarLayerViewModel(string barSize, int count, double depth)
     {

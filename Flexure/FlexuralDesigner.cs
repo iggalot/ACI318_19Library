@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ACI318_19Library
 {
@@ -250,78 +251,87 @@ namespace ACI318_19Library
                 warnings += $"{r:F6} , ";
             }
 
-            double c = roots.Min();
-            warnings += $"\nNeutral Axis location solver = {c:F6}";
-
-            double a = beta1 * c;
-
-            // compute stresses in steel  (negative for tension, positive for compression)
-            double eps_comp = EpsilonCu * (c - dPrime_in) / c;
-            double eps_tens = -EpsilonCu * (d_in - c) / c;
-            warnings += $"\neps_s_prime = {eps_comp:F6} and eps_tens = {eps_tens:F6}";
-
-            // compute stresses in steel
-            double fs_ksi = Math.Sign(eps_tens) * Math.Min(Math.Abs(eps_tens * es_psi), fy_psi) / 1000.0;
-            double fs_prime_ksi = Math.Sign(eps_comp) * Math.Min(Math.Abs(eps_comp * es_psi), fy_psi) / 1000.0;
-            warnings += $"\nfs_prime = {fs_prime_ksi:F2} ksi  and fs_ksi = {fs_ksi:F2} ksi";
-
-            // compute forces
-            double Cconc_kips = 0.85 * fck_psi/1000.0 * b * a;
-            double Csteel_kips = fs_prime_ksi * AsC;
-            double Tsteel_kips = fs_ksi * AsT;
-            warnings += $"\nCconc = {Cconc_kips:F2} kips  and Csteel_kips = {Csteel_kips:F2} kips  and Tsteel_kips = {Tsteel_kips:F2} kips";
-
-            // moments about top fiber -- CW positive -- compressive forcs are negative, tensile forces are positive
-            double Mconc_kipin = Cconc_kips * a / 2.0;
-            double Msteel_comp_kipin = Csteel_kips * dPrime_in; // comp_sign needed incase the "compression" steel actually ends up being tensile
-            double Msteel_tens__kipin = Tsteel_kips * d_in;
-            double Mn_kipin = Mconc_kipin + Msteel_comp_kipin + Msteel_tens__kipin;
-            warnings += $"\nMtot = {Mn_kipin:F2} kip-in  and Mconc_kipin = {Mconc_kipin:F2} kip-in  and Msteel_comp_kipin = {Msteel_comp_kipin:F2} kip-in  and Msteel = {Msteel_tens__kipin:F2} kip-in";
-
-            // alternative method -- compute about the Tensile steel -- CW negative...so need to flip the signs
-            double Mconc2_kipin = -Cconc_kips * (d_in - a / 2);
-            double Msteel_comp2_kipin = -Csteel_kips * (d_in - dPrime_in); // comp_sign needed incase the "compression" steel actually ends up being tensile
-            double Mn2_kipin = Mconc2_kipin + Msteel_comp2_kipin;
-            warnings += $"\nMtot = {Mn2_kipin:F2} kip-in  and Mconc_kipin = {Mconc2_kipin:F2} kip-in  and Msteel_comp_2 = {Msteel_comp2_kipin:F2} kip-in";
-
-            // verify they mathch
-            double diff = Mn_kipin - Mn2_kipin;
-            warnings += $"\n-- Checking methods for Mn_kipin diff = {diff:F2} kip-in";
-
-
-            // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
-            // -- search for the TensionRebar with the largest "DepthFromTop" value
-            double maxDepth_in = TensionRebars.Max(r => r.DepthFromTop);
-            double eps_y = fy_psi / es_psi;
-            double eps_tens_max = -EpsilonCu + maxDepth_in / c * EpsilonCu;
-            warnings += $"\nConcrete strain = {EpsilonCu:F6}    Steel yield strain = {eps_y:F6}  Max actual steel tensile strain = {eps_tens_max:F6}";
-
-            // now compute phi
-            double phi = 0.9;
-            if (eps_tens_max >= 0.005) { phi = 0.9; }
-            else if (eps_tens_max <= 0.002) { phi = 0.65; }
-            else
+            try
             {
-                phi = 0.65 + (eps_tens_max - 0.002) / (0.003) * (0.90 - 0.65);
+
+
+                double c = roots.Min();
+                warnings += $"\nNeutral Axis location solver = {c:F6}";
+
+                double a = beta1 * c;
+
+                // compute stresses in steel  (negative for tension, positive for compression)
+                double eps_comp = EpsilonCu * (c - dPrime_in) / c;
+                double eps_tens = -EpsilonCu * (d_in - c) / c;
+                warnings += $"\neps_s_prime = {eps_comp:F6} and eps_tens = {eps_tens:F6}";
+
+                // compute stresses in steel
+                double fs_ksi = Math.Sign(eps_tens) * Math.Min(Math.Abs(eps_tens * es_psi), fy_psi) / 1000.0;
+                double fs_prime_ksi = Math.Sign(eps_comp) * Math.Min(Math.Abs(eps_comp * es_psi), fy_psi) / 1000.0;
+                warnings += $"\nfs_prime = {fs_prime_ksi:F2} ksi  and fs_ksi = {fs_ksi:F2} ksi";
+
+                // compute forces
+                double Cconc_kips = 0.85 * fck_psi / 1000.0 * b * a;
+                double Csteel_kips = fs_prime_ksi * AsC;
+                double Tsteel_kips = fs_ksi * AsT;
+                warnings += $"\nCconc = {Cconc_kips:F2} kips  and Csteel_kips = {Csteel_kips:F2} kips  and Tsteel_kips = {Tsteel_kips:F2} kips";
+
+                // moments about top fiber -- CW positive -- compressive forcs are negative, tensile forces are positive
+                double Mconc_kipin = Cconc_kips * a / 2.0;
+                double Msteel_comp_kipin = Csteel_kips * dPrime_in; // comp_sign needed incase the "compression" steel actually ends up being tensile
+                double Msteel_tens__kipin = Tsteel_kips * d_in;
+                double Mn_kipin = Mconc_kipin + Msteel_comp_kipin + Msteel_tens__kipin;
+                warnings += $"\nMtot = {Mn_kipin:F2} kip-in  and Mconc_kipin = {Mconc_kipin:F2} kip-in  and Msteel_comp_kipin = {Msteel_comp_kipin:F2} kip-in  and Msteel = {Msteel_tens__kipin:F2} kip-in";
+
+                // alternative method -- compute about the Tensile steel -- CW negative...so need to flip the signs
+                double Mconc2_kipin = -Cconc_kips * (d_in - a / 2);
+                double Msteel_comp2_kipin = -Csteel_kips * (d_in - dPrime_in); // comp_sign needed incase the "compression" steel actually ends up being tensile
+                double Mn2_kipin = Mconc2_kipin + Msteel_comp2_kipin;
+                warnings += $"\nMtot = {Mn2_kipin:F2} kip-in  and Mconc_kipin = {Mconc2_kipin:F2} kip-in  and Msteel_comp_2 = {Msteel_comp2_kipin:F2} kip-in";
+
+                // verify they mathch
+                double diff = Mn_kipin - Mn2_kipin;
+                warnings += $"\n-- Checking methods for Mn_kipin diff = {diff:F2} kip-in";
+
+
+                // compute the tensilestrain in the extreme most tensile renforcement so that we can determine the true value of phi
+                // -- search for the TensionRebar with the largest "DepthFromTop" value
+                double maxDepth_in = TensionRebars.Max(r => r.DepthFromTop);
+                double eps_y = fy_psi / es_psi;
+                double eps_tens_max = -EpsilonCu + maxDepth_in / c * EpsilonCu;
+                warnings += $"\nConcrete strain = {EpsilonCu:F6}    Steel yield strain = {eps_y:F6}  Max actual steel tensile strain = {eps_tens_max:F6}";
+
+                // now compute phi
+                double phi = 0.9;
+                if (eps_tens_max >= 0.005) { phi = 0.9; }
+                else if (eps_tens_max <= 0.002) { phi = 0.65; }
+                else
+                {
+                    phi = 0.65 + (eps_tens_max - 0.002) / (0.003) * (0.90 - 0.65);
+                }
+                warnings += $"\nphi = {phi:F3}";
+
+                DesignResultModel design = new DesignResultModel()
+                {
+                    crossSection = section,
+                    Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
+                    PhiFlexure = phi,
+                    NeutralAxis = c,
+                    Warnings = warnings,
+                    eps_T = eps_tens_max,
+                    DepthToEpsT = maxDepth_in
+                };
+
+                // Check the overreinforcement status
+                if (design.IsOverreinforced is true)
+                    warnings += "\nSection is over-reinforced; ";
+
+                return design;
+            }  catch
+            {
+                MessageBox.Show("No roots found in solving for neutral axis position.");
+                return null;
             }
-            warnings += $"\nphi = {phi:F3}";
-
-            DesignResultModel design = new DesignResultModel()
-            {
-                crossSection = section,
-                Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
-                PhiFlexure = phi,
-                NeutralAxis = c,
-                Warnings = warnings,
-                eps_T = eps_tens_max,
-                DepthToEpsT = maxDepth_in
-            };
-
-            // Check the overreinforcement status
-            if (design.IsOverreinforced is true)
-                warnings += "\nSection is over-reinforced; ";
-
-            return design; ;
         }
 
 

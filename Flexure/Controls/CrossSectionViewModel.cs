@@ -15,7 +15,23 @@ namespace ACI318_19Library
         private double _fy = 60000;  // psi
 
         public double Width { get => _width; set { _width = value; OnPropertyChanged(nameof(Width)); } }
-        public double Height { get => _height; set { _height = value; OnPropertyChanged(nameof(Height)); } }
+        public double Height 
+        { 
+            get => _height; 
+            set 
+            { 
+                // hold the rebar locations so that the bottom dimension is constant in the cross section.
+                // i.e. if we change the depth of the section, the bottom bars adjust accordingly.
+                foreach (var item in TensionRebars)
+                {
+                    var depth = item.DepthFromTop;
+                    var current_height = Height;
+                    var bottom_dist = current_height - depth;
+                    item.DepthFromTop = value - bottom_dist;
+                }
+                _height = value; OnPropertyChanged(nameof(Height)); 
+            } 
+        }
         public double TensionCover { get => _tensionCover; set { _tensionCover = value; OnPropertyChanged(nameof(TensionCover)); } }
         public double CompressionCover { get => _compressionCover; set { _compressionCover = value; OnPropertyChanged(nameof(CompressionCover)); } }
         public double SideCover { get => _sideCover; set { _sideCover = value; OnPropertyChanged(nameof(SideCover)); } }
