@@ -1,5 +1,7 @@
 ﻿using ACI318_19Library.Flexure.Controls;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ACI318_19Library
 {
@@ -91,5 +93,23 @@ namespace ACI318_19Library
 
             Update();
         }
+
+        private void ListBoxItem_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var item = (sender as ListBoxItem)?.DataContext as DesignResultModel;
+            if (item != null)
+            {
+                // Clear the results panel
+                spResult.Children.Clear();
+
+                // Build and show the control
+                var control = new DesignResultControl
+                {
+                    Result = item
+                };
+                spResult.Children.Add(control);
+            }
+        }
+
     }
 }

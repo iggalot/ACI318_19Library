@@ -69,7 +69,13 @@
                      SelectedItem="{Binding SelectedDesign, Mode=OneWayToSource}"
                      DisplayMemberPath="ResultSummary" 
                              SelectionChanged="listValidDesigns_SelectionChanged"
-                     />
+                    >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <EventSetter Event="MouseEnter" Handler="ListBoxItem_MouseEnter"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
                 </ScrollViewer>
             </StackPanel>
 
