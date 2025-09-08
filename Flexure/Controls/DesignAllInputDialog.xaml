@@ -66,8 +66,9 @@
                 <ScrollViewer Grid.Column="0" MaxHeight="300">
                     <ListBox x:Name="listValidDesigns"
                      ItemsSource="{Binding ValidDesignsView}"
-                     SelectedItem="{Binding SelectedDesign, Mode=TwoWay}"
-                             DisplayMemberPath="ResultSummary" 
+                     SelectedItem="{Binding SelectedDesign, Mode=OneWayToSource}"
+                     DisplayMemberPath="ResultSummary" 
+                             SelectionChanged="listValidDesigns_SelectionChanged"
                      />
                 </ScrollViewer>
             </StackPanel>

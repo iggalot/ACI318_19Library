@@ -67,10 +67,10 @@ namespace ACI318_19Library
             ViewModel = vm;
             DataContext = ViewModel;
 
-            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 14.75));
-            ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 17.25));
+            //ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 14.75));
+            //ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 17.25));
 
-            ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#6", 2, 2.5));
+            //ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#6", 2, 2.5));
 
 
             Debug.WriteLine("DataContext is null? " + (DataContext == null));
@@ -153,13 +153,13 @@ namespace ACI318_19Library
         {
             // Only react to relevant properties
             if (e.PropertyName == nameof(ViewModel.Width) ||
-                e.PropertyName == nameof(ViewModel.Depth) ||
+                e.PropertyName == nameof(ViewModel.Height) ||
                 e.PropertyName == nameof(ViewModel.TensionCover) ||
                 e.PropertyName == nameof(ViewModel.CompressionCover) ||
                 e.PropertyName == nameof(ViewModel.SideCover) ||
                 e.PropertyName == nameof(ViewModel.ClearSpacing) ||
-                e.PropertyName == nameof(ViewModel.Fck) ||
-                e.PropertyName == nameof(ViewModel.Fy))
+                e.PropertyName == nameof(ViewModel.Fck_psi) ||
+                e.PropertyName == nameof(ViewModel.Fy_psi))
             {
                 Update();
             }
@@ -176,7 +176,7 @@ namespace ACI318_19Library
                 isValid = false;
                 errors.Add("Width must be greater than 0.");
             }
-            if (ViewModel.Depth <= 0)
+            if (ViewModel.Height <= 0)
             {
                 isValid = false;
                 errors.Add("Height must be greater than 0.");
@@ -207,12 +207,12 @@ namespace ACI318_19Library
             }
 
             // Material properties
-            if (ViewModel.Fck < 2000 || ViewModel.Fck > 10000)
+            if (ViewModel.Fck_psi < 2000 || ViewModel.Fck_psi > 10000)
             {
                 isValid = false;
                 errors.Add("f'c must be between 2000 and 10000 psi.");
             }
-            if (ViewModel.Fy < 40000 || ViewModel.Fy > 120000)
+            if (ViewModel.Fy_psi < 40000 || ViewModel.Fy_psi > 120000)
             {
                 isValid = false;
                 errors.Add("fy must be between 40,000 and 120,000 psi.");
@@ -226,7 +226,7 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Tension rebar layer {layer.BarSize} has invalid quantity.");
                 }
-                if (layer.DepthFromTop <= 0 || layer.DepthFromTop >= ViewModel.Depth)
+                if (layer.DepthFromTop <= 0 || layer.DepthFromTop >= ViewModel.Height)
                 {
                     isValid = false;
                     errors.Add($"Tension rebar layer {layer.BarSize} has invalid depth.");
@@ -240,7 +240,7 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Compression rebar layer {layer.BarSize} has invalid quantity.");
                 }
-                if (layer.DepthFromTop <= 0 || layer.DepthFromTop >= ViewModel.Depth)
+                if (layer.DepthFromTop <= 0 || layer.DepthFromTop >= ViewModel.Height)
                 {
                     isValid = false;
                     errors.Add($"Compression rebar layer {layer.BarSize} has invalid depth.");
@@ -265,7 +265,7 @@ namespace ACI318_19Library
         {
             var dialog = new RebarLayerInputDialog(RebarCatalog.RebarTable.Keys,
                                                    isTension: true,
-                                                   sectionDepth: ViewModel.Depth,
+                                                   sectionDepth: ViewModel.Height,
                                                    cover: ViewModel.TensionCover);
             dialog.Owner = Window.GetWindow(this);
 
@@ -282,7 +282,7 @@ namespace ACI318_19Library
         {
             var dialog = new RebarLayerInputDialog(RebarCatalog.RebarTable.Keys,
                                                    isTension: false,
-                                                   sectionDepth: ViewModel.Depth,
+                                                   sectionDepth: ViewModel.Height,
                                                    cover: ViewModel.CompressionCover);
             dialog.Owner = Window.GetWindow(this);
 
@@ -335,9 +335,13 @@ namespace ACI318_19Library
             if (section.TensionRebars.Count == 0) return;
 
             DesignResultModel design = FlexuralDesigner.ComputeMomentCapacity(section);
-            DesignResultControl control = new DesignResultControl();
-            control.Result = design;
-            spResult.Children.Add(control);
+
+            if (design != null)
+            {
+                DesignResultControl control = new DesignResultControl();
+                control.Result = design;
+                spResult.Children.Add(control);
+            }
         }
 
 

@@ -6,7 +6,7 @@ namespace ACI318_19Library
     public class CrossSectionViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         private double _width = 8;
-        private double _depth = 12;
+        private double _height = 12;
         private double _tensionCover = 1.5;
         private double _compressionCover = 1.5;
         private double _sideCover = 1.5;
@@ -15,14 +15,45 @@ namespace ACI318_19Library
         private double _fy = 60000;  // psi
 
         public double Width { get => _width; set { _width = value; OnPropertyChanged(nameof(Width)); } }
-        public double Depth { get => _depth; set { _depth = value; OnPropertyChanged(nameof(Depth)); } }
+        public double Height { get => _height; set { _height = value; OnPropertyChanged(nameof(Height)); } }
         public double TensionCover { get => _tensionCover; set { _tensionCover = value; OnPropertyChanged(nameof(TensionCover)); } }
         public double CompressionCover { get => _compressionCover; set { _compressionCover = value; OnPropertyChanged(nameof(CompressionCover)); } }
         public double SideCover { get => _sideCover; set { _sideCover = value; OnPropertyChanged(nameof(SideCover)); } }
         public double ClearSpacing { get => _clearSpacing; set { _clearSpacing = value; OnPropertyChanged(nameof(ClearSpacing)); } }
-        public double Fck { get => _fck; set { _fck = value; OnPropertyChanged(nameof(Fck)); } }
-        public double Fy { get => _fy; set { _fy = value; OnPropertyChanged(nameof(Fy)); } }
+        public double Fck_psi { get => _fck; set { _fck = value; OnPropertyChanged(nameof(Fck_psi)); } }
+        public double Fy_psi { get => _fy; set { _fy = value; OnPropertyChanged(nameof(Fy_psi)); } }
 
+        // Rebar layer lists
+        public ObservableCollection<RebarLayerViewModel> TensionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
+        public ObservableCollection<RebarLayerViewModel> CompressionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
+
+
+        public CrossSectionViewModel()
+        {
+                
+        }
+
+        public CrossSectionViewModel(CrossSection section)
+        {
+            Width = section.Width;
+            Height = section.Height;
+            TensionCover = section.TensionCover;
+            SideCover = section.SideCover;
+            ClearSpacing = section.ClearSpacing;
+            CompressionCover = section.CompressionCover;
+            Fck_psi = section.Fck_psi;
+
+            foreach(var layer in section.TensionRebars)
+            {
+                TensionRebars.Add(new RebarLayerViewModel(layer.BarSize, layer.Qty, layer.DepthFromTop));
+            }
+
+            foreach (var layer in section.CompressionRebars)
+            {
+                CompressionRebars.Add(new RebarLayerViewModel(layer.BarSize, layer.Qty, layer.DepthFromTop));
+            }
+
+        }
         public CrossSection ToCrossSection()
         {
             ObservableCollection<RebarLayer> tension_rebars = new ObservableCollection<RebarLayer>();
@@ -42,13 +73,13 @@ namespace ACI318_19Library
             return new CrossSection()
             {
                 Width = Width,
-                Height = Depth,
+                Height = Height,
                 TensionCover = TensionCover,
                 CompressionCover = CompressionCover,
                 SideCover = SideCover,
                 ClearSpacing = ClearSpacing,
-                Fck_psi = Fck,
-                Fy_psi = Fy,
+                Fck_psi = Fck_psi,
+                Fy_psi = Fy_psi,
                 TensionRebars = tension_rebars,
                 CompressionRebars = compression_rebars
             };
@@ -63,13 +94,13 @@ namespace ACI318_19Library
                 switch (columnName)
                 {
                     case nameof(Width):
-                    case nameof(Depth):
+                    case nameof(Height):
                     case nameof(TensionCover):
                     case nameof(CompressionCover):
                     case nameof(SideCover):
                     case nameof(ClearSpacing):
-                    case nameof(Fck):
-                    case nameof(Fy):
+                    case nameof(Fck_psi):
+                    case nameof(Fy_psi):
                         if (GetType().GetProperty(columnName).GetValue(this) is double value)
                         {
                             if (value <= 0) return "Value must be positive";
@@ -81,9 +112,6 @@ namespace ACI318_19Library
         }
 
 
-        // Rebar layer lists
-        public ObservableCollection<RebarLayerViewModel> TensionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
-        public ObservableCollection<RebarLayerViewModel> CompressionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
 
         // Example rebar catalog (in a real app, pass it in)
 

@@ -50,7 +50,7 @@
                 <!-- Depth -->
                 <TextBlock Text="Height, h (in):" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
                 <local:NumericUpDown x:Name="DepthBox" Grid.Row="1" Grid.Column="1"
-                         Value="{Binding Depth, UpdateSourceTrigger=PropertyChanged}"
+                         Value="{Binding Height, UpdateSourceTrigger=PropertyChanged}"
                          Minimum="4" Maximum="60" Step="1.0"
                                      ValueChanged="NumericUpDown_ValueChanged"/>
 
@@ -81,13 +81,13 @@
                 <!-- f'c -->
                 <TextBlock Text="f'c (ksi):" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center"/>
                 <local:NumericUpDown x:Name="FckBox" Grid.Row="6" Grid.Column="1"
-                         Value="{Binding Fck, UpdateSourceTrigger=PropertyChanged}"
+                         Value="{Binding Fck_psi, UpdateSourceTrigger=PropertyChanged}"
                          Minimum="2000" Maximum="10000" Step="1000" ValueChanged="NumericUpDown_ValueChanged"/>
 
                 <!-- Fy -->
                 <TextBlock Text="Fy (ksi):" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center"/>
                 <local:NumericUpDown x:Name="FyBox" Grid.Row="7" Grid.Column="1"
-                         Value="{Binding Fy, UpdateSourceTrigger=PropertyChanged}"
+                         Value="{Binding Fy_psi, UpdateSourceTrigger=PropertyChanged}"
                          Minimum="40000" Maximum="80000" Step="5000" ValueChanged="NumericUpDown_ValueChanged"/>
             </Grid>
 

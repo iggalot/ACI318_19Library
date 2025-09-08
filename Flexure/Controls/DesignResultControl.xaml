@@ -67,7 +67,7 @@
 
                 <!-- Row 2 -->
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="ϕ:" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.Phi, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.PhiFlexure, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="2" Text="εt:" Margin="2"/>
                 <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.eps_T, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F5}}" Margin="2"/>

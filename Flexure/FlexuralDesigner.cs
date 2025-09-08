@@ -97,6 +97,11 @@ namespace ACI318_19Library
 
                         var designResult = ComputeMomentCapacity(section);
 
+                        if (designResult == null) 
+                        {
+                            return;
+                        }
+
                         if (designResult.eps_T < 0.005)
                             break;
 
@@ -125,6 +130,11 @@ namespace ACI318_19Library
                                     section.AddCompressionRebar(compSize, compQty, compression_cover);
 
                                     var designResult = ComputeMomentCapacity(section);
+
+                                    if ((designResult == null))
+                                    {
+                                        return;
+                                    }
 
                                     if (designResult.eps_T < 0.005)
                                         break;
@@ -168,6 +178,9 @@ namespace ACI318_19Library
 
         public static DesignResultModel ComputeMomentCapacity(CrossSection section)
         {
+            // if we don't have any tension rebars defined, exit the calculations.
+            if (section == null || section.TensionRebars == null || section.TensionRebars.Count <= 0)  return null;
+
             double b= section.Width;
             double depth = section.Height;
             ObservableCollection<RebarLayer> TensionRebars = section.TensionRebars;

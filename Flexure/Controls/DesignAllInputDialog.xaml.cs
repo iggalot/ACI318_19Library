@@ -8,6 +8,7 @@ namespace ACI318_19Library
     /// </summary>
     public partial class DesignAllInputDialog : Window
     {
+        private bool _initialized = false;
         public DesignAllInputViewModel ViewModel { get; set; }
         public DesignAllInputDialog(DesignAllInputViewModel vm)
         {
@@ -15,11 +16,22 @@ namespace ACI318_19Library
 
             ViewModel = vm;
 
+
             DataContext = ViewModel;
 
-            this.Loaded += (s, e) => UpdateDefaultStyle();
+            this.Loaded += (s, e) =>
+            {
+                _initialized = true;
+                // Clear seelction so nothing is auto-selected  
+                listValidDesigns.SelectedIndex = -1;
 
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+                UpdateDefaultStyle();
+            };
+
+            //// use this event hook to trigger an event of a slecrtion change in a list box
+            //// -- since we are launching the cross section designer on the selection now, we don't need it.
+            //// -- Leaving htis commented as a reminder.
+            //ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
             ViewModel.Update();
             Update();
@@ -40,6 +52,11 @@ namespace ACI318_19Library
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
                 Update();
+
+ //           CrossSectionViewModel vm = new CrossSectionViewModel(ViewModel.SelectedDesign.crossSection);
+ //           CrossSectionInputDialog dlg = new CrossSectionInputDialog(vm);
+ ////           dlg.Owner = this;
+ //           dlg.ShowDialog();
         }
 
         public void Update()
@@ -51,6 +68,28 @@ namespace ACI318_19Library
             DesignResultControl control = new DesignResultControl();
             control.Result = ViewModel.SelectedDesign;
             spResult.Children.Add(control);
+        }
+
+        private void listValidDesigns_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (_initialized == false) return;  // break on the initial run
+
+            if (e.AddedItems.Count > 0 && listValidDesigns.SelectedIndex >= 0)
+            {
+                var crossSectionVM = new CrossSectionViewModel(ViewModel.SelectedDesign.crossSection);
+
+                var dlg = new CrossSectionInputDialog(crossSectionVM)
+                {
+                    Owner = this
+                };
+
+                dlg.ShowDialog();
+
+                // Clear selection so they can re-click the same item if needed
+                listValidDesigns.SelectedIndex = -1;
+            }
+
+            Update();
         }
     }
 }

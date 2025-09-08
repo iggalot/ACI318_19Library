@@ -10,14 +10,14 @@ namespace ACI318_19Library.Flexure
     public static class MemberDimensionProportioner
     {
         /// <summary>
-        /// Returns a first guess at the dimensions of the cross section as (double Width (in), double Depth (in))
+        /// Returns a first guess at the dimensions of the cross section as (double Width (in), double Height (in))
         /// </summary>
         /// <param name="dimension"
         /// -- For Beams -> Simply supported span</param>
         /// -- For 1-Way Slab -> Simply supported span
         /// -- For 2-Way Slab -> Longer of simply supportedspans
-        /// -- For Walls --> Use height for h/depth ratio.  Use 12" for width, Depth for thickness
-        /// -- For Retaining Walls --> Use height, H.  Use 12" for width, Depth for thickness
+        /// -- For Walls --> Use height for h/depth ratio.  Use 12" for width, Height for thickness
+        /// -- For Retaining Walls --> Use height, H.  Use 12" for width, Height for thickness
         /// -- For Columns --> Use column length.
         /// <param name="member_type"></param>
         /// <returns></returns>
