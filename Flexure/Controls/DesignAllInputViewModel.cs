@@ -99,8 +99,8 @@ namespace ACI318_19Library.Flexure.Controls
 
         public ICollectionView ValidDesignsView { get; private set; }
 
-        private ObservableCollection<DesignResultModel> _validDesigns;
-        public ObservableCollection<DesignResultModel> ValidDesigns
+        private ObservableCollection<FlexuralDesignResultModel> _validDesigns;
+        public ObservableCollection<FlexuralDesignResultModel> ValidDesigns
         {
             get => _validDesigns;
             set
@@ -119,8 +119,8 @@ namespace ACI318_19Library.Flexure.Controls
             }
         }
 
-        private DesignResultModel _selectedDesign;
-        public DesignResultModel SelectedDesign
+        private FlexuralDesignResultModel _selectedDesign;
+        public FlexuralDesignResultModel SelectedDesign
         {
             get => _selectedDesign;
             set
@@ -139,7 +139,7 @@ namespace ACI318_19Library.Flexure.Controls
 
         public DesignAllInputViewModel()
         {
-            _validDesigns = new ObservableCollection<DesignResultModel>();
+            _validDesigns = new ObservableCollection<FlexuralDesignResultModel>();
             ValidDesignsView = CollectionViewSource.GetDefaultView(_validDesigns);
 
             // set the Filter ONCE
@@ -152,7 +152,7 @@ namespace ACI318_19Library.Flexure.Controls
             ValidDesigns.Clear();
 
             FlexuralDesigner flex_design = new FlexuralDesigner();
-            var newDesigns = new ObservableCollection<DesignResultModel>(flex_design.DesignAllSectionsForMu(_designMomentMu_kipft));
+            var newDesigns = new ObservableCollection<FlexuralDesignResultModel>(flex_design.DesignAllSectionsForMu(_designMomentMu_kipft));
 
             foreach (var d in newDesigns)
             {
@@ -165,14 +165,14 @@ namespace ACI318_19Library.Flexure.Controls
             // Default selection: pick the first *visible* item from the view, not necessarily the first in the collection
             if (SelectedDesign == null)
             {
-                SelectedDesign = ValidDesignsView.Cast<DesignResultModel>().FirstOrDefault();
+                SelectedDesign = ValidDesignsView.Cast<FlexuralDesignResultModel>().FirstOrDefault();
             }
             else
             {
                 // If the currently selected item is filtered out, pick the first visible one
-                var selectedStillVisible = ValidDesignsView.Cast<DesignResultModel>().Any(d => d == SelectedDesign);
+                var selectedStillVisible = ValidDesignsView.Cast<FlexuralDesignResultModel>().Any(d => d == SelectedDesign);
                 if (!selectedStillVisible)
-                    SelectedDesign = ValidDesignsView.Cast<DesignResultModel>().FirstOrDefault();
+                    SelectedDesign = ValidDesignsView.Cast<FlexuralDesignResultModel>().FirstOrDefault();
             }
 
             OnPropertyChanged(nameof(NumValidDesignsString));
@@ -180,7 +180,7 @@ namespace ACI318_19Library.Flexure.Controls
 
         private bool FilterDesigns(object obj)
         {
-            if (!(obj is DesignResultModel design)) return false;
+            if (!(obj is FlexuralDesignResultModel design)) return false;
 
             // Width filter
             bool widthOk = !FilterWidth12 || design.crossSection.Width == 12;
@@ -213,10 +213,10 @@ namespace ACI318_19Library.Flexure.Controls
                 if (SortByArea)
                 {
                     ValidDesignsView.SortDescriptions.Add(
-                        new SortDescription(nameof(DesignResultModel.AreaGross), ListSortDirection.Ascending));
+                        new SortDescription(nameof(FlexuralDesignResultModel.AreaGross), ListSortDirection.Ascending));
                     // sort by your property; keep the property name you used earlier (AsT)
                     ValidDesignsView.SortDescriptions.Add(
-                        new SortDescription(nameof(DesignResultModel.AsT), ListSortDirection.Ascending));
+                        new SortDescription(nameof(FlexuralDesignResultModel.AsT), ListSortDirection.Ascending));
                 }
             }
         }

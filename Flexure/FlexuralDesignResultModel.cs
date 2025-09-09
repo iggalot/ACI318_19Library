@@ -7,7 +7,7 @@ using System.Text;
 namespace ACI318_19Library
 {
     // Add this container class (returns design output)
-    public class DesignResultModel
+    public class FlexuralDesignResultModel
     {
         /// <summary>Concrete cross section</summary>
         public CrossSection crossSection { get; set; }
@@ -89,27 +89,8 @@ namespace ACI318_19Library
 
         public bool IsOverreinforced { get => RhoActual > crossSection.RhoBalanced; }
 
-        /// <summary>Warnings (e.g. over-reinforced, compression steel not yielded)</summary>
-        public string Warnings { get; set; }
-
-        // ======================
-        // SHEAR SUMMARY
-        // ======================
-
-        /// <summary>Concrete shear contribution Vc (kips)</summary>
-        public double Vc { get; set; }
-
-        /// <summary>Steel shear contribution Vs (kips)</summary>
-        public double Vs { get; set; }
-
-        /// <summary>Nominal shear capacity Vn (kips)</summary>
-        public double Vn { get; set; }
-
-        /// <summary>Strength reduction factor for shear (φ)</summary>
-        public double PhiShear { get; set; } = 0.75;
-
-        /// <summary>Design shear strength φVn (kips)</summary>
-        public double PhiVn { get => PhiShear * Vn; }
+        /// <summary>FlexuralWarnings (e.g. over-reinforced, compression steel not yielded)</summary>
+        public string FlexuralWarnings { get; set; }
 
         // ======================
         // REFLECTION-BASED DISPLAY
@@ -194,14 +175,14 @@ namespace ACI318_19Library
             {
                 string str = string.Empty;
                 str += crossSection != null
-                    ? DisplayModelInfo()
+                    ? DisplayFlexuralModelInfo()
                     : $"(No section) | Mu={PhiMn:F0} kip-in";
 
                 return str;
             }
         }
 
-        public string DisplayModelInfo()
+        public string DisplayFlexuralModelInfo()
         {
             string str = string.Empty;
             str += $"W: {crossSection.Width} x D: {crossSection.Height} | Ag = {crossSection.AreaGross} sq.in. | PhiMn={PhiMn:F0} kip-in";
@@ -223,14 +204,9 @@ namespace ACI318_19Library
                 }
             }
 
-            // Shear display
-            if (Vn > 0)
-            {
-                str += $" | φVn = {PhiVn:F1} kips (Vc={Vc:F1}, Vs={Vs:F1})";
-            }
 
-            if (!string.IsNullOrWhiteSpace(Warnings))
-                str += $" | Warnings: {Warnings}";
+            if (!string.IsNullOrWhiteSpace(FlexuralWarnings))
+                str += $" | FlexuralWarnings: {FlexuralWarnings}";
 
             return str;
         }

@@ -334,11 +334,11 @@ namespace ACI318_19Library
             // Perform a moment calculation
             if (section.TensionRebars.Count == 0) return;
 
-            DesignResultModel design = FlexuralDesigner.ComputeMomentCapacity(section);
+            FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
 
             if (design != null)
             {
-                DesignResultControl control = new DesignResultControl();
+                FlexureDesignResultControl control = new FlexureDesignResultControl();
                 control.Result = design;
                 spResult.Children.Add(control);
             }

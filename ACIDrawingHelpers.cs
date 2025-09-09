@@ -12,7 +12,7 @@ namespace ACI318_19Library
         static Brush color_tension = Brushes.Blue;
 
         // Assume "this" is your Window/UserControl with Canvas named cnvCrossSection
-        public static void DrawCrossSection(Canvas cnv, DesignResultModel design)
+        public static void DrawCrossSection(Canvas cnv, FlexuralDesignResultModel design)
         {
             CrossSection section = design.crossSection;
 
@@ -188,7 +188,7 @@ namespace ACI318_19Library
         }
 
         // Assume "this" is your Window/UserControl with Canvas named cnvCrossSection
-        public static void DrawStrainDiagram(Canvas cnv, DesignResultModel design)
+        public static void DrawFlexuralStrainDiagram(Canvas cnv, FlexuralDesignResultModel design)
         {
             CrossSection section = design.crossSection;
 
@@ -224,8 +224,6 @@ namespace ACI318_19Library
                 StrokeDashArray = new DoubleCollection { 2, 2 }
             };
             cnv.Children.Add(line);
-
-
 
             // Draw bottom line of graph
             Line line3 = new Line()

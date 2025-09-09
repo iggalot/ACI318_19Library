@@ -4,23 +4,23 @@ using System.Windows.Controls;
 namespace ACI318_19Library
 {
     /// <summary>
-    /// Interaction logic for DesignResultControl.xaml
+    /// Interaction logic for FlexureDesignResultControl.xaml
     /// </summary>
-    public partial class DesignResultControl : UserControl
+    public partial class ShearDesignResultControl : UserControl
     {
-        public DesignResultModel Result
+        public ShearDesignResultModel Result
         {
-            get { return (DesignResultModel)GetValue(ResultProperty); }
+            get { return (ShearDesignResultModel)GetValue(ResultProperty); }
             set { SetValue(ResultProperty, value); }
         }
 
         public static readonly DependencyProperty ResultProperty =
             DependencyProperty.Register(nameof(Result),
-                typeof(DesignResultModel),
-                typeof(DesignResultControl),
+                typeof(ShearDesignResultModel),
+                typeof(ShearDesignResultControl),
                 new PropertyMetadata(null, OnResultChanged));
 
-        public DesignResultControl()
+        public ShearDesignResultControl()
         {
             InitializeComponent();
 
@@ -29,8 +29,8 @@ namespace ACI318_19Library
 
         private static void OnResultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var control = (DesignResultControl)d;
-            var model = e.NewValue as DesignResultModel;
+            var control = (ShearDesignResultControl)d;
+            var model = e.NewValue as ShearDesignResultModel;
             if (model != null)
             {
                 control.UpdateDisplay(); // method in your control to populate UI
@@ -39,12 +39,13 @@ namespace ACI318_19Library
 
         private void UpdateDisplay()
         {
-            cnvSection.Children.Clear();
+            cnvShearStirrupSection.Children.Clear();
 
             if (Result != null)
             {
-                ACIDrawingHelpers.DrawCrossSection(cnvSection, Result);
-                ACIDrawingHelpers.DrawStrainDiagram(cnvStrainDiagram, Result);
+                // do stuff
+
+                // draw figures
             }
         }
     }

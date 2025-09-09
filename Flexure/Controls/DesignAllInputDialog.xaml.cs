@@ -67,7 +67,7 @@ namespace ACI318_19Library
             spResult.Children.Clear();
 
             // get our new section from the ViewModel and display the results
-            DesignResultControl control = new DesignResultControl();
+            FlexureDesignResultControl control = new FlexureDesignResultControl();
             control.Result = ViewModel.SelectedDesign;
             spResult.Children.Add(control);
         }
@@ -96,14 +96,14 @@ namespace ACI318_19Library
 
         private void ListBoxItem_MouseEnter(object sender, MouseEventArgs e)
         {
-            var item = (sender as ListBoxItem)?.DataContext as DesignResultModel;
+            var item = (sender as ListBoxItem)?.DataContext as FlexuralDesignResultModel;
             if (item != null)
             {
                 // Clear the results panel
                 spResult.Children.Clear();
 
                 // Build and show the control
-                var control = new DesignResultControl
+                var control = new FlexureDesignResultControl
                 {
                     Result = item
                 };

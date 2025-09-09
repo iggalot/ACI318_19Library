@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-
-namespace ACI318_19Library
+﻿namespace ACI318_19Library
 {
     // Add this container class (returns design output)
     public class ShearDesignResultModel
@@ -12,8 +6,8 @@ namespace ACI318_19Library
         /// <summary>Concrete cross section</summary>
         public CrossSection crossSection { get; set; }
 
-        /// <summary>Warnings (e.g. over-reinforced, compression steel not yielded)</summary>
-        public string Warnings { get; set; }
+        /// <summary>FlexuralWarnings (e.g. over-reinforced, compression steel not yielded)</summary>
+        public string ShearWarnings { get; set; }
 
         // ======================
         // SHEAR SUMMARY
@@ -34,5 +28,22 @@ namespace ACI318_19Library
         /// <summary>Design shear strength φVn (kips)</summary>
         public double PhiVn { get => PhiShear * Vn; }
 
+        public double Av_over_s { get; set; }
+
+        public string DisplayShearInfo()
+        {
+            string str = string.Empty;
+
+            // Shear display
+            if (Vn > 0)
+            {
+                str += $" | φVn = {PhiVn:F1} kips (Vc={Vc:F1}, Vs={Vs:F1})";
+            }
+
+            if (!string.IsNullOrWhiteSpace(ShearWarnings))
+                str += $" | FlexuralWarnings: {ShearWarnings}";
+
+            return str;
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace ACI318_19Library
 
         private static Func<double, double> Fx_eq;  // The sum of forces X = 0 equation for all our terms -- this equation is needed by the solver
 
-        public List<DesignResultModel> DesignAllSectionsForMu(
+        public List<FlexuralDesignResultModel> DesignAllSectionsForMu(
             double MuTarget_kipft,
             double fck_psi = 4000, double fy_psi = 60000, double eps_cu = 0.003, double es_psi = 29000000,
             double tension_cover = 1.5,
@@ -34,7 +34,7 @@ namespace ACI318_19Library
             double MuTarget_kip_in = MuTarget_kipft * 12.0;
 
             CrossSection baseSection = new CrossSection();
-            List<DesignResultModel> successfulDesigns = new List<DesignResultModel>();
+            List<FlexuralDesignResultModel> successfulDesigns = new List<FlexuralDesignResultModel>();
 
             var widths = Enumerable.Range(4, 32).Select(i => (double)i).ToArray();
             var depths = Enumerable.Range(4, 32).Select(i => (double)i).ToArray();
@@ -43,7 +43,7 @@ namespace ACI318_19Library
 
             Parallel.ForEach(widths, b =>
             {
-                List<DesignResultModel> localResults = new List<DesignResultModel>();
+                List<FlexuralDesignResultModel> localResults = new List<FlexuralDesignResultModel>();
 
                 // Estimate R for ideal rho
                 CrossSection tempSection = new CrossSection(width: b, height: depths.Min());
@@ -96,7 +96,7 @@ namespace ACI318_19Library
                         section.TensionRebars.Clear();
                         section.AddTensionRebar(layer.BarSize, layer.Qty, layer.DepthFromTop);
 
-                        var designResult = ComputeMomentCapacity(section);
+                        var designResult = ComputeFlexuralMomentCapacity(section);
 
                         if (designResult == null) 
                         {
@@ -130,7 +130,7 @@ namespace ACI318_19Library
                                     section.AddTensionRebar(layer.BarSize, layer.Qty, layer.DepthFromTop);
                                     section.AddCompressionRebar(compSize, compQty, compression_cover);
 
-                                    var designResult = ComputeMomentCapacity(section);
+                                    var designResult = ComputeFlexuralMomentCapacity(section);
 
                                     if ((designResult == null))
                                     {
@@ -177,7 +177,7 @@ namespace ACI318_19Library
             return rho * fy_psi * (1 - 0.59 * rho * fy_psi / fck_psi);
         }
 
-        public static DesignResultModel ComputeMomentCapacity(CrossSection section)
+        public static FlexuralDesignResultModel ComputeFlexuralMomentCapacity(CrossSection section)
         {
             // if we don't have any tension rebars defined, exit the calculations.
             if (section == null || section.TensionRebars == null || section.TensionRebars.Count <= 0)  return null;
@@ -253,8 +253,6 @@ namespace ACI318_19Library
 
             try
             {
-
-
                 double c = roots.Min();
                 warnings += $"\nNeutral Axis location solver = {c:F6}";
 
@@ -311,13 +309,13 @@ namespace ACI318_19Library
                 }
                 warnings += $"\nphi = {phi:F3}";
 
-                DesignResultModel design = new DesignResultModel()
+                FlexuralDesignResultModel design = new FlexuralDesignResultModel()
                 {
                     crossSection = section,
                     Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
                     PhiFlexure = phi,
                     NeutralAxis = c,
-                    Warnings = warnings,
+                    FlexuralWarnings = warnings,
                     eps_T = eps_tens_max,
                     DepthToEpsT = maxDepth_in
                 };
@@ -362,7 +360,7 @@ namespace ACI318_19Library
             return true;
         }
 
-        List<DesignResultModel> FilterIdealDesignsByDepth(List<DesignResultModel> successfulSections)
+        List<FlexuralDesignResultModel> FilterIdealDesignsByDepth(List<FlexuralDesignResultModel> successfulSections)
         {
             var filtered = successfulSections
                 .GroupBy(r => new
@@ -381,7 +379,7 @@ namespace ACI318_19Library
             return filtered;
         }
 
-        List<DesignResultModel> FilterIdealDesignsByWidth(List<DesignResultModel> successfulSections)
+        List<FlexuralDesignResultModel> FilterIdealDesignsByWidth(List<FlexuralDesignResultModel> successfulSections)
         {
             var filtered = successfulSections
                 .GroupBy(r => new

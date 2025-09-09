@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace ACI318_19Library
 {
@@ -67,7 +65,7 @@ namespace ACI318_19Library
                 Vs = Vs_kips,
                 Vn = Vn_kips,
                 PhiShear = phiV,
-                Warnings = warnings
+                ShearWarnings = warnings
             };
 
             return design;
