@@ -314,6 +314,7 @@ namespace ACI318_19Library
         {
             // Clear the design results control
             spResult.Children.Clear();
+            spShearResult.Children.Clear();
 
             // Validate that all the input in the ViewModel is valid, otherwise dont return
             if (ValidateInputs() is false) return;
@@ -328,18 +329,28 @@ namespace ACI318_19Library
             section.ShearSpacing = 12;
             section.StirrupsLegs = 2;
 
-            ShearDesignResultModel shear_model = ShearDesigner.ComputeShearCapacity(section);
 
 
             // Perform a moment calculation
             if (section.TensionRebars.Count == 0) return;
             {
+                FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
+                ShearDesigner.ComputeShearCapacity(section, ref design);
+
+
                 FlexureDesignResultControl control = new FlexureDesignResultControl();
                 spResult.Children.Add(control);
                 if (control != null)
                 {
-                    FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
                     control.Result = design;
+                }
+
+                // Perform a shear calculation
+                ShearDesignResultControl shear_control = new ShearDesignResultControl();
+                spShearResult.Children.Add(shear_control);
+                if (shear_control != null)
+                {
+                    shear_control.Result = design;
                 }
             }
         }

@@ -60,15 +60,15 @@
                 <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Vn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <!-- Row 1 -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Vc (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Result.Vc, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Vc (kip-in):" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.Vc, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="Vs (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Vs, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Vs (kip-in):" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Result.Vs, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <!-- Row 2 -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Av/s:" Margin="2"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.Av_over_s, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Av/s:" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.Av_over_s, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="2" Text="ϕ:" Margin="2"/>
                 <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.PhiFlexure, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>

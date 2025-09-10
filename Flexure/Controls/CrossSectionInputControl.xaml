@@ -139,7 +139,10 @@
         <!-- Scrollable content -->
         <StackPanel  Grid.Column="1">
             <!--<Canvas x:Name="cnvCrossSection" Height="200" Width="200" HorizontalAlignment="Left" Background="White"/>-->
-            <StackPanel x:Name="spResult"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel x:Name="spResult"/>
+                <StackPanel x:Name="spShearResult"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

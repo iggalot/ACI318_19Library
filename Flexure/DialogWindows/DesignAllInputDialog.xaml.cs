@@ -65,6 +65,14 @@ namespace ACI318_19Library
         {
             // Clear the design results control
             spResult.Children.Clear();
+            spShearResult.Children.Clear();
+
+
+            // Perform a shear calculation
+            ShearDesignResultControl shear_control = new ShearDesignResultControl();
+            shear_control.Result = ViewModel.SelectedDesign;
+            spShearResult.Children.Add(shear_control);
+
 
             // get our new section from the ViewModel and display the results
             FlexureDesignResultControl control = new FlexureDesignResultControl();

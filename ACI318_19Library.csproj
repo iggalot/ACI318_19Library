@@ -75,7 +75,6 @@
     <Compile Include="Flexure\ViewModels\CrossSectionViewModel.cs" />
     <Compile Include="Flexure\ViewModels\DesignAllInputViewModel.cs" />
     <Compile Include="Flexure\ViewModels\RebarLayerViewModel.cs" />
-    <Compile Include="Flexure\ShearDesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesigner.cs" />
     <Compile Include="Flexure\ShearDesigner.cs" />

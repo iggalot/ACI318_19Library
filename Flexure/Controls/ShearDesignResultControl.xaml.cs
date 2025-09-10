@@ -8,15 +8,15 @@ namespace ACI318_19Library
     /// </summary>
     public partial class ShearDesignResultControl : UserControl
     {
-        public ShearDesignResultModel Result
+        public FlexuralDesignResultModel Result
         {
-            get { return (ShearDesignResultModel)GetValue(ResultProperty); }
+            get { return (FlexuralDesignResultModel)GetValue(ResultProperty); }
             set { SetValue(ResultProperty, value); }
         }
 
         public static readonly DependencyProperty ResultProperty =
             DependencyProperty.Register(nameof(Result),
-                typeof(ShearDesignResultModel),
+                typeof(FlexuralDesignResultModel),
                 typeof(ShearDesignResultControl),
                 new PropertyMetadata(null, OnResultChanged));
 
@@ -30,7 +30,7 @@ namespace ACI318_19Library
         private static void OnResultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (ShearDesignResultControl)d;
-            var model = e.NewValue as ShearDesignResultModel;
+            var model = e.NewValue as FlexuralDesignResultModel;
             if (model != null)
             {
                 control.UpdateDisplay(); // method in your control to populate UI

@@ -10,7 +10,7 @@ namespace ACI318_19Library
         /// </summary>
         /// <param name="section">CrossSection object containing geometry and reinforcement data</param>
         /// <returns>DesignResultModel populated with shear results (Vc, Vs, Vn_kips, PhiShear)</returns>
-        public static ShearDesignResultModel ComputeShearCapacity(CrossSection section)
+        public static void ComputeShearCapacity(CrossSection section, ref FlexuralDesignResultModel model)
         {
             if (section == null)
                 throw new ArgumentNullException(nameof(section));
@@ -58,17 +58,11 @@ namespace ACI318_19Library
             // --------------------------
             // 5. Populate DesignResultModel
             // --------------------------
-            ShearDesignResultModel design = new ShearDesignResultModel()
-            {
-                crossSection = section,
-                Vc = Vc_kips,
-                Vs = Vs_kips,
-                Vn = Vn_kips,
-                PhiShear = phiV,
-                ShearWarnings = warnings
-            };
-
-            return design;
+            model.Vc = Vc_kips;
+            model.Vs = Vs_kips;
+            model.Vn = Vn_kips;
+            model.PhiShear = phiV;
+            model.ShearWarnings = warnings;
         }
     }
 }

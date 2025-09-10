@@ -79,8 +79,10 @@
                 </ScrollViewer>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" x:Name="spResult">
-                <!--<local:CrossSectionInputControl x:Name="crossSectionControl" Width="350"/>-->
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <StackPanel x:Name="spResult"/>
+                <StackPanel x:Name="spShearResult"/>
+
             </StackPanel>
         </Grid>
     </Grid>
