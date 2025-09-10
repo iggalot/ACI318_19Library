@@ -1,8 +1,4 @@
-<<<<<<<< Updated upstream:Flexure/Controls/FlexureDesignResultControl.xaml
-﻿<UserControl x:Class="ACI318_19Library.FlexureDesignResultControl"
-========
-﻿<UserControl x:Class="ACI318_19Library.ShearDesignResultControl"
->>>>>>>> Stashed changes:Flexure/Controls/ShearDesignResultControl.xaml
+<UserControl x:Class="ACI318_19Library.FlexureDesignResultControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:ACI318_19Library"

@@ -53,17 +53,12 @@
     <Compile Include="Flexure\Controls\CrossSectionInputControl.xaml.cs">
       <DependentUpon>CrossSectionInputControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\Controls\ShearDesignResultControl.xaml.cs">
-      <DependentUpon>ShearDesignResultControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Flexure\DialogWindows\DesignAllInputDialog.xaml.cs">
       <DependentUpon>DesignAllInputDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Flexure\DialogWindows\CrossSectionInputDialog.xaml.cs">
       <DependentUpon>CrossSectionInputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\Controls\CrossSectionViewModel.cs" />
-    <Compile Include="Flexure\Controls\DesignAllInputViewModel.cs" />
     <Compile Include="Flexure\Controls\ShearDesignResultControl.xaml.cs">
       <DependentUpon>ShearDesignResultControl.xaml</DependentUpon>
     </Compile>
@@ -77,6 +72,8 @@
     <Compile Include="Flexure\DialogWindows\RebarLayerInputDialog.xaml.cs">
       <DependentUpon>RebarLayerInputDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Flexure\ViewModels\CrossSectionViewModel.cs" />
+    <Compile Include="Flexure\ViewModels\DesignAllInputViewModel.cs" />
     <Compile Include="Flexure\ViewModels\RebarLayerViewModel.cs" />
     <Compile Include="Flexure\ShearDesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesignResultModel.cs" />
@@ -108,12 +105,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Flexure\Controls\DesignResultControl.xaml">
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Flexure\Controls\FlexureDesignResultControl.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Flexure\Controls\NumericUpDown.xaml">
       <SubType>Designer</SubType>

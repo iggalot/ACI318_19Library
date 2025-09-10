@@ -39,7 +39,7 @@ namespace ACI318_19Library
 
         private void UpdateDisplay()
         {
-            cnvShearStirrupSection.Children.Clear();
+            //cnvShearStirrupSection.Children.Clear();
 
             if (Result != null)
             {
