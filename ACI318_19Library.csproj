@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -53,10 +53,13 @@
     <Compile Include="Flexure\Controls\CrossSectionInputControl.xaml.cs">
       <DependentUpon>CrossSectionInputControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\Controls\DesignAllInputDialog.xaml.cs">
+    <Compile Include="Flexure\Controls\ShearDesignResultControl.xaml.cs">
+      <DependentUpon>ShearDesignResultControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Flexure\DialogWindows\DesignAllInputDialog.xaml.cs">
       <DependentUpon>DesignAllInputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\Controls\CrossSectionInputDialog.xaml.cs">
+    <Compile Include="Flexure\DialogWindows\CrossSectionInputDialog.xaml.cs">
       <DependentUpon>CrossSectionInputDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Flexure\Controls\CrossSectionViewModel.cs" />
@@ -71,10 +74,10 @@
     <Compile Include="Flexure\Controls\NumericUpDown.xaml.cs">
       <DependentUpon>NumericUpDown.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\Controls\RebarLayerInputDialog.xaml.cs">
+    <Compile Include="Flexure\DialogWindows\RebarLayerInputDialog.xaml.cs">
       <DependentUpon>RebarLayerInputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\Controls\RebarLayerViewModel.cs" />
+    <Compile Include="Flexure\ViewModels\RebarLayerViewModel.cs" />
     <Compile Include="Flexure\ShearDesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesigner.cs" />
@@ -93,16 +96,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Flexure\Controls\DesignAllInputDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Flexure\Controls\CrossSectionInputDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Flexure\Controls\ShearDesignResultControl.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Flexure\DialogWindows\DesignAllInputDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Flexure\DialogWindows\CrossSectionInputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Flexure\Controls\DesignResultControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Flexure\Controls\FlexureDesignResultControl.xaml">
@@ -113,7 +119,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Flexure\Controls\RebarLayerInputDialog.xaml">
+    <Page Include="Flexure\DialogWindows\RebarLayerInputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

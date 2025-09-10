@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -334,13 +334,13 @@ namespace ACI318_19Library
             // Perform a moment calculation
             if (section.TensionRebars.Count == 0) return;
 
-            FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
 
-            if (design != null)
             {
                 FlexureDesignResultControl control = new FlexureDesignResultControl();
-                control.Result = design;
                 spResult.Children.Add(control);
+                control.Result = design;
+            if (design != null)
+            FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
             }
         }
 

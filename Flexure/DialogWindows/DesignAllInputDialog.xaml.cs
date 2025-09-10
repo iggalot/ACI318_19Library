@@ -1,4 +1,4 @@
-﻿using ACI318_19Library.Flexure.Controls;
+using ACI318_19Library.Flexure.Controls;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
