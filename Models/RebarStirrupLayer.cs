@@ -3,30 +3,27 @@
     /// <summary>
     /// Used for longitudinal or primary flexural reinforcement
     /// </summary>
-    public class RebarLayer
+    public class RebarStirrupLayer
     {
         public string BarSize { get; private set; }
-        public int Qty { get; private set; }
+        public int NumShearLegs { get; private set; }
         public Rebar Bar { get; private set; }
-        public double DepthFromTop { get; private set; }  // centroid depth from extreme compression fiber
+        public double StartPos { get; set; }
+        public double EndPos { get; set; }
+        public double Spacing { get; private set; }  // centroid depth from extreme compression fiber
 
         // backing field for manual steel area
         private double? _manualSteelArea;
 
         // Constructor for catalog-based layer
-        public RebarLayer(string barSize, int count, Rebar bar, double depth)
+        public RebarStirrupLayer(string barSize, int count, Rebar bar, double spacing, double start=0, double end=1000)
         {
             BarSize = barSize;
-            Qty = count;
+            NumShearLegs = count;
             Bar = bar;
-            DepthFromTop = depth;
-        }
-
-        // Constructor for manual trial layer
-        public RebarLayer(double steelArea, double depth)
-        {
-            _manualSteelArea = steelArea;
-            DepthFromTop = depth;
+            StartPos = start;
+            EndPos = end;
+            Spacing = spacing;
         }
 
         // Compute SteelArea: either manual or catalog-based
@@ -36,8 +33,8 @@
             {
                 if (_manualSteelArea.HasValue)
                     return _manualSteelArea.Value;
-                if (Bar != null && Qty > 0)
-                    return Qty * Bar.Area;
+                if (Bar != null && NumShearLegs > 0)
+                    return NumShearLegs * Bar.Area;
                 return 0.0;
             }
         }

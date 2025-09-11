@@ -53,25 +53,34 @@
                 </Grid.RowDefinitions>
 
                 <!-- Row 0 -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="ϕVn (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Result.PhiVn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="ϕVn (kip):" Margin="2"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Result.PhiVn_kip, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="Vn (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Vn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Vn (kip):" Margin="2"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Vn_kip, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <!-- Row 1 -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Vc (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.Vc, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="2" Text="Vs (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Result.Vs, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="ϕ_v:" Margin="2"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.PhiShear, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
 
                 <!-- Row 2 -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Av/s:" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.Av_over_s, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Vc (kip):" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.Vc_kip, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="ϕ_v:" Margin="2"/>
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.PhiShear, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Vc/2 (kip):" Margin="2"/>
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Result.Vc_kip_half, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+
+                <!-- Row 3 -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Vs (kip):" Margin="2"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Result.Vs_kip, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="Vs_max (kip):" Margin="2"/>
+                <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding Result.Vs_max_kip, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+
+                <!-- Row 2 -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Av/s (sq.in./in):" Margin="2"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Result.Av_over_s, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:F2}}" Margin="2"/>
+
            </Grid>
         </StackPanel>
 

@@ -106,7 +106,7 @@ namespace ACI318_19Library
                         if (designResult.eps_T < 0.005)
                             break;
 
-                        if (designResult.PhiMn >= MuTarget_kip_in)
+                        if (designResult.PhiMn_lbin >= MuTarget_kip_in)
                         {
                             designResult.DepthToEpsT = layer.DepthFromTop;
                             localResults.Add(designResult);
@@ -140,16 +140,16 @@ namespace ACI318_19Library
                                     if (designResult.eps_T < 0.005)
                                         break;
 
-                                    if (designResult.PhiMn >= MuTarget_kip_in)
+                                    if (designResult.PhiMn_lbin >= MuTarget_kip_in)
                                     {
                                         localResults.Add(designResult);
                                         break;
                                     }
                                 }
-                                if (localResults.Count > 0 && localResults.Last().PhiMn >= MuTarget_kip_in)
+                                if (localResults.Count > 0 && localResults.Last().PhiMn_lbin >= MuTarget_kip_in)
                                     break;
                             }
-                            if (localResults.Count > 0 && localResults.Last().PhiMn >= MuTarget_kip_in)
+                            if (localResults.Count > 0 && localResults.Last().PhiMn_lbin >= MuTarget_kip_in)
                                 break;
                         }
                     }
@@ -312,7 +312,7 @@ namespace ACI318_19Library
                 FlexuralDesignResultModel design = new FlexuralDesignResultModel()
                 {
                     crossSection = section,
-                    Mn = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
+                    Mn_lbin = Math.Abs(Mn_kipin),           // convert in-lb to kip-ft
                     PhiFlexure = phi,
                     NeutralAxis = c,
                     FlexuralWarnings = warnings,

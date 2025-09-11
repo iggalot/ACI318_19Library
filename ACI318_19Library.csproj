@@ -81,6 +81,7 @@
     <Compile Include="Flexure\ValueConverters\NumberToBackgroundConverter.cs" />
     <Compile Include="MemberDimensionProportioner.cs" />
     <Compile Include="Models\RebarCatalog.cs" />
+    <Compile Include="Models\RebarStirrupLayer.cs" />
     <Compile Include="Models\RebarLayer.cs" />
     <Compile Include="Models\RebarModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

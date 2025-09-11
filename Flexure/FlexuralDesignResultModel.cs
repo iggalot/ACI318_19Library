@@ -53,10 +53,10 @@ namespace ACI318_19Library
         }
 
         /// <summary>Final computed φMn (in-lb)</summary>
-        public double PhiMn { get => PhiFlexure * Mn; }
+        public double PhiMn_lbin { get => PhiFlexure * Mn_lbin; }
 
-        /// <summary>Final computed Mn (in-lb)</summary>
-        public double Mn { get; set; }
+        /// <summary>Final computed Mn_lbin (in-lb)</summary>
+        public double Mn_lbin { get; set; }
 
         /// <summary>Final phi used for flexure</summary>
         public double PhiFlexure { get; set; } = 0.9;
@@ -99,20 +99,26 @@ namespace ACI318_19Library
         // SHEAR SUMMARY
         // ======================
 
-        /// <summary>Concrete shear contribution Vc (kips)</summary>
-        public double Vc { get; set; }
+        /// <summary>Concrete shear contribution Vc_kip (kips)</summary>
+        public double Vc_kip { get; set; }
 
-        /// <summary>Steel shear contribution Vs (kips)</summary>
-        public double Vs { get; set; }
+        /// <summary>Concrete shear contribution Vc_kip (kips)</summary>
+        public double Vc_kip_half { get => Vc_kip * 0.5; }
 
-        /// <summary>Nominal shear capacity Vn (kips)</summary>
-        public double Vn { get; set; }
+        /// <summary>Steel shear contribution Vs_kip (kips)</summary>
+        public double Vs_kip { get; set; }
+
+        /// <summary>Steel shear contribution Vs_kip (kips)</summary>
+        public double Vs_max_kip { get; set; }
+
+        /// <summary>Nominal shear capacity Vn_kip (kips)</summary>
+        public double Vn_kip { get; set; }
 
         /// <summary>Strength reduction factor for shear (φ)</summary>
         public double PhiShear { get; set; } = 0.75;
 
         /// <summary>Design shear strength φVn (kips)</summary>
-        public double PhiVn { get => PhiShear * Vn; }
+        public double PhiVn_kip { get => PhiShear * Vn_kip; }
 
         public double Av_over_s { get; set; }
 
@@ -121,9 +127,9 @@ namespace ACI318_19Library
             string str = string.Empty;
 
             // Shear display
-            if (Vn > 0)
+            if (Vn_kip > 0)
             {
-                str += $" | φVn = {PhiVn:F1} kips (Vc={Vc:F1}, Vs={Vs:F1})";
+                str += $" | φVn = {PhiVn_kip:F1} kips (Vc_kip={Vc_kip:F1}, Vs_kip={Vs_kip:F1})";
             }
 
             if (!string.IsNullOrWhiteSpace(ShearWarnings))
@@ -216,7 +222,7 @@ namespace ACI318_19Library
                 string str = string.Empty;
                 str += crossSection != null
                     ? DisplayFlexuralModelInfo()
-                    : $"(No section) | Mu={PhiMn:F0} kip-in";
+                    : $"(No section) | Mu={PhiMn_lbin:F0} kip-in";
 
                 return str;
             }
@@ -225,7 +231,7 @@ namespace ACI318_19Library
         public string DisplayFlexuralModelInfo()
         {
             string str = string.Empty;
-            str += $"W: {crossSection.Width} x D: {crossSection.Height} | Ag = {crossSection.AreaGross} sq.in. | PhiMn={PhiMn:F0} kip-in";
+            str += $"W: {crossSection.Width} x D: {crossSection.Height} | Ag = {crossSection.AreaGross} sq.in. | PhiMn_lbin={PhiMn_lbin:F0} kip-in";
 
             if (crossSection.TensionRebars.Count > 0)
             {

@@ -9,7 +9,7 @@ namespace ACI318_19Library
         /// Uses ACI 318-19 Chapter 22 provisions for shear design.
         /// </summary>
         /// <param name="section">CrossSection object containing geometry and reinforcement data</param>
-        /// <returns>DesignResultModel populated with shear results (Vc, Vs, Vn_kips, PhiShear)</returns>
+        /// <returns>DesignResultModel populated with shear results (Vc_kip, Vs_kip, Vn_kips, PhiShear)</returns>
         public static void ComputeShearCapacity(ConcreteCrossSection section, ref FlexuralDesignResultModel model)
         {
             if (section == null)
@@ -23,7 +23,7 @@ namespace ACI318_19Library
             string warnings = "";
 
             // --------------------------
-            // 1. Compute concrete shear Vc (kips)
+            // 1. Compute concrete shear Vc_kip (kips)
             // ACI 318-19, Eq. 22.5.2.1
             // --------------------------
             // Convert to kips (1 kip = 1000 lb)
@@ -36,7 +36,7 @@ namespace ACI318_19Library
 
 
             // --------------------------
-            // 2. Compute steel contribution Vs (kips)
+            // 2. Compute steel contribution Vs_kip (kips)
             // --------------------------
             // Shear reinforcement (stirrups)
             
@@ -58,9 +58,10 @@ namespace ACI318_19Library
             // --------------------------
             // 5. Populate DesignResultModel
             // --------------------------
-            model.Vc = Vc_kips;
-            model.Vs = Vs_kips;
-            model.Vn = Vn_kips;
+            model.Vc_kip = Vc_kips;
+            model.Vs_kip = Vs_kips;
+            model.Vs_max_kip = Vs_max_kips;
+            model.Vn_kip = Vn_kips;
             model.PhiShear = phiV;
             model.ShearWarnings = warnings;
         }

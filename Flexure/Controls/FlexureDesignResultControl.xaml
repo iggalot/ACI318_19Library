@@ -57,10 +57,10 @@
 
                 <!-- Row 0 -->
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="ϕMn (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Result.PhiMn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Result.PhiMn_lbin, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="Mn (kip-in):" Margin="2"/>
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Mn, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding Result.Mn_lbin, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0:N0}}" Margin="2"/>
 
                 <!-- Row 1 -->
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="c (in):" Margin="2"/>
