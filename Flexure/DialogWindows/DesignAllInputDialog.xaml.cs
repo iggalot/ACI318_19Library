@@ -86,7 +86,7 @@ namespace ACI318_19Library
 
             if (e.AddedItems.Count > 0 && listValidDesigns.SelectedIndex >= 0)
             {
-                var crossSectionVM = new CrossSectionViewModel(ViewModel.SelectedDesign.crossSection);
+                var crossSectionVM = new ConcreteCrossSectionViewModel(ViewModel.SelectedDesign.crossSection);
 
                 var dlg = new CrossSectionInputDialog(crossSectionVM)
                 {
@@ -109,13 +109,21 @@ namespace ACI318_19Library
             {
                 // Clear the results panel
                 spResult.Children.Clear();
+                spShearResult.Children.Clear();
 
-                // Build and show the control
+                // Build and show the flexural control
                 var control = new FlexureDesignResultControl
                 {
                     Result = item
                 };
                 spResult.Children.Add(control);
+
+                // build and show the shear control
+                var shear_control = new ShearDesignResultControl
+                {
+                    Result = item
+                };
+                spShearResult.Children.Add(shear_control);
             }
         }
 

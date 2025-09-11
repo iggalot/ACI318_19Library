@@ -10,7 +10,7 @@ namespace ACI318_19Library
         /// </summary>
         /// <param name="section">CrossSection object containing geometry and reinforcement data</param>
         /// <returns>DesignResultModel populated with shear results (Vc, Vs, Vn_kips, PhiShear)</returns>
-        public static void ComputeShearCapacity(CrossSection section, ref FlexuralDesignResultModel model)
+        public static void ComputeShearCapacity(ConcreteCrossSection section, ref FlexuralDesignResultModel model)
         {
             if (section == null)
                 throw new ArgumentNullException(nameof(section));

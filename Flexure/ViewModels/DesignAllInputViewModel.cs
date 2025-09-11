@@ -76,6 +76,25 @@ namespace ACI318_19Library.Flexure.Controls
             }
         }
 
+        private double _designShearVu_kip = 0;
+        public double DesignShearVu_kip
+        {
+            get => _designMomentMu_kipft;
+            set
+            {
+                if (_designShearVu_kip != value)
+                {
+                    _designShearVu_kip = value;
+                    OnPropertyChanged(nameof(DesignShearVu_kip));
+                    OnPropertyChanged(nameof(DesignShearVu_kip));
+
+                    // Run Update logic
+                    Update();
+                }
+            }
+        }
+
+
         public double DesignMomentMu_kipin
         {
             get => _designMomentMu_kipft * 12.0;
@@ -153,6 +172,13 @@ namespace ACI318_19Library.Flexure.Controls
 
             FlexuralDesigner flex_design = new FlexuralDesigner();
             var newDesigns = new ObservableCollection<FlexuralDesignResultModel>(flex_design.DesignAllSectionsForMu(_designMomentMu_kipft));
+
+            for (int i = 0; i < newDesigns.Count; i++)
+            {
+                var item = newDesigns[i]; // Copy to local variable
+                ShearDesigner.ComputeShearCapacity(item.crossSection, ref item); // Modify by ref
+                newDesigns[i] = item; // Assign back to collection
+            }
 
             foreach (var d in newDesigns)
             {

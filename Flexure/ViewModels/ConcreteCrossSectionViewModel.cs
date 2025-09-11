@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace ACI318_19Library
 {
-    public class CrossSectionViewModel : INotifyPropertyChanged, IDataErrorInfo
+    public class ConcreteCrossSectionViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         private double _width = 8;
         private double _height = 12;
@@ -45,12 +45,12 @@ namespace ACI318_19Library
         public ObservableCollection<RebarLayerViewModel> CompressionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
 
 
-        public CrossSectionViewModel()
+        public ConcreteCrossSectionViewModel()
         {
 
         }
 
-        public CrossSectionViewModel(CrossSection section)
+        public ConcreteCrossSectionViewModel(ConcreteCrossSection section)
         {
             Width = section.Width;
             Height = section.Height;
@@ -71,7 +71,7 @@ namespace ACI318_19Library
             }
 
         }
-        public CrossSection ToCrossSection()
+        public ConcreteCrossSection ToCrossSection()
         {
             ObservableCollection<RebarLayer> tension_rebars = new ObservableCollection<RebarLayer>();
             ObservableCollection<RebarLayer> compression_rebars = new ObservableCollection<RebarLayer>();
@@ -104,7 +104,7 @@ namespace ACI318_19Library
                 }
             }
 
-            return new CrossSection()
+            return new ConcreteCrossSection()
             {
                 Width = Width,
                 Height = Height,

@@ -24,7 +24,7 @@ namespace ACI318Driver
 
         private void btnCrossSectionInput_Click(object sender, RoutedEventArgs e)
         {
-            CrossSectionViewModel viewModel = new CrossSectionViewModel();
+            ConcreteCrossSectionViewModel viewModel = new ConcreteCrossSectionViewModel();
             CrossSectionInputDialog dlg = new CrossSectionInputDialog(viewModel);
             dlg.Owner = this;
             dlg.ShowDialog();

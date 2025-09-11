@@ -14,7 +14,7 @@ namespace ACI318_19Library
         // Assume "this" is your Window/UserControl with Canvas named cnvCrossSection
         public static void DrawCrossSection(Canvas cnv, FlexuralDesignResultModel design)
         {
-            CrossSection section = design.crossSection;
+            ConcreteCrossSection section = design.crossSection;
 
             if (section == null || cnv == null) return;
 
@@ -190,7 +190,7 @@ namespace ACI318_19Library
         // Assume "this" is your Window/UserControl with Canvas named cnvCrossSection
         public static void DrawFlexuralStrainDiagram(Canvas cnv, FlexuralDesignResultModel design)
         {
-            CrossSection section = design.crossSection;
+            ConcreteCrossSection section = design.crossSection;
 
             if (section == null || cnv == null) return;
 

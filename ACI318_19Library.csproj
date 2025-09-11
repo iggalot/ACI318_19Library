@@ -50,8 +50,8 @@
     <Compile Include="DevelopmentLength\BaseDevelopmentLength.cs" />
     <Compile Include="DevelopmentLength\HookDevelopmentLength.cs" />
     <Compile Include="ACIDrawingHelpers.cs" />
-    <Compile Include="Flexure\Controls\CrossSectionInputControl.xaml.cs">
-      <DependentUpon>CrossSectionInputControl.xaml</DependentUpon>
+    <Compile Include="Flexure\Controls\ConcreteCrossSectionInputControl.xaml.cs">
+      <DependentUpon>ConcreteCrossSectionInputControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Flexure\DialogWindows\DesignAllInputDialog.xaml.cs">
       <DependentUpon>DesignAllInputDialog.xaml</DependentUpon>
@@ -72,7 +72,7 @@
     <Compile Include="Flexure\DialogWindows\RebarLayerInputDialog.xaml.cs">
       <DependentUpon>RebarLayerInputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Flexure\ViewModels\CrossSectionViewModel.cs" />
+    <Compile Include="Flexure\ViewModels\ConcreteCrossSectionViewModel.cs" />
     <Compile Include="Flexure\ViewModels\DesignAllInputViewModel.cs" />
     <Compile Include="Flexure\ViewModels\RebarLayerViewModel.cs" />
     <Compile Include="Flexure\FlexuralDesignResultModel.cs" />
@@ -85,10 +85,10 @@
     <Compile Include="Models\RebarModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DevelopmentLength\StraightDevelopmentLength.cs" />
-    <Compile Include="Models\CrossSection.cs" />
+    <Compile Include="Models\ConcreteCrossSection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Flexure\Controls\CrossSectionInputControl.xaml">
+    <Page Include="Flexure\Controls\ConcreteCrossSectionInputControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

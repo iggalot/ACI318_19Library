@@ -9,19 +9,19 @@ using System.Windows.Media;
 
 namespace ACI318_19Library
 {
-    public partial class CrossSectionInputControl : UserControl
+    public partial class ConcreteCrossSectionInputControl : UserControl
     {
-        public CrossSectionViewModel ViewModel { get; private set; }
+        public ConcreteCrossSectionViewModel ViewModel { get; private set; }
         public bool ValidateInputs()
         {
             return ValidationHelper.IsValid(this);
         }
 
-        public CrossSectionInputControl()
+        public ConcreteCrossSectionInputControl()
         {
             InitializeComponent();
             // create a default ViewModel if none provided
-            ViewModel = new CrossSectionViewModel();
+            ViewModel = new ConcreteCrossSectionViewModel();
             DataContext = ViewModel;
 
             this.Loaded += (s, e) => Update();
@@ -61,7 +61,7 @@ namespace ACI318_19Library
 
 
 
-        public CrossSectionInputControl(CrossSectionViewModel vm)
+        public ConcreteCrossSectionInputControl(ConcreteCrossSectionViewModel vm)
         {
             InitializeComponent();
             ViewModel = vm;
@@ -259,7 +259,7 @@ namespace ACI318_19Library
         }
 
 
-        public CrossSection GetCrossSection() => ViewModel.ToCrossSection();
+        public ConcreteCrossSection GetCrossSection() => ViewModel.ToCrossSection();
 
         private void BtnAddTension_Click(object sender, RoutedEventArgs e)
         {
@@ -320,7 +320,7 @@ namespace ACI318_19Library
             if (ValidateInputs() is false) return;
 
             // get our new section from the ViewModel
-            CrossSection section = GetCrossSection();
+            ConcreteCrossSection section = GetCrossSection();
 
             if (section == null)
                 return;

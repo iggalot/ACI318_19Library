@@ -7,13 +7,13 @@ namespace ACI318_19Library
     /// </summary>
     public partial class CrossSectionInputDialog : Window
     {
-        public CrossSectionViewModel ViewModel { get; private set; }
-        public CrossSectionInputDialog(CrossSectionViewModel viewModel)
+        public ConcreteCrossSectionViewModel ViewModel { get; private set; }
+        public CrossSectionInputDialog(ConcreteCrossSectionViewModel viewModel)
         {
             InitializeComponent();
             ViewModel = viewModel;
 
-            var control = new CrossSectionInputControl(ViewModel);
+            var control = new ConcreteCrossSectionInputControl(ViewModel);
             spControl.Children.Add(control); 
         }
 

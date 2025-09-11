@@ -33,7 +33,7 @@ namespace ACI318_19Library
         {
             double MuTarget_kip_in = MuTarget_kipft * 12.0;
 
-            CrossSection baseSection = new CrossSection();
+            ConcreteCrossSection baseSection = new ConcreteCrossSection();
             List<FlexuralDesignResultModel> successfulDesigns = new List<FlexuralDesignResultModel>();
 
             var widths = Enumerable.Range(4, 32).Select(i => (double)i).ToArray();
@@ -46,7 +46,7 @@ namespace ACI318_19Library
                 List<FlexuralDesignResultModel> localResults = new List<FlexuralDesignResultModel>();
 
                 // Estimate R for ideal rho
-                CrossSection tempSection = new CrossSection(width: b, height: depths.Min());
+                ConcreteCrossSection tempSection = new ConcreteCrossSection(width: b, height: depths.Min());
                 //tempSection.Width = b;
                 //tempSection.Height = depths.Min();
                 double rho_ideal = 0.01;
@@ -58,7 +58,7 @@ namespace ACI318_19Library
 
                 foreach (var h in depths.Where(h => h >= d_min_required))
                 {
-                    CrossSection section = tempSection.BaseClone(tempSection);
+                    ConcreteCrossSection section = tempSection.BaseClone(tempSection);
                     section.Width = b;
                     section.Height = h;
 
@@ -167,7 +167,7 @@ namespace ACI318_19Library
                 .ToList();
         }
 
-        private static bool RebarSpacingHorizontalIsValid(CrossSection section, string size, int qty)
+        private static bool RebarSpacingHorizontalIsValid(ConcreteCrossSection section, string size, int qty)
         {
             return (qty - 1) * section.ClearSpacing + 2.0 * section.SideCover + qty * RebarCatalog.RebarTable[size].Diameter < section.Width;
         }
@@ -177,7 +177,7 @@ namespace ACI318_19Library
             return rho * fy_psi * (1 - 0.59 * rho * fy_psi / fck_psi);
         }
 
-        public static FlexuralDesignResultModel ComputeFlexuralMomentCapacity(CrossSection section)
+        public static FlexuralDesignResultModel ComputeFlexuralMomentCapacity(ConcreteCrossSection section)
         {
             // if we don't have any tension rebars defined, exit the calculations.
             if (section == null || section.TensionRebars == null || section.TensionRebars.Count <= 0)  return null;
@@ -342,7 +342,7 @@ namespace ACI318_19Library
         }
 
 
-        private static bool RebarLayerFitsInWidth(CrossSection trialSection)
+        private static bool RebarLayerFitsInWidth(ConcreteCrossSection trialSection)
         {
             if (trialSection.TensionRebars.Count > 0)
             {
@@ -575,7 +575,7 @@ namespace ACI318_19Library
         /// Limiting singly-reinforced capacity at ρmax (tension-controlled, φ = 0.90).
         /// Returns AsMax (in^2), MnMax (in-lb), PhiMnMax (in-lb).
         /// </summary>
-        public (double AsMax, double MnMax, double PhiMnMax) GetSinglyReinforcedLimit(CrossSection section)
+        public (double AsMax, double MnMax, double PhiMnMax) GetSinglyReinforcedLimit(ConcreteCrossSection section)
         {
             double dEff = section.Height - section.TensionCover;
             double b = section.Width;

@@ -14,7 +14,7 @@ namespace ACI318_19Library
         CompressionControlled
     }
 
-    public class CrossSection
+    public class ConcreteCrossSection
     {
 
         // Geometry
@@ -107,8 +107,14 @@ namespace ACI318_19Library
 
         public double AreaGross { get => Width * Height; }
 
+        // Moment of inertia
+        public double Ix { get => Width * Height * Height * Height / 12.0; }
+
+        // Moment of inertia
+        public double Iy { get => Width * Width * Height * Height / 12.0; }
+
         // default constructor
-        public CrossSection(double fck_psi = 4000, double fy_psi = 60000, double epsilon_cu = 0.003, double es_psi = 29000000.0,
+        public ConcreteCrossSection(double fck_psi = 4000, double fy_psi = 60000, double epsilon_cu = 0.003, double es_psi = 29000000.0,
             double tension_cover = 1.5, double compression_cover = 1.5, double side_cover = 1.5, double clear_spacing = 1.5)
         {
             TensionCover = tension_cover;
@@ -121,7 +127,7 @@ namespace ACI318_19Library
             Es_psi = es_psi;
         }
 
-        public CrossSection(double width, double height,
+        public ConcreteCrossSection(double width, double height,
             double fck_psi = 4000, double fy_psi = 60000, double epsilon_cu = 0.003, double es_psi = 29000000.0,
             double tension_cover = 1.5, double compression_cover=1.5, double side_cover=1.5, double clear_spacing=1.5
             )
@@ -138,9 +144,9 @@ namespace ACI318_19Library
             Es_psi = es_psi;
         }
 
-        public CrossSection BaseClone(CrossSection section)
+        public ConcreteCrossSection BaseClone(ConcreteCrossSection section)
         {
-            return new CrossSection()
+            return new ConcreteCrossSection()
             {
                 Width = section.Width,
                 Height = section.Height,

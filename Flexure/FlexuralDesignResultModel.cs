@@ -10,7 +10,7 @@ namespace ACI318_19Library
     public class FlexuralDesignResultModel
     {
         /// <summary>Concrete cross section</summary>
-        public CrossSection crossSection { get; set; }
+        public ConcreteCrossSection crossSection { get; set; }
 
         // ======================
         // FLEXURE SUMMARY
