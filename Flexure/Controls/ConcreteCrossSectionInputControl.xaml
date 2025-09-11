@@ -135,6 +135,33 @@
                     </StackPanel>
                 </StackPanel>
             </Expander>
+
+
+            <!-- Stirrup Rebars -->
+            <Expander Grid.Row="3" Header="Stirrups" IsExpanded="True" Margin="0,8,0,0">
+                <StackPanel>
+                    <DataGrid x:Name="StirrupDataGrid"
+                              ItemsSource="{Binding StirrupRebars}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              MinHeight="100"
+                              >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
+                            <DataGridTextColumn Header="Legs" Binding="{Binding NumShearLegs}" Width="75"/>
+                            <DataGridTextColumn Header="Spacing, S (in)" Binding="{Binding Spacing}" Width="125"/>
+                            <DataGridTextColumn Header="Start (ft)" Binding="{Binding StartPos}" Width="75"/>
+                            <DataGridTextColumn Header="End (ft)" Binding="{Binding EndPos}" Width="75"/>
+                            <DataGridTextColumn Header="Av / S (sq.in./in)" Binding="{Binding Av_over_S}" Width="75"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <Button Content="Add" Width="50" Click="BtnAddStirrups_Click"/>
+                        <Button Content="Remove" Width="60" Margin="4,0,0,0" Click="BtnRemoveStirrups_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
         </StackPanel>
         <!-- Scrollable content -->
         <StackPanel  Grid.Column="1">

@@ -43,6 +43,7 @@ namespace ACI318_19Library
         // Rebar layer lists
         public ObservableCollection<RebarLayerViewModel> TensionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
         public ObservableCollection<RebarLayerViewModel> CompressionRebars { get; set; } = new ObservableCollection<RebarLayerViewModel>();
+        public ObservableCollection<StirrupRebarLayerViewModel> StirrupRebars { get; set; } = new ObservableCollection<StirrupRebarLayerViewModel>();
 
 
         public ConcreteCrossSectionViewModel()
@@ -70,11 +71,18 @@ namespace ACI318_19Library
                 CompressionRebars.Add(new RebarLayerViewModel(layer.BarSize, layer.Qty, layer.DepthFromTop));
             }
 
+            foreach (var layer in section.StirrupRebars)
+            {
+                StirrupRebars.Add(new StirrupRebarLayerViewModel(layer.BarSize, layer.NumShearLegs, layer.Spacing, layer.StartPos, layer.EndPos));
+            }
+
         }
         public ConcreteCrossSection ToCrossSection()
         {
             ObservableCollection<RebarLayer> tension_rebars = new ObservableCollection<RebarLayer>();
             ObservableCollection<RebarLayer> compression_rebars = new ObservableCollection<RebarLayer>();
+            ObservableCollection<RebarStirrupLayer> stirrup_rebars = new ObservableCollection<RebarStirrupLayer>();
+
             foreach (RebarLayerViewModel layer in TensionRebars)
             {
                 try
@@ -104,6 +112,20 @@ namespace ACI318_19Library
                 }
             }
 
+            foreach (StirrupRebarLayerViewModel layer in StirrupRebars)
+            {
+                try
+                {
+                    RebarStirrupLayer temp = new RebarStirrupLayer(layer.BarSize, layer.NumShearLegs, RebarCatalog.RebarTable[layer.BarSize], layer.Spacing, layer.StartPos, layer.EndPos);
+                    stirrup_rebars.Add(temp);
+                }
+                catch
+                {
+                    MessageBox.Show("Error in adding compression rebar data value");
+                    return null;
+                }
+            }
+
             return new ConcreteCrossSection()
             {
                 Width = Width,
@@ -115,7 +137,8 @@ namespace ACI318_19Library
                 Fck_psi = Fck_psi,
                 Fy_psi = Fy_psi,
                 TensionRebars = tension_rebars,
-                CompressionRebars = compression_rebars
+                CompressionRebars = compression_rebars,
+                StirrupRebars = stirrup_rebars,
             };
         }
 
@@ -163,9 +186,18 @@ namespace ACI318_19Library
             CompressionRebars.Add(new RebarLayerViewModel(barSize, count, depth));
         }
 
+        // Add stirrup layer
+        public void AddStirrupRebar(string barSize, int num_leg, double spacing, double start, double end)
+        {
+            if (!RebarCatalog.RebarTable.ContainsKey(barSize)) return;
+            StirrupRebars.Add(new StirrupRebarLayerViewModel(barSize, num_leg, spacing, start, end));
+        }
+
         // Remove selected layers (you can bind SelectedItem from DataGrid)
         public void RemoveTensionRebar(RebarLayerViewModel layer) => TensionRebars.Remove(layer);
         public void RemoveCompressionRebar(RebarLayerViewModel layer) => CompressionRebars.Remove(layer);
+
+        public void RemoveStirrupRebar(StirrupRebarLayerViewModel layer) => StirrupRebars.Remove(layer);
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

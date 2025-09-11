@@ -36,12 +36,18 @@ namespace ACI318_19Library
 
 
             // --------------------------
-            // 2. Compute steel contribution Vs_kip (kips)
+            // 2. Compute steel contribution Vs_kip (kips) for each rebar layer
             // --------------------------
             // Shear reinforcement (stirrups)
-            
-            double Av = RebarCatalog.RebarTable[section.Av_barSize].Area * section.StirrupsLegs;
-            double Vs_lbs = Av * fy_psi * d / section.ShearSpacing;
+
+            double Av = 0;
+            double Vs_lbs = 0;
+            if (section.StirrupRebars.Count > 0)
+            {
+                Av = RebarCatalog.RebarTable[section.StirrupRebars[0].BarSize].Area * section.StirrupRebars[0].NumShearLegs;
+                Vs_lbs = Av * fy_psi * d / section.StirrupRebars[0].Spacing;
+            }
+
             double Vs_kips = Vs_lbs / 1000.0;
 
 
@@ -64,6 +70,17 @@ namespace ACI318_19Library
             model.Vn_kip = Vn_kips;
             model.PhiShear = phiV;
             model.ShearWarnings = warnings;
+        }
+
+        public static double ComputeVs(ConcreteCrossSection section, RebarStirrupLayer layer)
+        {
+            if(section != null && layer != null)
+            {
+                double Av = RebarCatalog.RebarTable[layer.BarSize].Area * layer.NumShearLegs;
+                return Av * section.Fy_psi * section.dEffective() / layer.Spacing;
+            }
+
+            return 0.0;
         }
     }
 }

@@ -113,7 +113,7 @@ namespace ACI318_19Library.Flexure.Controls
             }
         }
 
-        // Count string uses the view so it reflects filtering
+        // NUmShearLegs string uses the view so it reflects filtering
         public string NumValidDesignsString => $"{ValidDesignsView.Cast<object>().Count()} valid designs";
 
         public ICollectionView ValidDesignsView { get; private set; }

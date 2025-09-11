@@ -28,11 +28,8 @@ namespace ACI318_19Library
         // Reinforcement layers
         public ObservableCollection<RebarLayer> TensionRebars { get; set; } = new ObservableCollection<RebarLayer>();
         public ObservableCollection<RebarLayer> CompressionRebars { get; set; } = new ObservableCollection<RebarLayer>();
-
-        // Shear reinforcement properties
-        public string Av_barSize { get; set; } = "#4"; // in^2 per stirrup set
-        public double ShearSpacing { get; set; } = double.PositiveInfinity; // in
-        public int StirrupsLegs { get; set; } = 0; // typically 2 legs
+        public ObservableCollection<RebarStirrupLayer> StirrupRebars { get; set; } = new ObservableCollection<RebarStirrupLayer>();
+       
 
         public string SectionSummaryString { get => $"{Width} in. x {Height} in. = {AreaGross} sq. in."; }
         // constants
@@ -159,7 +156,8 @@ namespace ACI318_19Library
                 EpsilonCu = section.EpsilonCu,
                 Es_psi = section.Es_psi,
                 TensionRebars = new ObservableCollection<RebarLayer>(section.TensionRebars),
-                CompressionRebars = new ObservableCollection<RebarLayer>(section.CompressionRebars)
+                CompressionRebars = new ObservableCollection<RebarLayer>(section.CompressionRebars),
+                StirrupRebars = new ObservableCollection<RebarStirrupLayer>(section.StirrupRebars)
             };
         }
 
@@ -183,15 +181,13 @@ namespace ACI318_19Library
             CompressionRebars.Add(new RebarLayer(barSize, count, rebar, dPrime));
         }
 
-        public void AddShearReinforcement(string barSize, int legs, double spacing)
+        public void AddShearRebar(string barSize, int legs, double spacing, double start, double end)
         {
             if (!RebarCatalog.RebarTable.ContainsKey(barSize))
                 throw new ArgumentException("Unknown bar size: " + barSize);
 
             var rebar = RebarCatalog.RebarTable[barSize];
-            Av_barSize = barSize; // total barSize 
-            StirrupsLegs = legs;
-            ShearSpacing = spacing;
+            StirrupRebars.Add(new RebarStirrupLayer(barSize, legs, rebar, spacing, start, end));
         }
 
         // Helper: effective tension steel centroid

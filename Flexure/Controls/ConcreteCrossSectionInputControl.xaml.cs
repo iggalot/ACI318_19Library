@@ -34,8 +34,12 @@ namespace ACI318_19Library
 
             TensionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
             CompressionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            StirrupDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+
             TensionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
             CompressionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+            StirrupDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+
 
             foreach (var layer in ViewModel.TensionRebars)
                 layer.PropertyChanged += Layer_PropertyChanged;
@@ -55,6 +59,17 @@ namespace ACI318_19Library
             {
                 if (e.NewItems != null)
                     foreach (RebarLayerViewModel layer in e.NewItems)
+                        layer.PropertyChanged += Layer_PropertyChanged;
+            };
+
+
+            foreach (var layer in ViewModel.StirrupRebars)
+                layer.PropertyChanged += Layer_PropertyChanged;
+
+            ViewModel.StirrupRebars.CollectionChanged += (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (StirrupRebarLayerViewModel layer in e.NewItems)
                         layer.PropertyChanged += Layer_PropertyChanged;
             };
         }
@@ -84,8 +99,11 @@ namespace ACI318_19Library
 
             TensionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
             CompressionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            StirrupDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+
             TensionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
             CompressionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+            StirrupDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
 
             foreach (var layer in ViewModel.TensionRebars)
                 layer.PropertyChanged += Layer_PropertyChanged;
@@ -105,6 +123,16 @@ namespace ACI318_19Library
             {
                 if (e.NewItems != null)
                     foreach (RebarLayerViewModel layer in e.NewItems)
+                        layer.PropertyChanged += Layer_PropertyChanged;
+            };
+
+            foreach (var layer in ViewModel.StirrupRebars)
+                layer.PropertyChanged += Layer_PropertyChanged;
+
+            ViewModel.StirrupRebars.CollectionChanged += (s, e) =>
+            {
+                if (e.NewItems != null)
+                    foreach (StirrupRebarLayerViewModel layer in e.NewItems)
                         layer.PropertyChanged += Layer_PropertyChanged;
             };
         }
@@ -247,6 +275,30 @@ namespace ACI318_19Library
                 }
             }
 
+            foreach (var layer in ViewModel.StirrupRebars)
+            {
+                if (layer.NumShearLegs <= 0)
+                {
+                    isValid = false;
+                    errors.Add($"Stirrup rebar layer {layer.BarSize} has invalid quantity.");
+                }
+                if (layer.Spacing <= 0)
+                {
+                    isValid = false;
+                    errors.Add($"Stirrup rebar layer {layer.Spacing} has invalid spacing.");
+                }
+                if (layer.StartPos <= 0)
+                {
+                    isValid = false;
+                    errors.Add($"Stirrup rebar layer {layer.StartPos} has invalid starting position.");
+                }
+                if (layer.EndPos <= layer.StartPos)
+                {
+                    isValid = false;
+                    errors.Add($"Stirrup rebar layer {layer.EndPos} cannot be less than or equal to the starting position.");
+                }
+            }
+
             // Optionally show errors in Debug or MessageBox
             if (!isValid)
             {
@@ -293,6 +345,18 @@ namespace ACI318_19Library
             Update();
         }
 
+        private void BtnAddStirrups_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new StirrupRebarLayerInputDialog();
+            dialog.Owner = Window.GetWindow(this);
+
+            if (dialog.ShowDialog() == true)
+            {
+                ViewModel.AddStirrupRebar(dialog.SelectedBarSize, dialog.NumShearLegs, dialog.Spacing, dialog.StartPos, dialog.EndPos);
+            }
+            Update();
+        }
+
 
         private void BtnRemoveTension_Click(object sender, RoutedEventArgs e)
         {
@@ -306,6 +370,14 @@ namespace ACI318_19Library
         {
             if (CompressionDataGrid.SelectedItem is RebarLayerViewModel layer)
                 ViewModel.RemoveCompressionRebar(layer);
+
+            Update();
+        }
+
+        private void BtnRemoveStirrups_Click(object sender, RoutedEventArgs e)
+        {
+            if (StirrupDataGrid.SelectedItem is StirrupRebarLayerViewModel layer)
+                ViewModel.RemoveStirrupRebar(layer);
 
             Update();
         }
@@ -325,19 +397,15 @@ namespace ACI318_19Library
             if (section == null)
                 return;
 
-            section.Av_barSize = "#4";
-            section.ShearSpacing = 12;
-            section.StirrupsLegs = 2;
-
-
-
             // Perform a moment calculation
             if (section.TensionRebars.Count == 0) return;
             {
+                // perform flexure and shear calculations
                 FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
                 ShearDesigner.ComputeShearCapacity(section, ref design);
 
 
+                // add the flexure result control
                 FlexureDesignResultControl control = new FlexureDesignResultControl();
                 spResult.Children.Add(control);
                 if (control != null)
@@ -345,7 +413,7 @@ namespace ACI318_19Library
                     control.Result = design;
                 }
 
-                // Perform a shear calculation
+                // add the shear result control
                 ShearDesignResultControl shear_control = new ShearDesignResultControl();
                 spShearResult.Children.Add(shear_control);
                 if (shear_control != null)
@@ -422,6 +490,11 @@ namespace ACI318_19Library
                 foreach (T childOfChild in FindVisualChildren<T>(child))
                     yield return childOfChild;
             }
+        }
+
+        public void UpdateUI()
+        {
+
         }
 
 

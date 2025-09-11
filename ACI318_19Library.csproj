@@ -69,11 +69,15 @@
     <Compile Include="Flexure\Controls\NumericUpDown.xaml.cs">
       <DependentUpon>NumericUpDown.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Flexure\DialogWindows\StirrupRebarLayerInputDialog.xaml.cs">
+      <DependentUpon>StirrupRebarLayerInputDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Flexure\DialogWindows\RebarLayerInputDialog.xaml.cs">
       <DependentUpon>RebarLayerInputDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Flexure\ViewModels\ConcreteCrossSectionViewModel.cs" />
     <Compile Include="Flexure\ViewModels\DesignAllInputViewModel.cs" />
+    <Compile Include="Flexure\ViewModels\StirrupRebarLayerViewModel.cs" />
     <Compile Include="Flexure\ViewModels\RebarLayerViewModel.cs" />
     <Compile Include="Flexure\FlexuralDesignResultModel.cs" />
     <Compile Include="Flexure\FlexuralDesigner.cs" />
@@ -112,6 +116,10 @@
     <Page Include="Flexure\Controls\NumericUpDown.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Flexure\DialogWindows\StirrupRebarLayerInputDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Flexure\DialogWindows\RebarLayerInputDialog.xaml">
       <SubType>Designer</SubType>
