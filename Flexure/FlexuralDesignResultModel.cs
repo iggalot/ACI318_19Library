@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -105,38 +106,18 @@ namespace ACI318_19Library
         /// <summary>Concrete shear contribution Vc_kip (kips)</summary>
         public double Vc_kip_half { get => Vc_kip * 0.5; }
 
-        /// <summary>Steel shear contribution Vs_kip (kips)</summary>
-        public double Vs_kip { get; set; }
+
 
         /// <summary>Steel shear contribution Vs_kip (kips)</summary>
         public double Vs_max_kip { get; set; }
 
-        /// <summary>Nominal shear capacity Vn_kip (kips)</summary>
-        public double Vn_kip { get; set; }
+        /// <summary>Steel shear contribution Vs_kip (kips)</summary>
+        public ObservableCollection<ShearLayerResult> ShearResults { get; set; } = new ObservableCollection<ShearLayerResult>();
 
         /// <summary>Strength reduction factor for shear (φ)</summary>
         public double PhiShear { get; set; } = 0.75;
 
-        /// <summary>Design shear strength φVn (kips)</summary>
-        public double PhiVn_kip { get => PhiShear * Vn_kip; }
-
         public double Av_over_s { get; set; }
-
-        public string DisplayShearInfo()
-        {
-            string str = string.Empty;
-
-            // Shear display
-            if (Vn_kip > 0)
-            {
-                str += $" | φVn = {PhiVn_kip:F1} kips (Vc_kip={Vc_kip:F1}, Vs_kip={Vs_kip:F1})";
-            }
-
-            if (!string.IsNullOrWhiteSpace(ShearWarnings))
-                str += $" | ShearWarnings: {ShearWarnings}";
-
-            return str;
-        }
 
         // ======================
         // REFLECTION-BASED DISPLAY

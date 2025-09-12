@@ -12,6 +12,11 @@
         public double EndPos { get; set; }
         public double Spacing { get; private set; }  // centroid depth from extreme compression fiber
 
+        public double Av_over_S
+        {
+            get => RebarCatalog.RebarTable[BarSize].Area * NumShearLegs / Spacing;
+        }
+
         // backing field for manual steel area
         private double? _manualSteelArea;
 
