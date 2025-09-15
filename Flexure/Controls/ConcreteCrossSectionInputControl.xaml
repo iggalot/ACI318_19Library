@@ -3,7 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:ACI318_19Library"
              >
-
+    <UserControl.Resources>
+        <ControlTemplate x:Key="RowValidationTemplate">
+            <DockPanel LastChildFill="True">
+                <TextBlock Foreground="Red" Margin="2"
+                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow},
+                                  Path=(Validation.Errors)[0].ErrorContent}"/>
+                <AdornedElementPlaceholder />
+            </DockPanel>
+        </ControlTemplate>
+    </UserControl.Resources>
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -98,7 +107,11 @@
                               ItemsSource="{Binding TensionRebars}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
-                              MinHeight="100">
+                              MinHeight="100"
+                              RowValidationErrorTemplate="{StaticResource RowValidationTemplate}">
+                        <DataGrid.RowValidationRules>
+                            <local:CrossSectionRowValidationRule ValidationStep="UpdatedValue" />
+                        </DataGrid.RowValidationRules>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
                             <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
@@ -121,7 +134,10 @@
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               MinHeight="100"
-                              >
+                              RowValidationErrorTemplate="{StaticResource RowValidationTemplate}">
+                        <DataGrid.RowValidationRules>
+                            <local:CrossSectionRowValidationRule ValidationStep="UpdatedValue" />
+                        </DataGrid.RowValidationRules>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
                             <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
@@ -145,7 +161,10 @@
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               MinHeight="100"
-                              >
+                              RowValidationErrorTemplate="{StaticResource RowValidationTemplate}">
+                        <DataGrid.RowValidationRules>
+                            <local:CrossSectionRowValidationRule ValidationStep="UpdatedValue" />
+                        </DataGrid.RowValidationRules>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
                             <DataGridTextColumn Header="Legs" Binding="{Binding NumShearLegs}" Width="75"/>

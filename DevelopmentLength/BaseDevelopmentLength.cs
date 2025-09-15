@@ -86,9 +86,9 @@ namespace ACI318_19Library
         {
             BarSize = sizeBar;
 
-            // Validate input information
+            // ValidateCrossSection input information
 
-            // 1. Validate bar size
+            // 1. ValidateCrossSection bar size
             bool sizeValid = false;
             foreach(var item in RebarData.Sizes)
             {
@@ -103,13 +103,13 @@ namespace ACI318_19Library
                 throw new InvalidOperationException("ERROR: Invalid bar size - barSize #" + sizeBar.ToString());
             }
 
-            // 2. Validate material strengths
+            // 2. ValidateCrossSection material strengths
             if (fy <= 0 || fc <= 0)
             {
                 throw new InvalidOperationException("ERROR: Material Strength is invalid - fy=" + SteelYieldStrength.ToString() + " f'c=" + ConcreteCompStrength);
             }
 
-            // 3. Validate cover distances
+            // 3. ValidateCrossSection cover distances
             if (cc_spacing < 0 || side < 0 || bottom< 0)
             {
                 throw new InvalidOperationException("ERROR: Cover and spacing reqs must be positive = CC_spacing=" + cc_spacing.ToString() + " : side_cover=" + side.ToString() + " : top/bottom cover=" + bottom.ToString());

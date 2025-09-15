@@ -167,9 +167,18 @@ namespace ACI318_19Library
                 .ToList();
         }
 
-        private static bool RebarSpacingHorizontalIsValid(ConcreteCrossSection section, string size, int qty)
+        public static bool RebarSpacingHorizontalIsValid(ConcreteCrossSection section, string size, int qty)
         {
-            return (qty - 1) * section.ClearSpacing + 2.0 * section.SideCover + qty * RebarCatalog.RebarTable[size].Diameter < section.Width;
+            if (section == null) return false;
+
+            // get the stirrup thickness
+            double stirrup_dia = 0;
+
+            if(section.StirrupRebars.Count >0)
+            {
+                stirrup_dia = RebarCatalog.RebarTable[section.StirrupRebars[0].BarSize].Diameter;
+            }
+            return (qty - 1) * section.ClearSpacing + 2.0 * stirrup_dia + 2.0 * section.SideCover + qty * RebarCatalog.RebarTable[size].Diameter < section.Width;
         }
 
         private static double ComputeRfromRho(double fck_psi, double fy_psi, double rho)

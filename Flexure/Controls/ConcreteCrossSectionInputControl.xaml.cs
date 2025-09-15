@@ -1,7 +1,11 @@
+using ACI318_19Library;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,76 +24,19 @@ namespace ACI318_19Library
         public ConcreteCrossSectionInputControl()
         {
             InitializeComponent();
-            // create a default ViewModel if none provided
-            ViewModel = new ConcreteCrossSectionViewModel();
-            DataContext = ViewModel;
-
-            this.Loaded += (s, e) => Update();
-
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
-
-
-
-            AttachNumericUpDownEvents();
-
-            TensionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
-            CompressionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
-            StirrupDataGrid.CellEditEnding += DataGrid_CellEditEnding;
-
-            TensionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
-            CompressionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
-            StirrupDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
-
-
-            foreach (var layer in ViewModel.TensionRebars)
-                layer.PropertyChanged += Layer_PropertyChanged;
-
-            ViewModel.TensionRebars.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (RebarLayerViewModel layer in e.NewItems)
-                        layer.PropertyChanged += Layer_PropertyChanged;
-            };
-
-
-            foreach (var layer in ViewModel.CompressionRebars)
-                layer.PropertyChanged += Layer_PropertyChanged;
-
-            ViewModel.CompressionRebars.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (RebarLayerViewModel layer in e.NewItems)
-                        layer.PropertyChanged += Layer_PropertyChanged;
-            };
-
-
-            foreach (var layer in ViewModel.StirrupRebars)
-                layer.PropertyChanged += Layer_PropertyChanged;
-
-            ViewModel.StirrupRebars.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (StirrupRebarLayerViewModel layer in e.NewItems)
-                        layer.PropertyChanged += Layer_PropertyChanged;
-            };
+            InitializeWithViewModel(new ConcreteCrossSectionViewModel());
         }
-
-
 
         public ConcreteCrossSectionInputControl(ConcreteCrossSectionViewModel vm)
         {
             InitializeComponent();
+            InitializeWithViewModel(vm);
+        }
+
+        private void InitializeWithViewModel(ConcreteCrossSectionViewModel vm)
+        {
             ViewModel = vm;
             DataContext = ViewModel;
-
-            //ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 14.75));
-            //ViewModel.TensionRebars.Add(new RebarLayerViewModel("#9", 2, 17.25));
-
-            //ViewModel.CompressionRebars.Add(new RebarLayerViewModel("#6", 2, 2.5));
-
-
-            Debug.WriteLine("DataContext is null? " + (DataContext == null));
-            Debug.WriteLine("TensionRebars count: " + ViewModel.TensionRebars.Count);
 
             this.Loaded += (s, e) => Update();
 
@@ -97,43 +44,33 @@ namespace ACI318_19Library
 
             AttachNumericUpDownEvents();
 
-            TensionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
-            CompressionDataGrid.CellEditEnding += DataGrid_CellEditEnding;
-            StirrupDataGrid.CellEditEnding += DataGrid_CellEditEnding;
+            // Hook DataGrids
+            HookGrid(TensionDataGrid);
+            HookGrid(CompressionDataGrid);
+            HookGrid(StirrupDataGrid);
 
-            TensionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
-            CompressionDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
-            StirrupDataGrid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+            // Hook rebar collections
+            HookRebarCollection(ViewModel.TensionRebars);
+            HookRebarCollection(ViewModel.CompressionRebars);
+            HookRebarCollection(ViewModel.StirrupRebars);
+        }
 
-            foreach (var layer in ViewModel.TensionRebars)
-                layer.PropertyChanged += Layer_PropertyChanged;
+        private void HookGrid(DataGrid grid)
+        {
+            grid.CellEditEnding += DataGrid_CellEditEnding;
+            grid.CurrentCellChanged += DataGrid_CurrentCellChanged;
+        }
 
-            ViewModel.TensionRebars.CollectionChanged += (s, e) =>
+        private void HookRebarCollection<T>(ObservableCollection<T> collection) where T : INotifyPropertyChanged
+        {
+            foreach (var item in collection)
+                item.PropertyChanged += Layer_PropertyChanged;
+
+            collection.CollectionChanged += (s, e) =>
             {
                 if (e.NewItems != null)
-                    foreach (RebarLayerViewModel layer in e.NewItems)
-                        layer.PropertyChanged += Layer_PropertyChanged;
-            };
-
-
-            foreach (var layer in ViewModel.CompressionRebars)
-                layer.PropertyChanged += Layer_PropertyChanged;
-
-            ViewModel.CompressionRebars.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (RebarLayerViewModel layer in e.NewItems)
-                        layer.PropertyChanged += Layer_PropertyChanged;
-            };
-
-            foreach (var layer in ViewModel.StirrupRebars)
-                layer.PropertyChanged += Layer_PropertyChanged;
-
-            ViewModel.StirrupRebars.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (StirrupRebarLayerViewModel layer in e.NewItems)
-                        layer.PropertyChanged += Layer_PropertyChanged;
+                    foreach (INotifyPropertyChanged item in e.NewItems)
+                        item.PropertyChanged += Layer_PropertyChanged;
             };
         }
 
@@ -193,7 +130,7 @@ namespace ACI318_19Library
             }
         }
 
-        public bool Validate()
+        public bool ValidateCrossSection()
         {
             bool isValid = true;
             var errors = new List<string>();
@@ -246,9 +183,40 @@ namespace ACI318_19Library
                 errors.Add("fy must be between 40,000 and 120,000 psi.");
             }
 
-            // Rebar layers
-            foreach (var layer in ViewModel.TensionRebars)
+            if (ValidateRebars(ref errors, ViewModel) is false)
+                isValid = false;
+
+            // Optionally show errors in Debug or MessageBox
+            if (!isValid)
             {
+                String str = string.Empty;
+                str += "\nValidation errors:";
+
+                foreach (var err in errors)
+                {
+                    str += "\n - " + err;
+
+                }
+
+                Debug.WriteLine(str);
+                MessageBox.Show(str);
+            }
+
+            return isValid;
+        }
+
+        private bool ValidateRebars(ref List<string> errors, ConcreteCrossSectionViewModel model)
+        {
+            bool isValid = true;
+
+            // Rebar layers
+            foreach (var layer in model.TensionRebars)
+            {
+                if (RebarCatalog.RebarTable.ContainsKey(layer.BarSize) is false)
+                {
+                    isValid = false;
+                    errors.Add($"Tension bar size {layer.BarSize} is not in RebarCatalog.  Did you forget '#' on the size designation?");
+                }
                 if (layer.Qty <= 0)
                 {
                     isValid = false;
@@ -259,10 +227,23 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Tension rebar layer {layer.BarSize} has invalid depth.");
                 }
+
+                if (FlexuralDesigner.RebarSpacingHorizontalIsValid(model.ToCrossSection(), layer.BarSize, layer.Qty) is false)
+                {
+                    isValid = false;
+                    errors.Add($"Tension rebar layer: ({layer.Qty})-{layer.BarSize} does not fit in layer.");
+                }
+
+                if (isValid is false) return false;  // return and stop checking 
             }
 
-            foreach (var layer in ViewModel.CompressionRebars)
+            foreach (var layer in model.CompressionRebars)
             {
+                if (RebarCatalog.RebarTable.ContainsKey(layer.BarSize) is false)
+                {
+                    isValid = false;
+                    errors.Add($"Compression bar size {layer.BarSize} is not in RebarCatalog.  Did you forget '#' on the size designation?");
+                }
                 if (layer.Qty <= 0)
                 {
                     isValid = false;
@@ -273,10 +254,23 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Compression rebar layer {layer.BarSize} has invalid depth.");
                 }
+
+                if (FlexuralDesigner.RebarSpacingHorizontalIsValid(model.ToCrossSection(), layer.BarSize, layer.Qty) is false)
+                {
+                    isValid = false;
+                    errors.Add($"Compression rebar layer: ({layer.Qty})-{layer.BarSize} does not fit in layer.");
+                }
+
+                if (isValid is false) return false;  // return and stop checking 
             }
 
-            foreach (var layer in ViewModel.StirrupRebars)
+            foreach (var layer in model.StirrupRebars)
             {
+                if (RebarCatalog.RebarTable.ContainsKey(layer.BarSize) is false)
+                {
+                    isValid = false;
+                    errors.Add($"Stirrup bar size {layer.BarSize} is not in RebarCatalog.  Did you forget '#' on the size designation?");
+                }
                 if (layer.NumShearLegs <= 0)
                 {
                     isValid = false;
@@ -287,7 +281,7 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Stirrup rebar layer {layer.Spacing} has invalid spacing.");
                 }
-                if (layer.StartPos <= 0)
+                if (layer.StartPos < 0)
                 {
                     isValid = false;
                     errors.Add($"Stirrup rebar layer {layer.StartPos} has invalid starting position.");
@@ -297,19 +291,12 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Stirrup rebar layer {layer.EndPos} cannot be less than or equal to the starting position.");
                 }
-            }
 
-            // Optionally show errors in Debug or MessageBox
-            if (!isValid)
-            {
-                Debug.WriteLine("Validation errors:");
-                foreach (var err in errors)
-                    Debug.WriteLine(" - " + err);
+                if (isValid is false) return false;  // return and stop checking 
             }
 
             return isValid;
         }
-
 
         public ConcreteCrossSection GetCrossSection() => ViewModel.ToCrossSection();
 
@@ -323,9 +310,31 @@ namespace ACI318_19Library
 
             if (dialog.ShowDialog() == true)
             {
-                ViewModel.AddTensionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
-                Debug.WriteLine($"TensionRebars count: {ViewModel.TensionRebars.Count}");
-                TensionDataGrid.Items.Refresh();
+                bool isValid = true;
+                List<string> errors = new List<string>();
+
+                // create a new view model and add the bars so we can validate it
+                ConcreteCrossSectionViewModel model = new ConcreteCrossSectionViewModel(ViewModel.ToCrossSection());
+                model.AddTensionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
+
+                if (ValidateRebars(ref errors, model) is false)
+                    isValid = false;
+
+                if (isValid)
+                {
+                    ViewModel.AddTensionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
+                    Debug.WriteLine($"TensionRebars count: {ViewModel.TensionRebars.Count}");
+                    TensionDataGrid.Items.Refresh();
+                } else
+                {
+                    string str = string.Empty;
+                    foreach(var err in errors)
+                    {
+                        str += "\n" + err;
+                    }
+                    Debug.WriteLine(str);
+                    MessageBox.Show(str);
+                }
             }
             Update();
         }
@@ -340,7 +349,31 @@ namespace ACI318_19Library
 
             if (dialog.ShowDialog() == true)
             {
-                ViewModel.AddCompressionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
+                bool isValid = true;
+                List<string> errors = new List<string>();
+
+                // create a new view model and add the bars so we can validate it
+                ConcreteCrossSectionViewModel model = new ConcreteCrossSectionViewModel(ViewModel.ToCrossSection());
+                model.AddCompressionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
+
+                if (ValidateRebars(ref errors, model) is false)
+                    isValid = false;
+
+                if (isValid)
+                {
+                    ViewModel.AddCompressionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
+                    CompressionDataGrid.Items.Refresh();
+                }
+                else
+                {
+                    string str = string.Empty;
+                    foreach (var err in errors)
+                    {
+                        str += "\n" + err;
+                    }
+                    Debug.WriteLine(str);
+                    MessageBox.Show(str);
+                }
             }
             Update();
         }
@@ -352,7 +385,32 @@ namespace ACI318_19Library
 
             if (dialog.ShowDialog() == true)
             {
-                ViewModel.AddStirrupRebar(dialog.SelectedBarSize, dialog.NumShearLegs, dialog.Spacing, dialog.StartPos, dialog.EndPos);
+                bool isValid = true;
+                List<string> errors = new List<string>();
+
+                // create a new view model and add the bars so we can validate it
+                ConcreteCrossSectionViewModel model = new ConcreteCrossSectionViewModel(ViewModel.ToCrossSection());
+                model.AddStirrupRebar(dialog.SelectedBarSize, dialog.NumShearLegs, dialog.Spacing, dialog.StartPos, dialog.EndPos);
+
+                if (ValidateRebars(ref errors, model) is false)
+                    isValid = false;
+
+                // actually add it to our view model
+                if (isValid)
+                {
+                    ViewModel.AddStirrupRebar(dialog.SelectedBarSize, dialog.NumShearLegs, dialog.Spacing, dialog.StartPos, dialog.EndPos);
+                    StirrupDataGrid.Items.Refresh();
+                }
+                else
+                {
+                    string str = string.Empty;
+                    foreach (var err in errors)
+                    {
+                        str += "\n" + err;
+                    }
+                    Debug.WriteLine(str);
+                    MessageBox.Show(str);
+                }
             }
             Update();
         }
@@ -388,8 +446,9 @@ namespace ACI318_19Library
             spResult.Children.Clear();
             spShearResult.Children.Clear();
 
-            // Validate that all the input in the ViewModel is valid, otherwise dont return
+            // ValidateCrossSection that all the input in the ViewModel is valid, otherwise dont return
             if (ValidateInputs() is false) return;
+            if (ValidateCrossSection() is false) return;
 
             // get our new section from the ViewModel
             ConcreteCrossSection section = GetCrossSection();
@@ -422,7 +481,6 @@ namespace ACI318_19Library
                 }
             }
         }
-
 
         public static class ValidationHelper
         {
@@ -491,12 +549,40 @@ namespace ACI318_19Library
                     yield return childOfChild;
             }
         }
+    }
 
-        public void UpdateUI()
+    public class CrossSectionRowValidationRule : ValidationRule
+    {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
+            // `value` is the row item (e.g. TensionRebarViewModel)
+            var row = value as object;
 
+            // Find the DataContext (your VM) from Application.Current.Windows
+            var control = Application.Current.Windows.OfType<Window>()
+                .SelectMany(w => FindVisualChildren<ConcreteCrossSectionInputControl>(w))
+                .FirstOrDefault();
+
+            if (control == null)
+                return ValidationResult.ValidResult;
+
+            if (!control.ValidateCrossSection())
+                return new ValidationResult(false, "Rebar validation failed.");
+
+            return ValidationResult.ValidResult;
         }
 
-
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) yield break;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                if (child is T t) yield return t;
+                foreach (var childOfChild in FindVisualChildren<T>(child))
+                    yield return childOfChild;
+            }
+        }
     }
+
 }
