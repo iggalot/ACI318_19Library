@@ -77,7 +77,7 @@ namespace ACI318_19Library
 
 
 
-            // Optionally draw cover lines
+            // draw the top cover line
             Line topCover = new Line
             {
                 X1 = offsetX,
@@ -90,6 +90,7 @@ namespace ACI318_19Library
             };
             cnv.Children.Add(topCover);
 
+            // draw the bottom cover line
             Line bottomCover = new Line
             {
                 X1 = offsetX,
@@ -101,6 +102,32 @@ namespace ACI318_19Library
                 StrokeDashArray = new DoubleCollection() { 2, 2 }
             };
             cnv.Children.Add(bottomCover);
+
+            // draw the left cover cover line
+            Line leftCover = new Line
+            {
+                X1 = offsetX + section.SideCover * scale,
+                Y1 = offsetY + (section.Height) * scale,
+                X2 = offsetX + section.SideCover * scale,
+                Y2 = offsetY + (0.0) * scale,
+                Stroke = Brushes.Green,
+                StrokeThickness = 1,
+                StrokeDashArray = new DoubleCollection() { 2, 2 }
+            };
+            cnv.Children.Add(leftCover);
+
+            // draw the right cover cover line
+            Line rightCover = new Line
+            {
+                X1 = offsetX + bPix - (section.SideCover) * scale,
+                Y1 = offsetY + (section.Height) * scale,
+                X2 = offsetX + bPix - (section.SideCover) * scale,
+                Y2 = offsetY + (0.0) * scale,
+                Stroke = Brushes.Green,
+                StrokeThickness = 1,
+                StrokeDashArray = new DoubleCollection() { 2, 2 }
+            };
+            cnv.Children.Add(rightCover);
         }
 
         private static void DrawRebarCentroidMarker(Canvas cnv, double loc, double side_cover, double scale, double offsetX, double offsetY, double sectionWidth, Brush fill)
