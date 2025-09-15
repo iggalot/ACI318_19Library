@@ -19,6 +19,12 @@ namespace ACI318_19Library
             if (section == null)
                 throw new ArgumentNullException(nameof(section));
 
+            // what if we don't have a flexural result yet?  Create one here....
+            if(model == null)
+            {
+                model = new FlexuralDesignResultModel();
+            }
+
             double b = section.Width;           // width of web (in)
             double d = section.dEffective();   // effective depth to tension steel (in)
             double fck_psi = section.Fck_psi;      // concrete compressive strength (psi)

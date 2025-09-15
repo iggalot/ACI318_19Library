@@ -11,7 +11,7 @@ namespace ACI318_19Library
     public class FlexuralDesignResultModel
     {
         /// <summary>Concrete cross section</summary>
-        public ConcreteCrossSection crossSection { get; set; }
+        public ConcreteCrossSection crossSection { get; set; } = new ConcreteCrossSection();
 
         // ======================
         // FLEXURE SUMMARY
@@ -22,7 +22,7 @@ namespace ACI318_19Library
             get
             {
                 string str = String.Empty;
-                if (crossSection.TensionRebars.Count == 0)
+                if (crossSection is null || crossSection.TensionRebars.Count == 0)
                 {
                     return "None";
                 }
@@ -40,7 +40,7 @@ namespace ACI318_19Library
             get
             {
                 string str = String.Empty;
-                if (crossSection.CompressionRebars.Count == 0)
+                if (crossSection is null || crossSection.CompressionRebars.Count == 0)
                 {
                     return "None";
                 }
@@ -75,18 +75,58 @@ namespace ACI318_19Library
         public double DepthToEpsT { get; set; }
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double AsC { get => crossSection.CompressionRebars.Sum(r => r.SteelArea); }
+        public double AsC
+        {
+            get
+            {
+                if (crossSection is null) return 0;
+                else return crossSection.CompressionRebars.Sum(r => r.SteelArea);
+            }
+        }
 
         /// <summary>Provided area by selection (in^2)</summary>
-        public double AsT { get => crossSection.TensionRebars.Sum(r => r.SteelArea); }
+        public double AsT
+        {
+            get
+            {
+                if (crossSection is null) return 0;
+                else return crossSection.TensionRebars.Sum(r => r.SteelArea);
+            }
+        }
 
-        public double AreaGross { get => crossSection.AreaGross; }
+        public double AreaGross
+        {
+            get
+            {
+                if (crossSection is null) return 0;
+                else return crossSection.AreaGross;
+            }
+        }
 
         /// <summary>Concrete stress block factor β1</summary>
-        public double Beta1 { get => FlexuralDesigner.GetBeta1(crossSection.Fck_psi); }
+        public double Beta1 
+        { 
+            get
+            {
+                if (crossSection is null)
+                {
+                    return 0.65;  // the minimum value
+                } else
+                {
+                    return FlexuralDesigner.GetBeta1(crossSection.Fck_psi);
+                }
+            } 
+        }
 
         /// <summary>Actual steel ratio ρ = AsT / (b*d)</summary>
-        public double RhoActual { get => AsT / crossSection.AreaGross; }
+        public double RhoActual 
+        {
+            get
+            {
+                if (crossSection is null || crossSection.AreaGross == 0) return 0;
+                else return AsT / crossSection.AreaGross;
+            } 
+        }
 
         public bool IsOverreinforced { get => RhoActual > crossSection.RhoBalanced; }
 

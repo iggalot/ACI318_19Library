@@ -15,6 +15,7 @@ namespace ACI318_19Library
         private double _fck = 4000;  // psi
         private double _fy = 60000;  // psi
 
+        public bool IsValid { get; set; } = true;
         public double Width { get => _width; set { _width = value; OnPropertyChanged(nameof(Width)); } }
         public double Height
         {

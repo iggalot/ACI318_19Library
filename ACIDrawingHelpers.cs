@@ -26,8 +26,25 @@ namespace ACI318_19Library
             double canvasH = cnv.ActualHeight > 0 ? cnv.ActualHeight : cnv.Height;
 
             // Compute scale to fit section inside canvas
-            double scaleX = (canvasW - 2 * margin) / section.Width;
-            double scaleY = (canvasH - 2 * margin) / section.Height;
+            double scaleX, scaleY;
+            if (section.Width <= 0)
+            {
+                scaleX = (canvasW - 2 * margin) / canvasW;
+            }
+            else
+            {
+                scaleX = (canvasW - 2 * margin) / section.Width;
+            }
+
+            if (section.Height <= 0)
+            {
+                scaleY = (canvasH - 2 * margin) / canvasH;
+            }
+            else
+            {
+                scaleY = (canvasW - 2 * margin) / section.Height;
+            }
+
             double scale = Math.Min(scaleX, scaleY);
 
             // Center offsets
@@ -231,7 +248,13 @@ namespace ACI318_19Library
             // Compute scale to fit section inside canvas
             double scaleX = (canvasW - 2 * margin) / section.Width;
             double scaleY = (canvasH - 2 * margin) / section.Height;
+
             double scale = Math.Min(scaleX, scaleY);
+
+            if(double.IsInfinity(scale))
+            {
+                return; // no need to draw since the section is either Width=0 or Height=0
+            }
 
             // Center offsets
             double offsetX = (canvasW - section.Width * scale) / 2.0;

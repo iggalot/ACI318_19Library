@@ -109,13 +109,24 @@
                               CanUserAddRows="False"
                               MinHeight="100"
                               RowValidationErrorTemplate="{StaticResource RowValidationTemplate}">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <Trigger Property="Validation.HasError" Value="True">
+                                        <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                                        <Setter Property="Background" Value="#FFFFC0C0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.RowValidationRules>
                             <local:CrossSectionRowValidationRule ValidationStep="UpdatedValue" />
                         </DataGrid.RowValidationRules>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
-                            <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
-                            <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop}" Width="75"/>
+                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Width="75"/>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Qty, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Width="75"/>
+                            <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Width="75"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -135,13 +146,24 @@
                               CanUserAddRows="False"
                               MinHeight="100"
                               RowValidationErrorTemplate="{StaticResource RowValidationTemplate}">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <Trigger Property="Validation.HasError" Value="True">
+                                        <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                                        <Setter Property="Background" Value="#FFFFC0C0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.RowValidationRules>
                             <local:CrossSectionRowValidationRule ValidationStep="UpdatedValue" />
                         </DataGrid.RowValidationRules>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize}" Width="75"/>
-                            <DataGridTextColumn Header="Count" Binding="{Binding Qty}" Width="75"/>
-                            <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop}" Width="75"/>
+                            <DataGridTextColumn Header="Bar Size" Binding="{Binding BarSize, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Width="75"/>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Qty, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Width="75"/>
+                            <DataGridTextColumn Header="Depth (in)" Binding="{Binding DepthFromTop, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" Width="75"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -162,6 +184,17 @@
                               CanUserAddRows="False"
                               MinHeight="100"
                               RowValidationErrorTemplate="{StaticResource RowValidationTemplate}">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <Trigger Property="Validation.HasError" Value="True">
+                                        <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                                        <Setter Property="Background" Value="#FFFFC0C0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.RowValidationRules>
                             <local:CrossSectionRowValidationRule ValidationStep="UpdatedValue" />
                         </DataGrid.RowValidationRules>

@@ -130,10 +130,10 @@ namespace ACI318_19Library
             }
         }
 
-        public bool ValidateCrossSection()
+        public bool ValidateCrossSection(ref List<string> errors)
         {
             bool isValid = true;
-            var errors = new List<string>();
+            errors = new List<string>();
 
             // Width and Height
             if (ViewModel.Width <= 0)
@@ -183,9 +183,6 @@ namespace ACI318_19Library
                 errors.Add("fy must be between 40,000 and 120,000 psi.");
             }
 
-            if (ValidateRebars(ref errors, ViewModel) is false)
-                isValid = false;
-
             // Optionally show errors in Debug or MessageBox
             if (!isValid)
             {
@@ -199,8 +196,9 @@ namespace ACI318_19Library
                 }
 
                 Debug.WriteLine(str);
-                MessageBox.Show(str);
             }
+
+            ViewModel.IsValid = isValid; //set our flag for validation
 
             return isValid;
         }
@@ -208,6 +206,14 @@ namespace ACI318_19Library
         private bool ValidateRebars(ref List<string> errors, ConcreteCrossSectionViewModel model)
         {
             bool isValid = true;
+
+            // Check that there is at least one tension rebar layer
+            if (model.TensionRebars.Count <= 0)
+            {
+                isValid = false;
+                errors.Add("There must be at least one tension rebar layer");
+            }
+
 
             // Rebar layers
             foreach (var layer in model.TensionRebars)
@@ -233,8 +239,6 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Tension rebar layer: ({layer.Qty})-{layer.BarSize} does not fit in layer.");
                 }
-
-                if (isValid is false) return false;  // return and stop checking 
             }
 
             foreach (var layer in model.CompressionRebars)
@@ -260,8 +264,6 @@ namespace ACI318_19Library
                     isValid = false;
                     errors.Add($"Compression rebar layer: ({layer.Qty})-{layer.BarSize} does not fit in layer.");
                 }
-
-                if (isValid is false) return false;  // return and stop checking 
             }
 
             foreach (var layer in model.StirrupRebars)
@@ -302,6 +304,13 @@ namespace ACI318_19Library
 
         private void BtnAddTension_Click(object sender, RoutedEventArgs e)
         {
+            List<string> errors = new List<string>();
+            if (ValidateCrossSection(ref errors) is false)
+            {
+                MessageBox.Show("You must correct cross section validation errors before proceeding.");
+                return;
+            }
+
             var dialog = new RebarLayerInputDialog(RebarCatalog.RebarTable.Keys,
                                                    isTension: true,
                                                    sectionDepth: ViewModel.Height,
@@ -311,10 +320,13 @@ namespace ACI318_19Library
             if (dialog.ShowDialog() == true)
             {
                 bool isValid = true;
-                List<string> errors = new List<string>();
 
                 // create a new view model and add the bars so we can validate it
+                // -- clear all of the current rebar in case we have a currently invalid entry, this let's us still add new valid entries to the list
                 ConcreteCrossSectionViewModel model = new ConcreteCrossSectionViewModel(ViewModel.ToCrossSection());
+                model.TensionRebars.Clear();
+                model.CompressionRebars.Clear();
+                model.StirrupRebars.Clear();
                 model.AddTensionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
 
                 if (ValidateRebars(ref errors, model) is false)
@@ -322,6 +334,7 @@ namespace ACI318_19Library
 
                 if (isValid)
                 {
+                    ViewModel.IsValid = true;
                     ViewModel.AddTensionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
                     Debug.WriteLine($"TensionRebars count: {ViewModel.TensionRebars.Count}");
                     TensionDataGrid.Items.Refresh();
@@ -341,6 +354,13 @@ namespace ACI318_19Library
 
         private void BtnAddComp_Click(object sender, RoutedEventArgs e)
         {
+            List<string> errors = new List<string>();
+            if (ValidateCrossSection(ref errors) is false)
+            {
+                MessageBox.Show("You must correct cross section validation errors before proceeding.");
+                return;
+            }
+
             var dialog = new RebarLayerInputDialog(RebarCatalog.RebarTable.Keys,
                                                    isTension: false,
                                                    sectionDepth: ViewModel.Height,
@@ -350,17 +370,20 @@ namespace ACI318_19Library
             if (dialog.ShowDialog() == true)
             {
                 bool isValid = true;
-                List<string> errors = new List<string>();
 
                 // create a new view model and add the bars so we can validate it
                 ConcreteCrossSectionViewModel model = new ConcreteCrossSectionViewModel(ViewModel.ToCrossSection());
                 model.AddCompressionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
+                model.TensionRebars.Clear();
+                model.CompressionRebars.Clear();
+                model.StirrupRebars.Clear();
 
                 if (ValidateRebars(ref errors, model) is false)
                     isValid = false;
 
                 if (isValid)
                 {
+                    ViewModel.IsValid = true;
                     ViewModel.AddCompressionRebar(dialog.SelectedBarSize, dialog.Count, dialog.Depth);
                     CompressionDataGrid.Items.Refresh();
                 }
@@ -380,17 +403,27 @@ namespace ACI318_19Library
 
         private void BtnAddStirrups_Click(object sender, RoutedEventArgs e)
         {
+            List<string> errors = new List<string>();
+            if (ValidateCrossSection(ref errors) is false)
+            {
+                MessageBox.Show("You must correct cross section validation errors before proceeding.");
+                return;
+            }
+
             var dialog = new StirrupRebarLayerInputDialog();
             dialog.Owner = Window.GetWindow(this);
+
 
             if (dialog.ShowDialog() == true)
             {
                 bool isValid = true;
-                List<string> errors = new List<string>();
 
                 // create a new view model and add the bars so we can validate it
                 ConcreteCrossSectionViewModel model = new ConcreteCrossSectionViewModel(ViewModel.ToCrossSection());
                 model.AddStirrupRebar(dialog.SelectedBarSize, dialog.NumShearLegs, dialog.Spacing, dialog.StartPos, dialog.EndPos);
+                model.TensionRebars.Clear();
+                model.CompressionRebars.Clear();
+                model.StirrupRebars.Clear();
 
                 if (ValidateRebars(ref errors, model) is false)
                     isValid = false;
@@ -398,6 +431,7 @@ namespace ACI318_19Library
                 // actually add it to our view model
                 if (isValid)
                 {
+                    ViewModel.IsValid = true;
                     ViewModel.AddStirrupRebar(dialog.SelectedBarSize, dialog.NumShearLegs, dialog.Spacing, dialog.StartPos, dialog.EndPos);
                     StirrupDataGrid.Items.Refresh();
                 }
@@ -446,9 +480,7 @@ namespace ACI318_19Library
             spResult.Children.Clear();
             spShearResult.Children.Clear();
 
-            // ValidateCrossSection that all the input in the ViewModel is valid, otherwise dont return
-            if (ValidateInputs() is false) return;
-            if (ValidateCrossSection() is false) return;
+            if (ViewModel.IsValid is false) return;
 
             // get our new section from the ViewModel
             ConcreteCrossSection section = GetCrossSection();
@@ -463,6 +495,7 @@ namespace ACI318_19Library
                 FlexuralDesignResultModel design = FlexuralDesigner.ComputeFlexuralMomentCapacity(section);
                 ShearDesigner.ComputeShearCapacity(section, ref design);
 
+                if (design == null) return;  // none of the calcs are valid
 
                 // add the flexure result control
                 FlexureDesignResultControl control = new FlexureDesignResultControl();
@@ -566,7 +599,8 @@ namespace ACI318_19Library
             if (control == null)
                 return ValidationResult.ValidResult;
 
-            if (!control.ValidateCrossSection())
+            List<string> errors = new List<string>();
+            if (!control.ValidateCrossSection(ref errors))
                 return new ValidationResult(false, "Rebar validation failed.");
 
             return ValidationResult.ValidResult;

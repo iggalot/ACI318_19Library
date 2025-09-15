@@ -43,8 +43,11 @@ namespace ACI318_19Library
 
             if (Result != null)
             {
-                ACIDrawingHelpers.DrawCrossSection(cnvSection, Result);
-                ACIDrawingHelpers.DrawFlexuralStrainDiagram(cnvStrainDiagram, Result);
+                if(Result.crossSection != null)
+                {
+                    ACIDrawingHelpers.DrawCrossSection(cnvSection, Result);
+                    ACIDrawingHelpers.DrawFlexuralStrainDiagram(cnvStrainDiagram, Result);
+                }
             }
         }
     }
